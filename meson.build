@@ -1,4 +1,4 @@
-project('c++ nvidia-oobaml', 'cpp',
+project('c++ nvidia-monitor-eventing', 'cpp',
   version : '0.1',
   license : 'MIT',
   meson_version: '>=0.58.0',
@@ -7,8 +7,8 @@ project('c++ nvidia-oobaml', 'cpp',
 
 # Project related links
 
-project_pretty_name = 'nvidia-oobaml'
-project_url = 'https://gitlab-master.nvidia.com/dgx/nvidia-oobaml'
+project_pretty_name = 'nvidia-monitor-eventing'
+project_url = 'https://gitlab-master.nvidia.com/dgx/nvidia-monitor-eventing'
 project_issues_url = project_url + '/issues/new'
 lang = 'cpp'
 
@@ -129,15 +129,15 @@ subdir('tools')
 pkg_mod = import('pkgconfig')
 pkg_mod.generate(libraries : amllib,
                  version : '0.1',
-                 name : 'oobaml',
-                 filebase : 'oobaml',
-                 description : 'nvidia-oobaml')
+                 name : 'monitor-eventing',
+                 filebase : 'monitor-eventing',
+                 description : 'nvidia-monitor-eventing')
 
 pkg_mod.generate(libraries : selftestlib,
                  version : '0.1',
                  name : 'selftest',
                  filebase : 'selftest',
-                 description : 'nvidia-oobaml-selftest')
+                 description : 'nvidia-monitor-eventing-selftest')
 
 if get_option('tests').enabled()
   gtest_dep = dependency('gtest', main: true, disabler: true, required: false)
@@ -208,10 +208,6 @@ bindir = get_option('prefix') + '/' + get_option('bindir')
 install_data('tools/mctp-vdm-util-wrapper',
              install_dir : bindir)
 
-## install xid wrapper
-install_data('tools/xid-event-util-wrapper',
-             install_dir : bindir)
-
 ## install mctp-error-detection tool
 install_data('tools/mctp-error-detection',
              install_dir : bindir)
@@ -255,7 +251,6 @@ if(get_option('tests').enabled())
     test('oobaml_unit_test', ut_bin)
 endif
 
-subdir('gpio-status-handler')
 if(get_option('device_health_service').enabled())
     subdir('device-health-service')
 endif
