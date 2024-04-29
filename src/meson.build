@@ -1,5 +1,5 @@
-amllib_sources = [
-    'aml_config_schemas.cpp',
+eventinglib_sources = [
+    'config_schemas.cpp',
     'check_accessor.cpp',
     'config_parser.cpp',
     'dat_traverse.cpp',
@@ -16,14 +16,13 @@ amllib_sources = [
     'log.cpp',
     'message_composer.cpp',
     'message_dispatcher.cpp',
-    'oobaml_api.cpp',
     'property_accessor.cpp',
     'util.cpp']
 
-amllib = shared_library('oobaml',
-                        amllib_sources,
+eventinglib = shared_library('eventing',
+                        eventinglib_sources,
                         include_directories : inc,
-                        dependencies : aml_dependencies,
+                        dependencies : mon_evt_dependencies,
                         version : '0.0.0',
                         install : true,
                         install_dir : get_option('libdir'))
@@ -33,7 +32,7 @@ selftestlib = shared_library('selftest',
                         selftestlib_sources,
                         include_directories : inc,
                         dependencies : [
-                                        declare_dependency(link_with : amllib),
+                                        declare_dependency(link_with : eventinglib),
                                         sdbusplus_dep,
                                         phosphor_logging_dep
                                       ],
@@ -41,16 +40,16 @@ selftestlib = shared_library('selftest',
                         install : true,
                         install_dir : get_option('libdir'))
 
-oobamld_sources = ['aml_main.cpp']
-oobamld_deps = declare_dependency(link_with : [amllib, selftestlib],
+monitor_eventingd_sources = ['eventing_main.cpp']
+monitor_eventingd_deps = declare_dependency(link_with : [eventinglib, selftestlib],
   include_directories : inc)
 
-oobamld = executable(
-    'oobamld',
-    oobamld_sources,
+monitor_eventingd = executable(
+    'monitor-eventingd',
+    monitor_eventingd_sources,
     include_directories: inc,
     dependencies: [
-        oobamld_deps,
+        monitor_eventingd_deps,
         sdbusplus_dep,
         sdeventplus_dep,
         phosphor_logging_dep,

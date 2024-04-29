@@ -153,7 +153,7 @@ class LogElapsedTime
  * #include "log.hpp"
  */
 #ifndef DBG_LOG_CTRL
-#define DBG_LOG_CTRL "nvoobaml_ctrl"
+#define DBG_LOG_CTRL "mon_evt_ctrl"
 #endif
 
 /**

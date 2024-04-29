@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "aml.hpp"
+#include "common.hpp"
 #include "dat_traverse.hpp"
 #include "event_handler.hpp"
 
@@ -225,32 +225,32 @@ class Selftest : public event_handler::EventHandler
      * already evaluated test report corectness, not test operation status.
      *
      * @param[in] event
-     * @return aml::RcCode::succ when all testpoints passed, otherwise
-     * aml::RcCode::error (failed TP or failed test operation)
+     * @return eventing::RcCode::succ when all testpoints passed, otherwise
+     * eventing::RcCode::error (failed TP or failed test operation)
      */
-    aml::RcCode process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override
     {
         if (_dat.count(event.device) == 0)
         {
             std::cerr << "Error: device: " << event.device
                       << " is an invalid key!" << std::endl;
-            return aml::RcCode::error;
+            return eventing::RcCode::error;
         }
 
         ReportResult rep;
         const dat_traverse::Device& dev = _dat.at(event.device);
 
-        if (perform(dev, rep) != aml::RcCode::succ)
+        if (perform(dev, rep) != eventing::RcCode::succ)
         {
-            return aml::RcCode::error;
+            return eventing::RcCode::error;
         }
 
         if (!evaluateTestReport(rep))
         {
-            return aml::RcCode::error;
+            return eventing::RcCode::error;
         }
 
-        return aml::RcCode::succ;
+        return eventing::RcCode::succ;
     };
 
     /** @brief Performs selftest on given device.
@@ -263,9 +263,9 @@ class Selftest : public event_handler::EventHandler
      * <ReportResult>
      * @param[in]  layersToIgnore - for these passed layer names testpoints are
      * skipped and only empty layers are included in the reportRes; default none
-     * @return aml::RcCode meaning testing operation status, not test results
+     * @return eventing::RcCode meaning testing operation status, not test results
      */
-    aml::RcCode perform(const dat_traverse::Device& dev,
+    eventing::RcCode perform(const dat_traverse::Device& dev,
                         ReportResult& reportRes,
                         std::vector<std::string> layersToIgnore = {},
                         const bool& doEventDetermination = false);
@@ -276,9 +276,9 @@ class Selftest : public event_handler::EventHandler
      * <ReportResult>
      * @param[in]  layersToIgnore - for these passed layer names testpoints are
      * skipped and only empty layers are included in the reportRes; default none
-     * @return aml::RcCode meaning testing operation status, not test results
+     * @return eventing::RcCode meaning testing operation status, not test results
      */
-    aml::RcCode performEntireTree(ReportResult& reportRes,
+    eventing::RcCode performEntireTree(ReportResult& reportRes,
                                   std::vector<std::string> layersToIgnore = {},
                                   const bool& doEventDetermination = false);
 
@@ -409,11 +409,11 @@ class RootCauseTracer : public EventHandler
      * @param[in out] event - shall carry problematic device name; gets written
      * in selftest report of problematic device + its associated devices
      *
-     * @return aml::RcCode::succ when performed root cause tracing, otherwise
-     * aml::RcCode::error (wrong device name in event, performing selftest
+     * @return eventing::RcCode::succ when performed root cause tracing, otherwise
+     * eventing::RcCode::error (wrong device name in event, performing selftest
      * failed). Warning - does not mean a root cause was found, but op success.
      */
-    aml::RcCode process([[maybe_unused]] event_info::EventNode& event) override;
+    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override;
 
   private:
     /**

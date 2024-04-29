@@ -8,7 +8,7 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-#include "aml.hpp"
+#include "common.hpp"
 #include "cmd_line.hpp"
 #include "dat_traverse.hpp"
 #include "dbus_accessor.hpp"
@@ -221,7 +221,7 @@ int main(int argc, char* argv[])
 
     selftest::Selftest selftest("selfTest", datMap);
     selftest::ReportResult reportResult;
-    aml::RcCode result = aml::RcCode::succ;
+    eventing::RcCode result = eventing::RcCode::succ;
 
     PROFILING_SWITCH(TS.addTimepoint("initialized"));
 
@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
 
     PROFILING_SWITCH(TS.addTimepoint("selftest_finished"));
 
-    if (result != aml::RcCode::succ)
+    if (result != eventing::RcCode::succ)
     {
         return -1;
     }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
 #
 #  NVIDIA CORPORATION and its licensors retain all intellectual property
 #  and proprietary rights in and to this software, related documentation
@@ -13,11 +13,11 @@
 
 set -o pipefail
 
-APP_NAME="aml-memory-watcher"
+APP_NAME="monitor-eventing-memory-watcher"
 APP_VER="0.1"
 
-[ -z "$PROCESS_NAME" ] && PROCESS_NAME="oobamld"
-[ -z "$SERVICE_NAME" ] && SERVICE_NAME="nvidia-oobaml.service"
+[ -z "$PROCESS_NAME" ] && PROCESS_NAME="monitor-eventingd"
+[ -z "$SERVICE_NAME" ] && SERVICE_NAME="nvidia-monitor-eventing.service"
 [ -z "$MEMORY_LIMIT_MB" ] && MEMORY_LIMIT_MB=500
 [ -z "$RESTART_DELAY" ] && RESTART_DELAY=5
 [ -z "$CHECK_INTERVAL" ] && CHECK_INTERVAL=60

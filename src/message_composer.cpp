@@ -5,7 +5,7 @@
 
 #include "message_composer.hpp"
 
-#include "aml.hpp"
+#include "common.hpp"
 #include "dbus_accessor.hpp"
 #include "event_handler.hpp"
 #include "event_info.hpp"

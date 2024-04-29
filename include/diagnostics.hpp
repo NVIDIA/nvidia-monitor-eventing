@@ -427,7 +427,7 @@ class Test
      * result object.
      *
      * Example from some instance of the @c EventInfoParseTest class: "Parse
-     * event info json object from file '/usr/share/oobaml/event_info.json' to
+     * event info json object from file '${datadir}/event_info.json' to
      * the native C++ object 'event_info::EventMap', using
      * 'event_info::loadFromJson(...)' function"
      */

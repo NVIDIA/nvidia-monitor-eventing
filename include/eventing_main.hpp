@@ -13,16 +13,16 @@
 
 #include <memory>
 
-namespace oob_aml
+namespace mon_evt
 {
 
-constexpr auto SERVICE_BUSNAME = "xyz.openbmc_project.OOBAML";
-constexpr auto TOP_OBJPATH = "/xyz/openbmc_project/OOBAML";
-constexpr auto SERVICE_IFCNAME = "xyz.openbmc_project.OOBAML";
+constexpr auto SERVICE_BUSNAME = "xyz.openbmc_project.MON_EVT";
+constexpr auto TOP_OBJPATH = "/xyz/openbmc_project/MON_EVT";
+constexpr auto SERVICE_IFCNAME = "xyz.openbmc_project.MON_EVT";
 
-} // namespace oob_aml
+} // namespace mon_evt
 
-namespace aml
+namespace eventing
 {
 
 std::shared_ptr<json_schema::JsonSchema> dataAccessorSchema();
@@ -31,4 +31,4 @@ std::shared_ptr<json_schema::JsonSchema> eventInfoJsonSchema();
 
 std::shared_ptr<json_schema::JsonSchema> datSchema();
 
-} // namespace aml
+} // namespace eventing

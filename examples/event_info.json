@@ -40,7 +40,7 @@
             },
             {
               "type": "CONSTANT",
-              "value": "'TODO (proper accessor needs to be defined in /usr/share/oobaml/event_info.json)'"
+              "value": "'TODO (proper accessor needs to be defined in /usr/share/mon_evt/event_info.json)'"
             }
           ]
         }
@@ -497,7 +497,7 @@
             },
             {
               "type": "CONSTANT",
-              "value": "'TODO (proper accessor needs to be defined in /usr/share/oobaml/event_info.json)'"
+              "value": "'TODO (proper accessor needs to be defined in /usr/share/mon_evt/event_info.json)'"
             }
           ]
         }
@@ -546,7 +546,7 @@
             },
             {
               "type": "CONSTANT",
-              "value": "'TODO (proper accessor needs to be defined in /usr/share/oobaml/event_info.json)'"
+              "value": "'TODO (proper accessor needs to be defined in /usr/share/mon_evt/event_info.json)'"
             }
           ]
         }
@@ -703,7 +703,7 @@
             },
             {
               "type": "CONSTANT",
-              "value": "'TODO (proper accessor needs to be defined in /usr/share/oobaml/event_info.json)'"
+              "value": "'TODO (proper accessor needs to be defined in /usr/share/mon_evt/event_info.json)'"
             }
           ]
         }
@@ -1074,7 +1074,7 @@
             },
             {
               "type": "CONSTANT",
-              "value": "'TODO (proper accessor needs to be defined in /usr/share/oobaml/event_info.json)'"
+              "value": "'TODO (proper accessor needs to be defined in /usr/share/mon_evt/event_info.json)'"
             }
           ]
         }
@@ -1353,7 +1353,7 @@
             },
             {
               "type": "CONSTANT",
-              "value": "'TODO (proper accessor needs to be defined in /usr/share/oobaml/event_info.json)'"
+              "value": "'TODO (proper accessor needs to be defined in /usr/share/mon_evt/event_info.json)'"
             }
           ]
         }
@@ -1451,7 +1451,7 @@
             },
             {
               "type": "CONSTANT",
-              "value": "'TODO (proper accessor needs to be defined in /usr/share/oobaml/event_info.json)'"
+              "value": "'TODO (proper accessor needs to be defined in /usr/share/mon_evt/event_info.json)'"
             }
           ]
         }
@@ -1502,7 +1502,7 @@
             },
             {
               "type": "CONSTANT",
-              "value": "'TODO (proper accessor needs to be defined in /usr/share/oobaml/event_info.json)'"
+              "value": "'TODO (proper accessor needs to be defined in /usr/share/mon_evt/event_info.json)'"
             }
           ]
         }

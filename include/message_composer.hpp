@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "aml.hpp"
+#include "common.hpp"
 #include "dat_traverse.hpp"
 #include "data_accessor.hpp"
 #include "dbus_accessor.hpp"
@@ -51,16 +51,16 @@ class MessageComposer : public event_handler::EventHandler
      * based on device namespace.
      *
      * @param event
-     * @return aml::RcCode
+     * @return eventing::RcCode
      */
-    aml::RcCode process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override
     {
         bool success = createLog(event);
         if (success)
         {
-            return aml::RcCode::succ;
+            return eventing::RcCode::succ;
         }
-        return aml::RcCode::error;
+        return eventing::RcCode::error;
     }
 
     /**

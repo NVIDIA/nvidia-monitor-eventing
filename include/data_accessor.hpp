@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "aml.hpp"
+#include "common.hpp"
 #include "dbus_accessor.hpp"
 #include "device_id.hpp"
 #include "property_accessor.hpp"

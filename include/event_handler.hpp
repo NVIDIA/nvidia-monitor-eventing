@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "aml.hpp"
+#include "common.hpp"
 #include "data_accessor.hpp"
 #include "event_info.hpp"
 #include "object.hpp"
@@ -30,7 +30,7 @@ class EventHandler : public object::Object
     {}
 
   public:
-    virtual aml::RcCode process(event_info::EventNode&) = 0;
+    virtual eventing::RcCode process(event_info::EventNode&) = 0;
 };
 
 /**
@@ -50,9 +50,9 @@ class ClearEvent : public EventHandler
      * @brief Clear event via its accessor.
      *
      * @param event
-     * @return aml::RcCode
+     * @return eventing::RcCode
      */
-    aml::RcCode process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override
     {
 
         if (event.accessor.isTypeDeviceCoreApi())
@@ -74,12 +74,12 @@ class ClearEvent : public EventHandler
                     log_err(
                         "Clear API Error on property(%s) of deviceId(%d), rc=%d!\n",
                         property.c_str(), deviceId, rc);
-                    return aml::RcCode::error;
+                    return eventing::RcCode::error;
                 }
             }
         }
 
-        return aml::RcCode::succ;
+        return eventing::RcCode::succ;
     }
 };
 
@@ -111,9 +111,9 @@ class EventHandlerManager : public object::Object
      * @brief Run a particular handler by name.
      *
      * @param event
-     * @return aml::RcCode
+     * @return eventing::RcCode
      */
-    aml::RcCode RunHandler(event_info::EventNode& event,
+    eventing::RcCode RunHandler(event_info::EventNode& event,
                            const std::string& name)
     {
         for (auto& hdlr : _handlers)
@@ -123,25 +123,25 @@ class EventHandlerManager : public object::Object
                 log_dbg("running handler(%s) on event(%s)\n",
                         hdlr->getName().c_str(), event.getName().c_str());
                 auto rc = hdlr->process(event);
-                if (rc != aml::RcCode::succ)
+                if (rc != eventing::RcCode::succ)
                 {
                     log_err("handler(%s) on event(%s) failed, rc = %d!\n",
                             hdlr->getName().c_str(), event.getName().c_str(),
-                            aml::to_integer(rc));
+                            eventing::to_integer(rc));
                 }
-                return aml::RcCode::succ;
+                return eventing::RcCode::succ;
             }
         }
-        return aml::RcCode::succ;
+        return eventing::RcCode::succ;
     }
 
     /**
      * @brief Run all registered event handlers in order.
      *
      * @param event
-     * @return aml::RcCode
+     * @return eventing::RcCode
      */
-    aml::RcCode RunAllHandlers(event_info::EventNode& event)
+    eventing::RcCode RunAllHandlers(event_info::EventNode& event)
     {
         for (auto& hdlr : _handlers)
         {
@@ -150,16 +150,16 @@ class EventHandlerManager : public object::Object
 
             auto rc = hdlr->process(event);
 
-            if (rc != aml::RcCode::succ)
+            if (rc != eventing::RcCode::succ)
             {
                 log_err("handler(%s) on event(%s) failed, rc = %d!\n",
                         hdlr->getName().c_str(), event.getName().c_str(),
-                        aml::to_integer(rc));
+                        eventing::to_integer(rc));
                 // let it generate the Event even there is a failure
                 // TODO: add some handling use case when it should stop/continue
             }
         }
-        return aml::RcCode::succ;
+        return eventing::RcCode::succ;
     }
 
   private:

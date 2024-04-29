@@ -8,9 +8,9 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-#include "aml_main.hpp"
+#include "eventing_main.hpp"
 
-#include "aml.hpp"
+#include "common.hpp"
 #include "cmd_line.hpp"
 #include "dat_traverse.hpp"
 #include "diagnostics.hpp"
@@ -38,7 +38,7 @@
 using namespace std;
 using namespace phosphor::logging;
 
-const auto APPNAME = "oobamld";
+const auto APPNAME = "monitor-eventingd";
 const auto APPVER = "0.1";
 const auto HMC_BOOTUP_TMP_FILE = "/tmp/hmc_up";
 
@@ -61,7 +61,7 @@ constexpr int RETRY_SLEEP = 5;
 #define DEFAULT_TOTAL_THREAD_LIMIT 4
 #endif
 
-namespace aml
+namespace eventing
 {
 
 namespace profile
@@ -244,7 +244,7 @@ int showHelp()
 
 // sd_bus* bus = nullptr;
 
-} // namespace aml
+} // namespace eventing
 
 void startWorkerThread(std::shared_ptr<boost::asio::io_context> io)
 {
@@ -282,27 +282,27 @@ int main(int argc, char* argv[])
 
     try
     {
-        cmd_line::CmdLine cmdLine(argc, argv, aml::cmdLineArgs);
+        cmd_line::CmdLine cmdLine(argc, argv, eventing::cmdLineArgs);
         rc = cmdLine.parse();
         rc = cmdLine.process();
     }
     catch (const std::exception& e)
     {
         logs_err("%s\n", e.what());
-        aml::showHelp();
+        eventing::showHelp();
         return rc ? rc : 1; // ensure exit is always non-zero
     }
-    if (aml::configuration.helpOptSet)
+    if (eventing::configuration.helpOptSet)
     {
-        aml::showHelp();
+        eventing::showHelp();
         return 0;
     }
-    else if (aml::configuration.diagnosticsModeOptSet)
+    else if (eventing::configuration.diagnosticsModeOptSet)
     {
         try
         {
-            return diagnostics::run(aml::configuration.dat,
-                                    aml::configuration.event);
+            return diagnostics::run(eventing::configuration.dat,
+                                    eventing::configuration.event);
         }
         catch (const std::exception& e)
         {
@@ -316,24 +316,24 @@ int main(int argc, char* argv[])
 
     // Initialization
     event_info::loadFromFile(
-        aml::profile::eventMap, aml::profile::propertyFilterSet,
-        aml::profile::eventTriggerView, aml::profile::eventAccessorView,
-        aml::profile::eventRecoveryView, aml::configuration.event);
+        eventing::profile::eventMap, eventing::profile::propertyFilterSet,
+        eventing::profile::eventTriggerView, eventing::profile::eventAccessorView,
+        eventing::profile::eventRecoveryView, eventing::configuration.event);
 
-    // event_info::printMap(aml::profile::eventMap);
+    // event_info::printMap(eventing::profile::eventMap);
 
 #ifdef EVENTING_FEATURE_ONLY
     // Register event handlers
     message_composer::MessageComposer msgComposer("MsgComp1");
 #else
-    dat_traverse::Device::populateMap(aml::profile::datMap,
-                                      aml::configuration.dat);
+    dat_traverse::Device::populateMap(eventing::profile::datMap,
+                                      eventing::configuration.dat);
 
     // Register event handlers
-    message_composer::MessageComposer msgComposer(aml::profile::datMap,
+    message_composer::MessageComposer msgComposer(eventing::profile::datMap,
                                                   "MsgComp1");
     event_handler::DATTraverse datTraverser("DatTraverser1");
-    datTraverser.setDAT(aml::profile::datMap);
+    datTraverser.setDAT(eventing::profile::datMap);
 
     int retryGettingDbusInfo = 0;
     bool error = true;
@@ -361,30 +361,30 @@ int main(int argc, char* argv[])
 
     // Create threadpool manager
     event_detection::threadpoolManager = std::make_unique<ThreadpoolManager>(
-        aml::configuration.running_thread_limit,
-        aml::configuration.total_thread_limit);
+        eventing::configuration.running_thread_limit,
+        eventing::configuration.total_thread_limit);
 
     event_detection::queue =
         std::make_unique<PcQueueType>(PROPERTIESCHANGED_QUEUE_SIZE);
 
-    event_detection::eventTriggerView = aml::profile::eventTriggerView;
-    event_detection::eventAccessorView = aml::profile::eventAccessorView;
-    event_detection::eventRecoveryView = aml::profile::eventRecoveryView;
+    event_detection::eventTriggerView = eventing::profile::eventTriggerView;
+    event_detection::eventAccessorView = eventing::profile::eventAccessorView;
+    event_detection::eventRecoveryView = eventing::profile::eventRecoveryView;
 
     event_handler::ClearEvent clearEvent("ClearEvent");
     event_handler::EventHandlerManager eventHdlrMgr("EventHandlerManager");
 
 #ifndef EVENTING_FEATURE_ONLY
     event_handler::RootCauseTracer rootCauseTracer("RootCauseTracer",
-                                                   aml::profile::datMap);
+                                                   eventing::profile::datMap);
 
-    selftest::Selftest selftest("bootupSelftest", aml::profile::datMap);
+    selftest::Selftest selftest("bootupSelftest", eventing::profile::datMap);
     selftest::ReportResult rep_res;
 #endif // EVENTING_FEATURE_ONLY
 
     event_detection::EventDetection eventDetection(
-        "EventDetection1", &aml::profile::eventMap,
-        &aml::profile::propertyFilterSet, &eventHdlrMgr);
+        "EventDetection1", &eventing::profile::eventMap,
+        &eventing::profile::propertyFilterSet, &eventHdlrMgr);
 
 #ifndef EVENTING_FEATURE_ONLY
     auto thread = std::make_unique<std::thread>([rep_res, selftest,
@@ -419,7 +419,7 @@ int main(int argc, char* argv[])
 
         if (selftest.performEntireTree(rep_res,
                                        std::vector<std::string>{"data_dump"},
-                                       reEvalLogs) != aml::RcCode::succ)
+                                       reEvalLogs) != eventing::RcCode::succ)
         {
             logs_err("Bootup Selftest failed\n");
             return;
@@ -458,7 +458,7 @@ int main(int argc, char* argv[])
     eventHdlrMgr.RegisterHandler(&msgComposer);
     eventHdlrMgr.RegisterHandler(&clearEvent);
 
-    logs_dbg("Creating %s\n", (const char*)oob_aml::SERVICE_BUSNAME);
+    logs_dbg("Creating %s\n", (const char*)oob_eventing::SERVICE_BUSNAME);
     sd_bus* mainThreadBus = nullptr;
     rc = sd_bus_default_system(&mainThreadBus);
     logs_dbg("main thread dbus connection is %p\n", mainThreadBus);
@@ -476,10 +476,10 @@ int main(int argc, char* argv[])
         auto sdbusp =
             std::make_shared<sdbusplus::asio::connection>(*io, mainThreadBus);
 
-        sdbusp->request_name(oob_aml::SERVICE_BUSNAME);
+        sdbusp->request_name(oob_eventing::SERVICE_BUSNAME);
         auto server = sdbusplus::asio::object_server(sdbusp);
-        auto iface = server.add_interface(oob_aml::TOP_OBJPATH,
-                                          oob_aml::SERVICE_IFCNAME);
+        auto iface = server.add_interface(oob_eventing::TOP_OBJPATH,
+                                          oob_eventing::SERVICE_IFCNAME);
         auto eventMatcher =
             eventDetection.startEventDetection(&eventDetection, sdbusp);
 

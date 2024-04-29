@@ -8,7 +8,7 @@
 
 #include <type_traits>
 
-namespace aml
+namespace eventing
 {
 
 enum class RcCode : int
@@ -31,4 +31,4 @@ constexpr auto to_integer(E e) -> typename std::underlying_type<E>::type
     return static_cast<typename std::underlying_type<E>::type>(e);
 }
 
-} // namespace aml
+} // namespace eventing

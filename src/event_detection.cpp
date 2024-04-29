@@ -3,8 +3,8 @@
  */
 #include "event_detection.hpp"
 
-#include "aml.hpp"
-#include "aml_main.hpp"
+#include "common.hpp"
+#include "eventing_main.hpp"
 #include "data_accessor.hpp"
 #include "event_handler.hpp"
 #include "event_info.hpp"

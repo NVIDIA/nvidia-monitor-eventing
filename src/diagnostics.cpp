@@ -1,6 +1,6 @@
 #include "diagnostics.hpp"
 
-#include "aml_main.hpp"
+#include "eventing_main.hpp"
 #include "json_proc.hpp"
 #include "printing_util.hpp"
 
@@ -859,12 +859,12 @@ int run(const std::string& datFile, const std::string& eventInfoFile,
 {
     auto datJsonReadTest = JsonReadTest::create(datFile);
     auto datJsonSchematTest =
-        JsonSchemaTest::create("DAT", aml::datSchema(), datJsonReadTest);
+        JsonSchemaTest::create("DAT", eventing::datSchema(), datJsonReadTest);
     auto datParseTest = DatParseTest::create(datJsonSchematTest);
 
     auto eventInfoJsonReadTest = JsonReadTest::create(eventInfoFile);
     auto eventInfoJsonSchemaTest = JsonSchemaTest::create(
-        "event info", aml::eventInfoJsonSchema(), eventInfoJsonReadTest);
+        "event info", eventing::eventInfoJsonSchema(), eventInfoJsonReadTest);
     auto eventInfoInnerConsistencyTest =
         EventInfoInnerConsistencyTest::create(eventInfoJsonSchemaTest);
     auto eventInfoParseTest =

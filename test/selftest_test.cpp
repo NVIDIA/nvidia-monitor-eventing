@@ -232,7 +232,7 @@ TEST(selftestTest, doPerform)
     // dat_traverse::Device::printTree(datMap);
     selftest::Selftest selftest("selftestObj", datMap);
     selftest::ReportResult rep_res;
-    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), aml::RcCode::succ);
+    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), eventing::RcCode::succ);
     EXPECT_EQ(rep_res.size(), 2);
     EXPECT_EQ(rep_res.find("GPU0") != rep_res.end(), true);
     EXPECT_EQ(rep_res.find("VR0") != rep_res.end(), true);
@@ -248,7 +248,7 @@ TEST(selftestTest, doPerform)
     selftest::ReportResult otherRep;
     auto tp = datMap.at("VR0").test["power_rail"].testPoints.begin();
     tp->second.expectedValue = "force_test_to_fail";
-    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), otherRep), aml::RcCode::succ);
+    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), otherRep), eventing::RcCode::succ);
     EXPECT_EQ(otherRep["VR0"].layer["power_rail"][0].result, false);
     EXPECT_EQ(otherRep["GPU0"].layer["power_rail"][0].result, false);
 }
@@ -306,7 +306,7 @@ TEST(selftestTest, performUsingLayerFilter)
     EXPECT_EQ(
         selftest.perform(datMap.at("GPU0"), rep_res,
                          std::vector<std::string>{"data_dump", "erot_control"}),
-        aml::RcCode::succ);
+        eventing::RcCode::succ);
     EXPECT_EQ(rep_res.size(), 2);
     EXPECT_EQ(rep_res.find("GPU0") != rep_res.end(), true);
     EXPECT_EQ(rep_res.find("VR0") != rep_res.end(), true);
@@ -397,7 +397,7 @@ TEST(selftestTest, doPerformEntireTree)
     selftest::Selftest selftest("selftestObj", datMap);
     selftest::ReportResult rep_res;
 
-    EXPECT_EQ(selftest.performEntireTree(rep_res), aml::RcCode::succ);
+    EXPECT_EQ(selftest.performEntireTree(rep_res), eventing::RcCode::succ);
     EXPECT_EQ(rep_res.size(), devs.size() + 1); /* + 1 for baseboard */
     for (auto& dev : devs)
     {
@@ -452,24 +452,24 @@ TEST(selftestTest, doProcess)
     event_info::EventNode event("test event");
     event.device = "GPU0";
 
-    EXPECT_EQ(selftest.process(event), aml::RcCode::succ);
+    EXPECT_EQ(selftest.process(event), eventing::RcCode::succ);
 
     /* purposely fail single TP */
     auto tp = datMap.at("VR0").test["power_rail"].testPoints.begin();
     tp->second.expectedValue = "force_test_to_fail";
-    EXPECT_EQ(selftest.process(event), aml::RcCode::error);
+    EXPECT_EQ(selftest.process(event), eventing::RcCode::error);
 
     event.device = "trash_device";
-    aml::RcCode result = aml::RcCode::succ;
+    eventing::RcCode result = eventing::RcCode::succ;
     EXPECT_NO_THROW(result = selftest.process(event));
-    EXPECT_EQ(result, aml::RcCode::error);
+    EXPECT_EQ(result, eventing::RcCode::error);
 }
 
 TEST(selftestTest, wrongDeviceTestpoint)
 {
     /* Device_A: (dummy TP's) + TP pointing to wrong device,
        which is not present in DAT map.
-       Expected: no exception is thrown but the result is aml::RcCode::error */
+       Expected: no exception is thrown but the result is eventing::RcCode::error */
     nlohmann::json jdat;
     nlohmann::json jgpu0;
     nlohmann::json jvr0;
@@ -510,9 +510,9 @@ TEST(selftestTest, wrongDeviceTestpoint)
     // dat_traverse::Device::printTree(datMap);
     selftest::Selftest selftest("selftestObj", datMap);
     selftest::ReportResult rep_res;
-    aml::RcCode result = aml::RcCode::succ;
+    eventing::RcCode result = eventing::RcCode::succ;
     EXPECT_NO_THROW(result = selftest.perform(datMap.at("GPU0"), rep_res));
-    EXPECT_EQ(result, aml::RcCode::error);
+    EXPECT_EQ(result, eventing::RcCode::error);
 }
 
 TEST(selftestTest, cachesReports)
@@ -579,7 +579,7 @@ TEST(selftestTest, cachesReports)
     // dat_traverse::Device::printTree(datMap);
     selftest::Selftest selftest("selftestObj", datMap);
     selftest::ReportResult rep_res;
-    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), aml::RcCode::succ);
+    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), eventing::RcCode::succ);
     EXPECT_EQ(rep_res.size(), 3);
     EXPECT_EQ(rep_res.find("GPU0") != rep_res.end(), true);
     EXPECT_EQ(rep_res.find("VR0") != rep_res.end(), true);
@@ -679,7 +679,7 @@ TEST(selftestTest, highlyRecursedDevices)
     // dat_traverse::Device::printTree(datMap);
     selftest::Selftest selftest("selftestObj", datMap);
     selftest::ReportResult rep_res;
-    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), aml::RcCode::succ);
+    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), eventing::RcCode::succ);
     EXPECT_EQ(rep_res.size(), 5);
     EXPECT_EQ(rep_res.find("GPU0") != rep_res.end(), true);
     EXPECT_EQ(rep_res.find("VR0") != rep_res.end(), true);
@@ -745,7 +745,7 @@ TEST(selftestTest, immuneToDeviceTestPointCircle)
     // dat_traverse::Device::printTree(datMap);
     selftest::Selftest selftest("selftestObj", datMap);
     selftest::ReportResult rep_res;
-    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), aml::RcCode::succ);
+    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), eventing::RcCode::succ);
     EXPECT_EQ(rep_res.size(), 2);
     EXPECT_EQ(rep_res.find("GPU0") != rep_res.end(), true);
     EXPECT_EQ(rep_res.find("VR0") != rep_res.end(), true);
@@ -1018,7 +1018,7 @@ TEST(rootCauseTraceTest, test1)
     dat.insert(std::pair<std::string, dat_traverse::Device>(hsc8.name, hsc8));
 
     event_handler::RootCauseTracer rootCauseTracer("testTracer", dat);
-    
+
     nlohmann::json j;
     j["event"] = "Event0";
     j["error_id"] = "Event0-Error";
@@ -1046,7 +1046,7 @@ TEST(rootCauseTraceTest, test1)
     persistentEvent.setDeviceIndexTuple(device_id::PatternIndex(0));
 
     event_info::EventNode event(persistentEvent);
-    EXPECT_EQ(rootCauseTracer.process(event), aml::RcCode::succ);
+    EXPECT_EQ(rootCauseTracer.process(event), eventing::RcCode::succ);
     EXPECT_EQ(event.selftestReport["header"]["summary"]["test-case-failed"], 0);
     EXPECT_EQ(event.selftestReport["tests"].size(), 5);
     EXPECT_EQ(dat.at("GPU0").healthStatus.healthRollup, "Critical");
@@ -1062,7 +1062,7 @@ TEST(rootCauseTraceTest, test1)
     dat.at("GPU0").test["pin_status"].testPoints.begin()->second.expectedValue =
         "force_test_to_fail";
 
-    EXPECT_EQ(rootCauseTracer.process(event), aml::RcCode::succ);
+    EXPECT_EQ(rootCauseTracer.process(event), eventing::RcCode::succ);
     EXPECT_EQ(event.selftestReport["header"]["summary"]["test-case-failed"], 1);
     EXPECT_EQ(event.selftestReport["tests"].size(), 5);
     EXPECT_EQ(dat.at("GPU0").healthStatus.originOfCondition, "GPU0");
@@ -1077,7 +1077,7 @@ TEST(rootCauseTraceTest, test1)
         .testPoints.begin()
         ->second.expectedValue = "force_test_to_fail";
 
-    EXPECT_EQ(rootCauseTracer.process(event), aml::RcCode::succ);
+    EXPECT_EQ(rootCauseTracer.process(event), eventing::RcCode::succ);
     /*  test case failed count is a sum of purposely failed GPU0 above +
         + GPU0 nested device TP (retimer) also failed + retimer's single
         failed TP, 3 in total */
@@ -1093,7 +1093,7 @@ TEST(rootCauseTraceTest, test1)
     dat.at("HSC8").test["pin_status"].testPoints.begin()->second.expectedValue =
         "force_test_to_fail";
 
-    EXPECT_EQ(rootCauseTracer.process(event), aml::RcCode::succ);
+    EXPECT_EQ(rootCauseTracer.process(event), eventing::RcCode::succ);
     EXPECT_EQ(event.selftestReport["header"]["summary"]["test-case-failed"], 5);
     EXPECT_EQ(event.selftestReport["tests"].size(), 5);
     EXPECT_EQ(dat.at("GPU0").healthStatus.healthRollup, "Critical");
@@ -1105,10 +1105,10 @@ TEST(rootCauseTraceTest, test1)
 
     /* reset event */
     event = persistentEvent;
-    aml::RcCode result = aml::RcCode::succ;
+    eventing::RcCode result = eventing::RcCode::succ;
     event.device = "trash_device";
     EXPECT_NO_THROW(result = rootCauseTracer.process(event));
-    EXPECT_EQ(result, aml::RcCode::error);
+    EXPECT_EQ(result, eventing::RcCode::error);
     EXPECT_EQ(persistentEvent.getOriginOfCondition(), std::nullopt);
 }
 

@@ -35,7 +35,7 @@ GLACIER_LOG_FILE="/var/mctp-vdm-output.bin"
 SELFTEST_CMD="selftest 08 00 00 00"
 AUTH_STAT_CMD="active_auth_status"
 
-MCTP_CACHE_DIR="/tmp/aml_mctp_cache"
+MCTP_CACHE_DIR="/tmp/erot_cache"
 MCTP_CACHE_FILE_PREFIX="${MCTP_CACHE_DIR:?}/query_boot_status_"
 
 DEVNAME=""
@@ -282,7 +282,7 @@ mctp_access() #(dev_eid, pretty_cmd) => <value>
             file_data=`cat "/dev/fd/$cachefd"`
             file_time=`echo "$file_data" | head -n 1`
         fi
-        
+
         local file_rc=0
         local age=$(( $monotonic_time - $file_time ))
         if [ $age -gt $CACHE_STALE_AGE ] || [ $file_time -eq 0 ]
@@ -292,7 +292,7 @@ mctp_access() #(dev_eid, pretty_cmd) => <value>
             local output;output=`timeout $MCTP_CACHE_COMMAND_TIMEOUT $cmdline`;rc=$?
             printf "%s\n%s\n%s" "$monotonic_time" "$rc" "$output" > "/dev/fd/$cachefd"
         else
-            # cachefile contains the file time, rc and output, read from there 
+            # cachefile contains the file time, rc and output, read from there
             # skipping time metadata (first line)
             file_rc=`echo "$file_data" | head -n 2 | tail -n 1`
             local output;output=`echo "$file_data" | tail -n +3`
