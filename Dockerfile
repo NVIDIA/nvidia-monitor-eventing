@@ -1,5 +1,5 @@
-FROM ubuntu:18.04
-LABEL Description="NVIDIA OOB Active Monitoring and Logging Development Environment"
+FROM ubuntu:20.04
+LABEL Description="NVIDIA Device Monitoring and Eventing Development Environment"
 LABEL Version="0.1"
 LABEL Maintainer="Kun Zhao(kuzhao@nvidia.com)"
 LABEL ImageName="bldenv:module"

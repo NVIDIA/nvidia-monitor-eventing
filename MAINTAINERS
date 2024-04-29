@@ -1,4 +1,4 @@
-List of maintainers for nvidia-gpuoob
+List of maintainers for nvidia-monitor-eventing
 ===============================
 
 How to use this list:
@@ -64,8 +64,3 @@ START OF MAINTAINERS LIST
 
 M:  Kun Zhao <kuzhao@nvidia.com> <zkxz!>
 M:  Vishal Jian <visjain@nvidia.com>
-M:  Harinder Singh <harinders@nvidia.com>
-M:  Christian Choi <christianc@nvidia.com>
-M:  Shanjit Jajmann <sjajmann@nvidia.com>
-
-
