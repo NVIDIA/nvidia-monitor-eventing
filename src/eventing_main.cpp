@@ -458,7 +458,7 @@ int main(int argc, char* argv[])
     eventHdlrMgr.RegisterHandler(&msgComposer);
     eventHdlrMgr.RegisterHandler(&clearEvent);
 
-    logs_dbg("Creating %s\n", (const char*)oob_eventing::SERVICE_BUSNAME);
+    logs_dbg("Creating %s\n", (const char*)mon_evt::SERVICE_BUSNAME);
     sd_bus* mainThreadBus = nullptr;
     rc = sd_bus_default_system(&mainThreadBus);
     logs_dbg("main thread dbus connection is %p\n", mainThreadBus);
@@ -476,10 +476,10 @@ int main(int argc, char* argv[])
         auto sdbusp =
             std::make_shared<sdbusplus::asio::connection>(*io, mainThreadBus);
 
-        sdbusp->request_name(oob_eventing::SERVICE_BUSNAME);
+        sdbusp->request_name(mon_evt::SERVICE_BUSNAME);
         auto server = sdbusplus::asio::object_server(sdbusp);
-        auto iface = server.add_interface(oob_eventing::TOP_OBJPATH,
-                                          oob_eventing::SERVICE_IFCNAME);
+        auto iface = server.add_interface(mon_evt::TOP_OBJPATH,
+                                          mon_evt::SERVICE_IFCNAME);
         auto eventMatcher =
             eventDetection.startEventDetection(&eventDetection, sdbusp);
 

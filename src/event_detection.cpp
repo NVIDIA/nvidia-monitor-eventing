@@ -9,6 +9,7 @@
 #include "event_handler.hpp"
 #include "event_info.hpp"
 #include "pc_event.hpp"
+#include "log.hpp"
 
 #include <boost/container/flat_map.hpp>
 #include <nlohmann/json.hpp>
@@ -18,6 +19,8 @@
 #include <iostream>
 #include <regex>
 #include <thread>
+
+log_init;
 
 using json = nlohmann::json;
 
