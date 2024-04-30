@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2022, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
 #
 #  NVIDIA CORPORATION and its licensors retain all intellectual property
 #  and proprietary rights in and to this software, related documentation
@@ -17,11 +17,11 @@ APP_VER="0.1"
 
 # Platform dependent profile.
 # Use Case 1:
-# In OpenBMC recipe, replace PROFILE_FILE with 
+# In OpenBMC recipe, replace PROFILE_FILE with
 # selftest_i2c_profile.csv proper path.
 #
 # Use Case 2:
-# From cmdline, define PROFILE_FILE=<path of profile.csv> 
+# From cmdline, define PROFILE_FILE=<path of profile.csv>
 # before calling this script to run with custom profile.
 [ -z "$PROFILE_FILE" ] && PROFILE_FILE="selftest_i2c_profile.csv"
 profile_path="${PROFILE_FILE}"
@@ -29,7 +29,7 @@ profile_path="${PROFILE_FILE}"
 # Maps current namespace deviceId to general device name.
 # Eg. GPU_SXM_5 -> GPU0
 # For details refer to target help
-[ -z "$DEVICE_NAME_MAPPER" ] && DEVICE_NAME_MAPPER="device-id-norm.sh" 
+[ -z "$DEVICE_NAME_MAPPER" ] && DEVICE_NAME_MAPPER="device-id-norm.sh"
 
 show_help()
 {
@@ -176,7 +176,7 @@ fi
 dbg "$i2cCmd"
 
 if [ $DRY_RUN -eq 1 ]; then
-    output="0xaa" # dummy out 
+    output="0xaa" # dummy out
     dbg "dry run, substituting read value with $output"
     rc=0
 elif [ $TEST_RUN -eq 1 ]; then
@@ -224,7 +224,7 @@ if [ $rc -ne 0 ]; then
     else
         echo "link-down; $ADDITIONAL_OUTPUT"
         exit 0
-    fi  
+    fi
 else
     echo "link-up"
     exit 0

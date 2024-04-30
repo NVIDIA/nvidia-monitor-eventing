@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 
-# Copyright (c) 2022, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
 #
 # NVIDIA CORPORATION and its licensors retain all intellectual property
 # and proprietary rights in and to this software, related documentation
@@ -77,7 +77,7 @@ def get_redfish_object(ip, user, pwd, port, device):
     response = requests.get(path, verify=False, auth=HTTPBasicAuth(user, pwd), timeout=10)
     return response.json()
 
-# traverses DAT 
+# traverses DAT
 # for each pair of (upstream, downstream):
 #   edit health status
 #   check if healthrollup of upstream changed
@@ -135,7 +135,7 @@ def traverse_dat(ip, user, pwd, qemu_port, bmcweb_port):
                 skipped += 1
                 execute_fn(handle, revert_cmd)
                 continue
-                
+
             healthrollup = resp["Status"]["HealthRollup"]
             print("Health rollup for upstream device {}: {}".format(device, healthrollup))
             print("Expected: {}".format(expected))
@@ -158,7 +158,7 @@ def traverse_dat(ip, user, pwd, qemu_port, bmcweb_port):
         print()
     return passes, fails, skipped
 
-    
+
 passes, fails, skipped = traverse_dat(args.ip, args.user, args.password, args.port, args.redfish_port)
 print("\nSummary:")
 print("{} tests passed".format(passes))

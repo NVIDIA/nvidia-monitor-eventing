@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+
 set -o pipefail
 
 APP_NAME="mctp-error-detection"
@@ -57,7 +66,7 @@ fi
 
 output=`$cmdline`
 # rc to contain first number from
-# output of 
+# output of
 # busctl call xyz.openbmc_project.GpuMgr /xyz/openbmc_project/GpuMgr xyz.openbmc_project.GpuMgr.Server PassthroughFpga iyyyau 0 0xb1 0x81 0 0
 
 rc=`echo $output |  awk -F'[^0-9]+' '{ print $2 }'`

@@ -1,3 +1,13 @@
+/**
+ * Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+ *
+ * NVIDIA CORPORATION and its licensors retain all intellectual property
+ * and proprietary rights in and to this software, related documentation
+ * and any modifications thereto.  Any use, reproduction, disclosure or
+ * distribution of this software and related documentation without an express
+ * license agreement from NVIDIA CORPORATION is strictly prohibited.
+ */
+
 #pragma once
 #include "dat_traverse.hpp"
 #include "device_id.hpp"
@@ -14,8 +24,8 @@
 /**
  * @brief A framework for writing diagnostics unit tests
  *
- * The tests are meant to be run when launching AML in a special diagnostics
- * mode, where none of the usual AML functionalities are started and only a
+ * The tests are meant to be run when launching mon_evt in a special diagnostics
+ * mode, where none of the usual functionalities are started and only a
  * series of tests is performed after which the program exits.
  *
  * Diagnostics mode is a middle ground between error injection and google tests.
@@ -24,7 +34,7 @@
  *                  Google     Error injection  Diagnostics
  *                  tests      (SW & HW)        mode
  *    ------------------------------------------------------
- *     Test object  Code unit  AML as blackbox  Code unit
+ *     Test object  Code unit  mon_evt as blackbox  Code unit
  *    ------------------------------------------------------
  *     Environment  Mocked     Real             Real
  *
@@ -32,14 +42,14 @@
  *
  * ("Real environment" = running in target OS, using real configuration files).
  *
- * The goal is to allow for testing and debugging pieces of AML code running in
+ * The goal is to allow for testing and debugging pieces of the code running in
  * a target environment while being executed in a highly controlled manner (as
  * opposed to observing their behavior "in the wild" through inspecting logs).
  *
  * After the tests are done the results are printed in a structured form of json
  * object to the standard output, a file, or any other stream of choice.
  *
- * Because the testing, by its own nature, cannot assume that neither the AML
+ * Because the testing, by its own nature, cannot assume that neither the
  * code pieces nor the provided configuration are correct, and yet any but the
  * most trivial tests must require some level of data and algorithm correctness
  * before proceeding, the tests naturally fall under a partially ordered
@@ -66,11 +76,11 @@
  *
  * A "test" may also have somewhat different goal than determining whether some
  * piece of data or code is correct or not and instead focus on obtaining some
- * relevant information about the AML, configuration or the system, to be
- * included in the json results and used for diagnosing problems with AML.
+ * relevant information about the mon_evt, configuration or the system, to be
+ * included in the json results and used for diagnosing problems.
  * Examples: values from the accessors found in 'dat.json' and
  * 'event_info.json', or a list of possible origins of condition given the
- * provided configuration and the OOC algorithm implemented in AML. In this case
+ * provided configuration and the OOC algorithm implemented. In this case
  * the test finishes with simply "done" status, having the same repercussions
  * for dependant tests as "passed".
  *

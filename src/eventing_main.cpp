@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
  *
  * NVIDIA CORPORATION and its licensors retain all intellectual property
  * and proprietary rights in and to this software, related documentation
@@ -219,10 +219,10 @@ static cmd_line::CmdLineArgs cmdLineArgs = {
      setTotalThreadLimit},
     {"-D", "--diagnostics-mode", cmd_line::OptFlag::none, "",
      cmd_line::ActFlag::normal,
-     "Run AML in diagnostics mode. This performs a series of tests logging "
+     "Run in diagnostics mode. This performs a series of tests logging "
      "the carried work to stderr and printing the results in json form to stdout, "
      "then the program quits. "
-     "Must be accompanied by all the other typical AML options "
+     "Must be accompanied by all the other typical options "
      "(in particular the specification of DAT and event info files)",
      []([[maybe_unused]] cmd_line::ArgFuncParamType params) -> int {
          configuration.diagnosticsModeOptSet = true;
@@ -306,7 +306,7 @@ int main(int argc, char* argv[])
         }
         catch (const std::exception& e)
         {
-            shortlogs_err(<< "Exception caught while running AML in "
+            shortlogs_err(<< "Exception caught while running in "
                           << "diagnostics mode: '" << e.what() << "'");
             return 1;
         }
@@ -485,7 +485,7 @@ int main(int argc, char* argv[])
 
         iface->initialize();
 
-        logs_err("NVIDIA OOB AML daemon is ready.\n");
+        logs_err("NVIDIA Monitor and Eventing daemon is ready.\n");
         io->run();
     }
     catch (const std::exception& e)

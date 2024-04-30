@@ -1,3 +1,11 @@
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
 import argparse
 import lark
 import pprint
@@ -489,14 +497,14 @@ def parse(string):
 
 def main():
     args = readArgs()
-    
+
     try:
         ids = parse(args.expr)
     except Exception as exc:
         print(f"Error during parsing:")
         print(exc)
         return 1
-    
+
     if args.regex:
         print(getRegex(ids.strings))
     else:
@@ -505,25 +513,25 @@ def main():
                 raise Exception(f"A single string 'arg' argument required")
             else:
                 invIds = ids.invert()
-        
+
                 if args.map:
                     raise Exception("To implement")
                 else:
                     values = invIds.values(
                         args.arg[0], args.brackets_in, args.brackets_out)
-        
+
         else:
             rawInput = tuple([
                 None if a == "_" else int(a)
                 for a in args.arg])
-        
+
             if args.map:
                 pairs = ids.pairs(
                     rawInput, args.brackets_in, args.brackets_out)
             else:
                 values = ids.values(
                     rawInput, args.brackets_in, args.brackets_out)
-        
+
         if args.map:
             # expect 'pairs' to be defined
             if args.python_format:

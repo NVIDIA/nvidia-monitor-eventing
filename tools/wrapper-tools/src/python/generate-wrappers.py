@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+
 import pandas as pd
 import re
 from pprint import pprint
@@ -53,11 +62,11 @@ class WrapperMockupDefs:
     #       { space_joined_parameters →
     #         (execution_time, string_OUTPUT, exit_code) }
     #   }
-    
+
     def __init__(self, testpoints):
         super().__init__()
         self.wrappersMapping = {}
-        for (i, row) in testpoints.iterrows():                
+        for (i, row) in testpoints.iterrows():
             if row[WrapperMockupDefs.Columns.CMD.val] not in self.wrappersMapping:
                 self.wrappersMapping[row[WrapperMockupDefs.Columns.CMD.val]] = {}
             assert(not pd.isna(row[WrapperMockupDefs.Columns.PARAMS.val]))

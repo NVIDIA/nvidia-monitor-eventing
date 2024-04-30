@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+
 import pandas as pd
 import os
 import pathlib
@@ -105,7 +114,7 @@ def main():
                                sep = args.sep,
                                quotechar = args.quotechar,
                                encoding = args.encoding,
-                               index = True)    
+                               index = True)
     return 0
 
 if __name__ == "__main__":
