@@ -103,17 +103,17 @@ phosphor_logging_dep = dependency(
 )
 
 # Add all the dependencies
-aml_dependencies = []
+mon_evt_dependencies = []
 
-aml_dependencies += sdbusplus_dep
-aml_dependencies += phosphor_logging_dep
-#aml_dependencies += dependency('glib-2.0')
-aml_dependencies += dependency('threads')
-aml_dependencies += meson.get_compiler('cpp').find_library('pthread')
-aml_dependencies += meson.get_compiler('cpp').find_library('rt')
+mon_evt_dependencies += sdbusplus_dep
+mon_evt_dependencies += phosphor_logging_dep
+#mon_evt_dependencies += dependency('glib-2.0')
+mon_evt_dependencies += dependency('threads')
+mon_evt_dependencies += meson.get_compiler('cpp').find_library('pthread')
+mon_evt_dependencies += meson.get_compiler('cpp').find_library('rt')
 
 if cxx.has_header('nlohmann/json.hpp')
-    aml_dependencies += declare_dependency()
+    mon_evt_dependencies += declare_dependency()
 endif
 
 # Add Include Directory
@@ -127,7 +127,7 @@ subdir('tools')
 
 # Pkg-config
 pkg_mod = import('pkgconfig')
-pkg_mod.generate(libraries : amllib,
+pkg_mod.generate(libraries : eventinglib,
                  version : '0.1',
                  name : 'monitor-eventing',
                  filebase : 'monitor-eventing',
@@ -178,8 +178,8 @@ srcfiles_unittest = [
     'test/selftest_test.cpp',
     'test/util_test.cpp']
 
-amllib_sources = [
-    'src/aml_config_schemas.cpp',
+eventinglib_sources = [
+    'src/config_schemas.cpp',
     'src/check_accessor.cpp',
     'src/config_parser.cpp',
     'src/dat_traverse.cpp',
@@ -196,7 +196,6 @@ amllib_sources = [
     'src/log.cpp',
     'src/message_composer.cpp',
     'src/message_dispatcher.cpp',
-    'src/oobaml_api.cpp',
     'src/property_accessor.cpp',
     'src/util.cpp']
 
@@ -232,23 +231,23 @@ install_data('tools/wrapper_nvlink_wp_status/nvlink-wp-status-wrapper',
 install_data('tools/device_id_mapping/device-id-norm.sh',
              install_dir : bindir)
 
-## install AML memory watcher service
-install_data('aml-memory-watcher/aml-memory-watcher',
+## install memory watcher service
+install_data('monitor-eventing-memory-watcher/monitor-eventing-memory-watcher',
              install_dir : bindir)
 
 if(get_option('tests').enabled())
     # generate the test executable
     ut_bin = executable(
-      'oobaml_unit_test',
-      srcfiles_unittest + amllib_sources + selftestlib_sources,
+      'eventing_unit_test',
+      srcfiles_unittest + eventinglib_sources + selftestlib_sources,
       include_directories : inc,
       install_dir: bindir,
-      dependencies: aml_dependencies + [
+      dependencies: mon_evt_dependencies + [
         gtest_dep,
         gmock_dep,
       ]
     )
-    test('oobaml_unit_test', ut_bin)
+    test('eventing_unit_test', ut_bin)
 endif
 
 if(get_option('device_health_service').enabled())

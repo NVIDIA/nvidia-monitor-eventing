@@ -1,7 +1,7 @@
 if get_option('eventing_feature_only').disabled()
 
     selftest_tool_sources = ['selftest_tool.cpp']
-    selftest_tool_deps = declare_dependency(link_with : [amllib, selftestlib],
+    selftest_tool_deps = declare_dependency(link_with : [eventinglib, selftestlib],
     include_directories : inc)
 
     selftest_tool = executable('selftest_tool',
@@ -20,7 +20,7 @@ if get_option('eventing_feature_only').disabled()
     dbus_tester_bin = executable(
         'dbus_tester',
         dbus_tester_sources,
-        dependencies: aml_dependencies + [
+        dependencies: mon_evt_dependencies + [
             sdbusplus_dep,
             meson.get_compiler('cpp').find_library('rt')
         ],

@@ -76,7 +76,7 @@ DIR_SAVE_ENTRIES_ALREADY_FOUND="$DIR_SAVE_ENTRIES/already_found"
 REDFISH_ENTRIES_URI="http://127.0.0.1:80/redfish/v1/Systems/HGX_Baseboard_0/LogServices/EventLog/Entries"
 REDFISH_CHASSIS_URI="http://127.0.0.1:80/redfish/v1/Chassis"
 
-CURL_CMD="/tmp/oobaml/bin/curl -i"
+CURL_CMD="/tmp/mon_evt/bin/curl -i"
 gl_log_id=0  ## entry to be generated for the firt busctl command
 DRY_RUN=0
 

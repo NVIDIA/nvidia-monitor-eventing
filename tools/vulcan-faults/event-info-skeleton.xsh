@@ -72,14 +72,14 @@ def ensureEntry(jsonObj, *keys):
             obj[key] = {}
         obj = obj[key]
 
-# "TODO: Accessor definition [type: Object] 
-#        ^-----------------^        ^----^  
-#              what                jsonType 
-# 
+# "TODO: Accessor definition [type: Object]
+#        ^-----------------^        ^----^
+#              what                jsonType
+#
 #    (could not be deduced from cell; cell value: 'any other WP?';
 #    ^-----------------------------^               ^-----------^
 #             comment                                 cell
-# 
+#
 #    row: 53, col: 'Fault Scenario')"
 #         ^^        ^------------^
 #     where[0]         where[1]
@@ -152,7 +152,7 @@ vf = pd.merge(vfSum, vfOpCode, how = "left", on = referenceCol,
 n = vf.shape[0]
 eventInfoJson = {}
 
-accessorDefinition = "accessor object (see 'https://gitlab-collab-01.nvidia.com/viking-team/nvidia-oobaml/-/tree/vulcan_faults/examples#accessor-format')"
+accessorDefinition = "accessor object (see 'https://gitlab-collab-01.nvidia.com/viking-team/nvidia-monitor-eventing/-/tree/vulcan_faults/examples#accessor-format')"
 
 for (i, row) in vf.iterrows():
     gsheetsIndex = i + 2

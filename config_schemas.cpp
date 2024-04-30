@@ -1,6 +1,6 @@
-#include "aml_main.hpp"
+#include "eventing_main.hpp"
 
-namespace aml
+namespace eventing
 {
 
 std::shared_ptr<json_schema::JsonSchema> accessorCheckerSchema()
@@ -159,4 +159,4 @@ std::shared_ptr<json_schema::JsonSchema> datSchema()
     return literal(true);
 }
 
-} // namespace aml
+} // namespace eventing

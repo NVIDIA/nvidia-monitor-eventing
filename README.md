@@ -87,7 +87,7 @@ To change the logging level during runtime, e.g. to 3 - debug, we need to pass f
 -l <level> 0 - None; 1 - +Error; 2 - +Warning; 3 - +Info
 ```
 
-To change the target for log output during runtime, e.g. to /tmp/aml_debug.log, we need to pass following command line argument.
+To change the target for log output during runtime, e.g. to /tmp/mon_evt_debug.log, we need to pass following command line argument.
 ``` markdown
 -L <log_file> where to output the log. Output to screen if the arg not present.
 ```

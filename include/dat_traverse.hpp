@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "aml.hpp"
+#include "common.hpp"
 #include "data_accessor.hpp"
 #include "dbus_accessor.hpp"
 #include "event_handler.hpp"
@@ -236,15 +236,15 @@ class DATTraverse : public event_handler::EventHandler
      * and update device status.
      *
      * @param event
-     * @return aml::RcCode
+     * @return eventing::RcCode
      */
-    aml::RcCode process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override
     {
         std::string problemDevice = event.device;
         if (problemDevice.length() == 0)
         {
             log_err("%s error: empty device\n", this->getName().c_str());
-            return aml::RcCode::error;
+            return eventing::RcCode::error;
         }
 
         std::vector<std::function<void(dat_traverse::Device & device,
@@ -255,7 +255,7 @@ class DATTraverse : public event_handler::EventHandler
 
         parentTraverse(this->dat, problemDevice, hasParents, parentCallbacks);
 
-        return aml::RcCode::succ;
+        return eventing::RcCode::succ;
     }
 
     /**

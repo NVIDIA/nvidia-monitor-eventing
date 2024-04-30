@@ -264,7 +264,7 @@ bool Selftest::isDeviceCached(const std::string& devName,
     return true; /* already cached */
 }
 
-aml::RcCode Selftest::perform(const dat_traverse::Device& dev,
+eventing::RcCode Selftest::perform(const dat_traverse::Device& dev,
                               ReportResult& reportRes,
                               std::vector<std::string> layersToIgnore,
                               const bool& doEventDetermination)
@@ -277,7 +277,7 @@ aml::RcCode Selftest::perform(const dat_traverse::Device& dev,
         shortlog_dbg(<< "selftest: skipping device: '" << dev.name
                      << "' reason: "
                      << (shouldSkip ? "optimized" : "already tested"));
-        return aml::RcCode::succ;
+        return eventing::RcCode::succ;
     }
 
     if (doEventDetermination)
@@ -340,11 +340,11 @@ aml::RcCode Selftest::perform(const dat_traverse::Device& dev,
                     std::cerr << "Error: invalid device key: " << devName
                               << " in nested tp in selftest perform"
                               << std::endl;
-                    return aml::RcCode::error;
+                    return eventing::RcCode::error;
                 }
 
                 auto& devNested = this->_dat.at(devName);
-                aml::RcCode selftestRes = aml::RcCode::succ;
+                eventing::RcCode selftestRes = eventing::RcCode::succ;
                 if (!isDeviceCached(devName, reportRes))
                 {
                     selftestRes =
@@ -352,7 +352,7 @@ aml::RcCode Selftest::perform(const dat_traverse::Device& dev,
                                       doEventDetermination);
                 }
 
-                bool devEvalRes = (selftestRes == aml::RcCode::succ) &&
+                bool devEvalRes = (selftestRes == eventing::RcCode::succ) &&
                                   evaluateDevice(reportRes[devName]);
 
                 fillTpRes(tmpTestPointResult, testPoint.expectedValue,
@@ -377,10 +377,10 @@ aml::RcCode Selftest::perform(const dat_traverse::Device& dev,
         }
     }
     reportRes[dev.name] = tmpDeviceReport;
-    return aml::RcCode::succ;
+    return eventing::RcCode::succ;
 }
 
-aml::RcCode Selftest::performEntireTree(ReportResult& reportRes,
+eventing::RcCode Selftest::performEntireTree(ReportResult& reportRes,
                                         std::vector<std::string> layersToIgnore,
                                         const bool& doEventDetermination)
 {
@@ -405,12 +405,12 @@ aml::RcCode Selftest::performEntireTree(ReportResult& reportRes,
     for (auto& dev : _dat)
     {
         if (perform(dev.second, reportRes, layersToIgnore,
-                    doEventDetermination) != aml::RcCode::succ)
+                    doEventDetermination) != eventing::RcCode::succ)
         {
-            return aml::RcCode::error;
+            return eventing::RcCode::error;
         }
     }
-    return aml::RcCode::succ;
+    return eventing::RcCode::succ;
 }
 
 Selftest::Selftest(const std::string& name,
@@ -568,10 +568,10 @@ void Report::writeSummaryHeader(void)
 
 /* ========================= free function todo ========================= */
 
-aml::RcCode DoSelftest([[maybe_unused]] const dat_traverse::Device& dev,
+eventing::RcCode DoSelftest([[maybe_unused]] const dat_traverse::Device& dev,
                        [[maybe_unused]] const std::string& report)
 {
-    return aml::RcCode::error;
+    return eventing::RcCode::error;
 }
 
 } // namespace selftest
@@ -641,7 +641,7 @@ void RootCauseTracer::updateRootCause(
     DATTraverse::setOriginOfCondition(dev, status);
 }
 
-aml::RcCode RootCauseTracer::process([
+eventing::RcCode RootCauseTracer::process([
     [maybe_unused]] event_info::EventNode& event)
 {
     std::string problemDevice = event.device;
@@ -649,7 +649,7 @@ aml::RcCode RootCauseTracer::process([
     {
         std::cerr << "Error: rootCauseTracer device: [" << problemDevice
                   << "] is invalid key - cannot process rootCause" << std::endl;
-        return aml::RcCode::error;
+        return eventing::RcCode::error;
     }
 
     PROFILING_SWITCH(
@@ -663,11 +663,11 @@ aml::RcCode RootCauseTracer::process([
         current solution is quick, temporary, hardcoded patch */
     if (selftester.perform(_dat.at(problemDevice), completeReportRes,
                            std::vector<std::string>{"data_dump"}) !=
-        aml::RcCode::succ)
+        eventing::RcCode::succ)
     {
         std::cerr << "Error: rootCauseTracer failed to perform selftest "
                   << "for device " << problemDevice << std::endl;
-        return aml::RcCode::error;
+        return eventing::RcCode::error;
     }
 
     /* append to already existing event severities a selftest severity then find
@@ -698,12 +698,12 @@ aml::RcCode RootCauseTracer::process([
     {
         std::cerr << "Error: rootCauseTracer failed to generate report!"
                   << std::endl;
-        return aml::RcCode::error;
+        return eventing::RcCode::error;
     }
 
     event.selftestReport = reportGenerator.getReport();
 
-    return aml::RcCode::succ;
+    return eventing::RcCode::succ;
 }
 
 } // namespace event_handler

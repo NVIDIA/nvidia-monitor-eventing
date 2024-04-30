@@ -3,7 +3,7 @@ option('debug_log', type: 'integer', min : 0, max : 4, value : 0,
 option('sandbox_mode', type : 'feature', value : 'auto',
         description : 'Sandbox mode enablement')
 option ('tests', type : 'feature', value : 'enabled',
-        description : 'Enable Unit tests for oobaml')
+        description : 'Enable Unit tests for monitor-eventing')
 option ('log_elapsed_time', type : 'feature', value : 'disabled',
         description : 'Enable generation of the Elpased time logs')
 option('profile_selftest_and_recovery', type : 'feature', value : 'disabled',

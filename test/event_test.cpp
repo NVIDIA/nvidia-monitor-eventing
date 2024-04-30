@@ -1,5 +1,5 @@
-#include "aml.hpp"
-#include "aml_main.hpp"
+#include "common.hpp"
+#include "eventing_main.hpp"
 #include "dat_traverse.hpp"
 #include "data_accessor.hpp"
 #include "event_detection.hpp"
@@ -14,7 +14,7 @@ TEST(JsonSchemaTest, Default)
 {
     using namespace json_schema;
     auto ev = event_GPU_VRFailure();
-    auto eventSchema = aml::eventInfoJsonSchema();
+    auto eventSchema = eventing::eventInfoJsonSchema();
     json_proc::ProblemsCollector problemsCollector;
     eventSchema->check(ev, problemsCollector);
     for (const auto& problem : problemsCollector)
