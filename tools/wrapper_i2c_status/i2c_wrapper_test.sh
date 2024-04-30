@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+
 if [[ "$1" != "-y" ]]; then
     echo "Are you running this test script on hw machine? [y/n]"
     read userInput
@@ -17,7 +26,7 @@ scriptName="./i2c_wrapper"
 export DEVICE_NAME_MAPPER="device-id-norm.sh"
 ITER_CFG=500
 
-perfTest() 
+perfTest()
 {
     testsTotal=$(($testsTotal + 1))
     local symbol="$1"
@@ -60,7 +69,7 @@ perfTest()
     echo -n -e "test $testsTotal\r"
 }
 
-errorRateTest() 
+errorRateTest()
 {
     testsTotal=$(($testsTotal + 1))
     local ITER_TO_FINISH=$ITER_CFG
@@ -108,7 +117,7 @@ errorRateTest()
     else
         testsPassed=$(($testsPassed + 1))
     fi
-    
+
     echo -n -e "test $testsTotal\r"
 }
 

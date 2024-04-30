@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2022, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
 #
 #  NVIDIA CORPORATION and its licensors retain all intellectual property
 #  and proprietary rights in and to this software, related documentation
@@ -18,18 +18,18 @@ APP_VER="0.1"
 
 # Platform dependent profile.
 # Use Case 1:
-# In OpenBMC recipe, replace PROFILE_FILE with 
+# In OpenBMC recipe, replace PROFILE_FILE with
 # selftest_fpga_regtbl_profile.csv proper path.
 #
 # Use Case 2:
-# From cmdline, define PROFILE_FILE=<path of device_mctp_eid.csv> 
+# From cmdline, define PROFILE_FILE=<path of device_mctp_eid.csv>
 # before calling this script to run with custom profile.
 [ -z "$PROFILE_FILE" ] && PROFILE_FILE="selftest_fpga_regtbl_profile.csv"
 
 # Maps current namespace deviceId to general device name.
 # Eg. GPU_SXM_5 -> GPU0
 # For details refer to target help
-[ -z "$DEVICE_NAME_MAPPER" ] && DEVICE_NAME_MAPPER="device-id-norm.sh" 
+[ -z "$DEVICE_NAME_MAPPER" ] && DEVICE_NAME_MAPPER="device-id-norm.sh"
 
 profile_path="${PROFILE_FILE}"
 # default is i2c-2 because fpga defs spreadsheet pointed all commands to the same
@@ -226,7 +226,7 @@ DEVNAME="$1"
 
 if [ $TEST_RUN -eq 1 ]; then
     lines=`initialLineMatch ${COMMAND} ${DEVNAME}`;rc=$?
-    parseLines "${lines}";rc=$? 
+    parseLines "${lines}";rc=$?
     echo "$slaveaddr $regsize $regaddr $bitidx"
     exit 0
 fi

@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+
 testsTotal=0
 testsPassed=0
 testsFailed=0
@@ -8,14 +17,14 @@ testsFailed=0
 export DEVICE_MAP_FILE="../device_id_mapping/device_id_map.csv"
 export DEVICE_NAME_MAPPER="../device_id_mapping/device-id-norm.sh"
 
-perfTest() 
+perfTest()
 {
     testsTotal=$(($testsTotal + 1))
     local cmd="$1"
     local dev="$2"
     local exp="$3"
     local resp=`./fpga_regtbl_wrapper -test-run $cmd $dev`
-    
+
     if [ "$resp" != "$exp" ]; then
         echo "ERROR: test failed $cmd $dev resp $resp != expected $exp"
         testsFailed=$(($testsFailed + 1))

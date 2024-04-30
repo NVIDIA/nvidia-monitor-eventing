@@ -2,7 +2,7 @@
 
 # Rationale
 
-Device id mapping language was devised to compactly represent a mapping between integer indexes and textual device names. This functionality is useful in all of AML, from main daemon through wrappers to configuration files generating scripts. This is no surprise considering that AML stands between SMBPBI hardware interface and the Redfish interface, both using different names for the same devices with different indexing scheme, for example:
+Device id mapping language was devised to compactly represent a mapping between integer indexes and textual device names. This functionality is useful, from main daemon through wrappers to configuration files generating scripts. This is no surprise considering that between SMBPBI hardware interface and the Redfish interface, both using different names for the same devices with different indexing scheme, for example:
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -69,7 +69,7 @@ Device id mapping language was devised to compactly represent a mapping between 
 </tbody>
 </table>
 
-On top of that AML is the controller of association relations between different devices and expressing them pose a challange, even if both sides are named using the same convention, for example the association between NVSwitches and Hot Swap Controllers:
+On top of that monitor-eventing is the controller of association relations between different devices and expressing them pose a challange, even if both sides are named using the same convention, for example the association between NVSwitches and Hot Swap Controllers:
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -120,11 +120,11 @@ Device id mapping language provides the fundamental building block to easily exp
 The language has two implementations:
 
 1.  Python implementation `tools/device-id-lang/ids.py` to be used as a standalone CLI program as well as a python module to use in other scripts.
-2.  C++ implementation in the form of set of classes to be used directly by the AML daemon's code, defined in the `device_id` namespace, in the files
+2.  C++ implementation in the form of set of classes to be used directly by the daemon's code, defined in the `device_id` namespace, in the files
     -   `src/device_id.cpp`,
     -   `include/device_id.hpp`.
 
-The python version serves as a prototyping lab and may provide a richer set of features, but for all intents and purposes the languages defined by these two implementations are equivalent. 
+The python version serves as a prototyping lab and may provide a richer set of features, but for all intents and purposes the languages defined by these two implementations are equivalent.
 
 
 # Python parser `ids.py`
@@ -155,19 +155,19 @@ To print all the values a pattern represents simply pass it as the first argumen
 
 This shows how the bracket contents `1-8` are interpreted - as a range of values from `1` to `8`, which are interpolated into the containing string. The string may contain arbitrary characters, except for `[` and `]` (will be covered in the next version).
 
-    $ python3 ids.py 'Change the gear 
+    $ python3 ids.py 'Change the gear
     to [1-6]...'
-    Change the gear 
+    Change the gear
     to 1...
-    Change the gear 
+    Change the gear
     to 2...
-    Change the gear 
+    Change the gear
     to 3...
-    Change the gear 
+    Change the gear
     to 4...
-    Change the gear 
+    Change the gear
     to 5...
-    Change the gear 
+    Change the gear
     to 6...
 
 The numbers specifying the range cannot be negative. If the right number is lower than the left one the span is interpreted as empty which always results in an empty set of expanded values
@@ -331,9 +331,9 @@ We must ensure python is able to find it. There are many ways to do it and all o
 Use `ids.parse()` function to obtain the `DeviceIdPattern` object. Then `pairs()` function can be called to iterate over the whole mapping:
 
     import ids
-    
+
     pat = ids.parse("=<{[0-1]-[0-1]-[0-1]}>=")
-    
+
     for arg, value in pat.pairs():
         print(f"{arg} -> '{value}'")
 
@@ -351,11 +351,11 @@ Output:
 
 The `pairs()` function returns an *iterator* of argument-value pairs, not a dictionary. To convert it to a dictionary just pass the iterator to `dict` constructor.
 
-    import ids    
+    import ids
     import pprint
-    
+
     pat = ids.parse("=<{[0-1]-[0-1]-[0-1]}>=")
-    
+
     patDict = dict(pat.pairs())
     pprint.pp(patDict)
 
@@ -387,9 +387,9 @@ Output:
 Similarly to iterating the argument-value pairs we can iterate over the values of the mapping only with the `values()` function:
 
     import ids
-    
+
     pat = ids.parse("=<{[0-1]-[0-1]-[0-1]}>=")
-    
+
     for value in pat.values():
         print(f"'{value}'")
 
@@ -409,12 +409,12 @@ Just as with `pairs()` the `values()` function returns an iterator. To obtain an
 
     import ids
     import pprint
-    
+
     pat = ids.parse("=<{[0-1]-[0-1]-[0-1]}>=")
-        
+
     valuesList = list(pat.values())
     pprint.pp(valuesList)
-    
+
     print(f"Fourth element: {valuesList[3]}")
 
 Output:
@@ -437,9 +437,9 @@ The `values()` function works in the same way as [evaluating a device id pattern
 
     import ids
     import pprint
-    
+
     pat = ids.parse("=<{[0-1]-[0-1]-[0-1]}>=")
-    
+
     for value in pat.values((0,)):
         print(f"'{value}'")
 
@@ -486,9 +486,9 @@ Output:
 Assuming we have a pattern and one of its instances, for example `PCIeRetimer_[0-7]` and `PCIeRetimer_1`, we can obtain the list of index tuples at which `PCIeRetimer_[0-7]` evaluated would yield `PCIeRetimer_1` by using the `invert()` method of the `DeviceIdPattern` object.
 
     import ids
-    
+
     pat = ids.parse("PCIeRetimer_[0-7]")
-    
+
     invPat = pat.invert()
     print(list(invPat.values("PCIeRetimer_1")))
 
@@ -668,7 +668,7 @@ We can check whether a given string in variable `someDeviceName` matches the pat
         }
     }
 
-For `someDeviceName` being `"GPU_SXM_5"` the output will be 
+For `someDeviceName` being `"GPU_SXM_5"` the output will be
 
     (5)
 
@@ -682,7 +682,7 @@ The `match(...)` function works well together with `eval(...)` if we use the res
     DeviceIdPattern gpus("GPU_SXM_[1-8]");
     DeviceIdPattern gpusDbusPaths(
         "/xyz/openbmc_project/inventory/system/processors/GPU_SXM_[1-8]");
-    
+
     std::vector<PatternIndex> gpuIndexes = gpus.match("GPU_SXM_3");
     for (const auto& gpuIndex: gpuIndexes)
     {
@@ -922,7 +922,7 @@ and the following code would throw an exception at `gpusDbusPaths.eval(gpuIndex)
     DeviceIdPattern gpus("GPU_SXM_[1-8]");
     DeviceIdPattern gpusDbusPaths(
         "/xyz/openbmc_project/inventory/system/processors/GPU_SXM_[0-7]");
-    
+
     std::vector<PatternIndex> gpuIndexes = gpus.match("GPU_SXM_8");
     for (const auto& gpuIndex: gpuIndexes)
     {
@@ -1029,7 +1029,7 @@ This corresponds to the following mapping:
 </tbody>
 </table>
 
-The number of NVlinks, usually around 40, was reduced for the sake of clarity. The ranges in brackets are treated independently, with the rightmost changing the fastest. 
+The number of NVlinks, usually around 40, was reduced for the sake of clarity. The ranges in brackets are treated independently, with the rightmost changing the fastest.
 
 The object `switchNvlinks` can be used in the exact same manner as if it had just one bracket.
 
@@ -1113,7 +1113,7 @@ Same issue with functions `eval(...)` and `match(...)`:
     DeviceIdPattern gpusDbusPaths(
         "/xyz/openbmc_project/inventory/system/fabrics/"
         "HGX_NVLinkFabric_0/Switches/NVSwitch_[0-3]/Ports/NVLink_[0-2]");
-    
+
     std::vector<PatternIndex> switchNvlinksIndexes = gpusDbusPaths.match(
         "/xyz/openbmc_project/inventory/system/fabrics/"
         "HGX_NVLinkFabric_0/Switches/NVSwitch_0/Ports/NVLink_2");
@@ -1522,7 +1522,7 @@ The bracket syntax makes it possible to change the ordering of input indexes, so
 
     [r|...]
 
-where `...` is an arbitrary mapping specification as described in [index span mappings](#org496b8d6) and [mapping sums](#orgf0ef5fe). The indexing of the input starts from 0. For example, the pattern: 
+where `...` is an arbitrary mapping specification as described in [index span mappings](#org496b8d6) and [mapping sums](#orgf0ef5fe). The indexing of the input starts from 0. For example, the pattern:
 
     NVSwitch_[1|0-3]/NVLink_[0|10-12]
 
@@ -2158,7 +2158,7 @@ The `PatternIndex::unspecified` can be provided in places ignored by the pattern
 ## Complete device id pattern language syntax
 
     string_map: string? ( brack_map string? )*
-    
+
     brack_map          : "[" indexed_map "]"
     indexed_map        : sum_map | proper_indexed_map
     proper_indexed_map : number "|" sum_map
@@ -2167,7 +2167,7 @@ The `PatternIndex::unspecified` can be provided in places ignored by the pattern
     proper_map         : range ":" range
     range              : number | proper_range
     proper_range       : number "-" number
-    
+
     number: /[0-9]+/
     string: /[^[]+/
 

@@ -1,6 +1,11 @@
-
-/*
+/**
+ * Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
  *
+ * NVIDIA CORPORATION and its licensors retain all intellectual property
+ * and proprietary rights in and to this software, related documentation
+ * and any modifications thereto.  Any use, reproduction, disclosure or
+ * distribution of this software and related documentation without an express
+ * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
 #pragma once
@@ -318,8 +323,8 @@ class EventDetection : public object::Object
             // if addFullDeviceName is empty foundAllDevices is false
             if (addFullDeviceName.empty() && deviceNames.size() > 1)
             {
-                // case where new AML version performing entries generated
-                //  by an old AML version which does not save FULL_DEVICE_NAME
+                // case where new version performing entries generated
+                //  by an old version which does not save FULL_DEVICE_NAME
                 auto reverseCounter = deviceNames.size() -1;
                 // main device devId was already checked, check only others
                 foundAllDevices = true;

@@ -1,3 +1,11 @@
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
 """
 Module for handling devices from Json input file which as 'accessor' information not empty
 So far accessor.type = DBUS are handled
@@ -325,7 +333,7 @@ class EventAccessorInjectorScript(InjectorScriptBase):
                 if com.LIST_EVENTS is True:
                     print(f"{com.DEVICE_HW}{information['range']} \"{event}\"")
                 else:
-                    self.print_test_AML_single_injection(event, com.range_start_end_list)
+                    self.print_test_single_injection(event, com.range_start_end_list)
         else:
             if len(com.SINGLE_DEVICE) > 0  and com.DEVICE_HW != com.SINGLE_DEVICE:
                should_generate_commands = False
@@ -363,7 +371,7 @@ class EventAccessorInjectorScript(InjectorScriptBase):
         super().remove_accessor_fields()
 
 
-    def print_test_AML_single_injection(self, event, range_list):
+    def print_test_single_injection(self, event, range_list):
         """
         Prints a command such as './test_AML.sh inject  -m -d PCIeRetimer -e "I2C EEPROM Error" -i 0'
         """

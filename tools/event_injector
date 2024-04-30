@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+
 set -o pipefail
 
 ################################################################################
@@ -253,7 +262,7 @@ evtdoc2cmdline() # $1: profile
     local logger_svc="xyz.openbmc_project.Logging"
     local logger_obj="/xyz/openbmc_project/logging"
     local logger_add_entry="xyz.openbmc_project.Logging.Create Create ssa{ss}"
-    
+
     local key_res="xyz.openbmc_project.Logging.Entry.Resolution"
 
     TEMPFILE=/tmp/$$.tmp
@@ -292,7 +301,7 @@ evtdoc2cmdline() # $1: profile
             local msg_id=`echo "$line_fmt" | cut -f4`
             local msg_svr=`echo "$line_fmt" | cut -f5`
             local msg_res=`echo "$line_fmt" | cut -f6`
-            #local msg_origcond=`echo "$line_fmt" | cut -f7` # Out of scope for QEMU R5 
+            #local msg_origcond=`echo "$line_fmt" | cut -f7` # Out of scope for QEMU R5
             local msg_args=`echo "$line_fmt" | cut -f8`
             msg_args=`sed 's/"//g' <<<"$msg_args"`
             msg_args=`sed 's/[][]//g' <<<"$msg_args"`
@@ -307,7 +316,7 @@ evtdoc2cmdline() # $1: profile
             msg="$msg \"REDFISH_MESSAGE_ID\" \"${msg_id}\""
             msg="$msg \"REDFISH_MESSAGE_ARGS\" \"${msg_args}\""
             msg="$msg ${key_res} \"${msg_res}\"" # TBD
-            # msg="$msg \"REDFISH_MESSAGE_ORIGCOND\" \"${msg_origcond}\"" # TBD # Out of scope for QEMU R5 
+            # msg="$msg \"REDFISH_MESSAGE_ORIGCOND\" \"${msg_origcond}\"" # TBD # Out of scope for QEMU R5
 
             local cmd="busctl call ${logger_svc} ${logger_obj} ${logger_add_entry} ${msg}"
 
@@ -318,11 +327,11 @@ evtdoc2cmdline() # $1: profile
 
             if [ ! -z "$inject" ] && [ "$inject" = "true" ]; then
 
-                eval $cmd 
-                
+                eval $cmd
+
                 rc=$?
                 echo -n "Injecting Device Event Log ($event) to D-Bus: "
-                if [ $rc -ne 0 ]; then 
+                if [ $rc -ne 0 ]; then
                     echo "Failed"
                 else
                     echo "Passed"
@@ -364,7 +373,7 @@ main() # $*: all args
         echo "[E] [$prf] doesn't exist!"
         return 2
     fi
-    
+
     evtdoc2cmdline "$prf" "$inject"
 
     return 0

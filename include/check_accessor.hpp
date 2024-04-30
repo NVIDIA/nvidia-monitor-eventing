@@ -1,3 +1,13 @@
+/**
+ * Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+ *
+ * NVIDIA CORPORATION and its licensors retain all intellectual property
+ * and proprietary rights in and to this software, related documentation
+ * and any modifications thereto.  Any use, reproduction, disclosure or
+ * distribution of this software and related documentation without an express
+ * license agreement from NVIDIA CORPORATION is strictly prohibited.
+ */
+
 #pragma once
 
 #include "data_accessor.hpp"
@@ -86,7 +96,7 @@ class CheckAccessor
      * @param dataAcc if type is "DBUS" and it already contains data
      *                DataAccessor::read() will not be called  for dataAcc.
      *
-     * @note  Regarding AML flow it is always type DBUS and always contains the
+     * @note  Regarding the flow it is always type DBUS and always contains the
      *        real Objec Path and Property data received from DBus.
      *        So this is the "event.trigger".
      *        Unless _trigger is already set by a previous check() call, dataAcc

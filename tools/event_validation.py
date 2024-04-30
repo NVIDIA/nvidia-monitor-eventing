@@ -8,7 +8,7 @@ Event Inject tests
 # This script injects events using event_injector script and verify
 # log creation by BMCWeb
 #
-# Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
 #
 # NVIDIA CORPORATION and its licensors retain all intellectual property
 # and proprietary rights in and to this software, related documentation
@@ -96,7 +96,7 @@ available_options = [
         'kwargs': {
             'type': int,
             'default': 2,
-            'help': '''[optional] Test Mode to perform; 1=insert event logs; 2=change device status, requires AML daemon
+            'help': '''[optional] Test Mode to perform; 1=insert event logs; 2=change device status, requires monitor-eventing daemon
                     (which should insert event logs)
                     '''
         }

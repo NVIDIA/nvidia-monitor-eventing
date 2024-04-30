@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2022, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
 #
 #  NVIDIA CORPORATION and its licensors retain all intellectual property
 #  and proprietary rights in and to this software, related documentation
@@ -18,11 +18,11 @@ APP_VER="0.1"
 
 # Platform dependent profile.
 # Use Case 1:
-# In OpenBMC recipe, replace PROFILE_FILE with 
+# In OpenBMC recipe, replace PROFILE_FILE with
 # selftest_pcie_profile.csv proper path.
 #
 # Use Case 2:
-# From cmdline, define PROFILE_FILE=<path of selftest_pcie_profile.csv> 
+# From cmdline, define PROFILE_FILE=<path of selftest_pcie_profile.csv>
 # before calling this script to run with custom profile.
 [ -z "$PROFILE_FILE" ] && PROFILE_FILE="selftest_pcie_profile.csv"
 profile_path="${PROFILE_FILE}"
@@ -30,7 +30,7 @@ profile_path="${PROFILE_FILE}"
 # Maps current namespace deviceId to general device name.
 # Eg. GPU_SXM_5 -> GPU0
 # For details refer to target help
-[ -z "$DEVICE_NAME_MAPPER" ] && DEVICE_NAME_MAPPER="device-id-norm.sh" 
+[ -z "$DEVICE_NAME_MAPPER" ] && DEVICE_NAME_MAPPER="device-id-norm.sh"
 
 show_help()
 {
@@ -186,7 +186,7 @@ fi
 
 # for device id position configured as:
 #   * 'cmd' put id in id place as assual
-#   * 'arg2' put id in place of arg2; 
+#   * 'arg2' put id in place of arg2;
 # id received from mapping could be empty in some cases - update only if valid
 id=0
 if [ "${id_pos,,}" = "cmd" ]; then
@@ -227,7 +227,7 @@ fi
 dbg "$output"
 
 #skip signature, static
-# echo $(echo $output | cut -f1 -d' ')  
+# echo $(echo $output | cut -f1 -d' ')
 
 #status of passthrough command, 0 on success otherwise error code
 outStatus=$(echo $output | cut -f2 -d' ')
@@ -236,9 +236,9 @@ if [ "$outStatus" != "0" ]; then
     exit 1
 fi
 
-# output bytes count not supported yet, static 4 is fine for now (the 4 
+# output bytes count not supported yet, static 4 is fine for now (the 4
 # means to parse 4 bytes past this)
-# outCnt=$(echo $output | cut -f3 -d' ') 
+# outCnt=$(echo $output | cut -f3 -d' ')
 
 # ????
 outStatusRegister=$(echo $output | cut -f4 -d' ')
@@ -293,7 +293,7 @@ if [ "${POSTPROCESS_COMMAND,,}" = "pcie_link_status" ]; then
 fi
 
 # return value to shell and last exitcode
-echo $value 
+echo $value
 exit $rc
 
 

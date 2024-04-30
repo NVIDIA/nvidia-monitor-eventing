@@ -1,3 +1,11 @@
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
 import ids
 import argparse
 import pprint
@@ -97,11 +105,11 @@ def readArgs():
 
 def openInput(filename, **rest):
     return (sys.stdin if filename == "-"
-            else open(filename, "r", **rest))    
+            else open(filename, "r", **rest))
 
 def main():
     args = readArgs()
-    # with open(args.json, "r") as jsonFile:        
+    # with open(args.json, "r") as jsonFile:
     with openInput(args.json) as jsonFile:
         js = json.load(jsonFile)
         results = transform(js, ())

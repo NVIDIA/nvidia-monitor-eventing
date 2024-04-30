@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+
 ################################################################################
 # Definitions
 #
@@ -206,7 +215,7 @@ update_health()
     do
         cmd="$cmd $i"
     done
-    
+
     echo $cmd
 
     if [ $dry_run = true ]
@@ -260,7 +269,7 @@ depth_first_search()
         if [ $rc -eq 0 ]; then
             update_health "$current_device" "$line" "$health" "$dry_run"
             status=$?
-            if [ "$run_all" = true ] && [ "$status" -eq 0 ] 
+            if [ "$run_all" = true ] && [ "$status" -eq 0 ]
             then
                 return 7
             fi
@@ -271,7 +280,7 @@ depth_first_search()
         fi
     # done < <(eval "jq '.[\"${current_device}\"]' ${tree_location}" | tr -d "[]")
     done < <(eval "grep -o '\"${current_device}\": \[.*]' ${tree_location}" | sed 's/.*://' | tr -d "[]" | tr , '\n')
-    
+
     return 1
 }
 
@@ -358,7 +367,7 @@ main() # $*: all args
         echo "[E] [$tree_location] doesn't exist!"
         return 2
     fi
-    
+
     if [ -z "$health" ]; then
         echo "[E] No Health provided!"
         return 2

@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+
 # export for dependant map tool, you might need to set it yourself if doesn't work
 export DEVICE_MAP_FILE="../device_id_mapping/device_id_map.csv"
 export DEVICE_NAME_MAPPER="../device_id_mapping/device-id-norm.sh"
@@ -49,9 +58,9 @@ if [ -n "$1" ]; then
         value=$(( ${value} | ($expectedWrapperOut << $startBit) ))
                 # echo "# $value"
 
-        # Randomize some value, and mask it into simulated randomized data 
+        # Randomize some value, and mask it into simulated randomized data
         # output register or extended data output register (depending on profile
-        # config). During test expect that unmasked value would equal value 
+        # config). During test expect that unmasked value would equal value
         # masked into register.
 
         if [ -n "$dataOutBits" ]; then
@@ -60,7 +69,7 @@ if [ -n "$1" ]; then
             artificialCmdOutput="(iau) 0 4 0 520093729 0xdecafbad $value"
         fi
 
-        randId=$RANDOM 
+        randId=$RANDOM
         if [ "${dev,,}" = "gpu" ]; then
             randId=$(( ( randId % 8 ) + 1 ))
             dev="GPU_SXM_$randId"
@@ -91,14 +100,14 @@ testsTotal=0
 testsPassed=0
 testsFailed=0
 
-perfTest() 
+perfTest()
 {
     testsTotal=$(($testsTotal + 1))
      local symbol="$1"
      local dev="$2"
      local artOut="$3"
      local exp="$4"
-    # Warning - hacky workaround here, substitute spaces to underscores then in 
+    # Warning - hacky workaround here, substitute spaces to underscores then in
     # called script restore spaces from underscores. This is because bash strips
     # quotes when evaluating cmd making problem with passing string argument eg.
     # "(iau) 0 4 0 520093729 131412 6" is "" stripped and appears as 7 args.

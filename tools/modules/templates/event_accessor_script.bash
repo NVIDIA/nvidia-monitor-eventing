@@ -45,7 +45,7 @@ gl_is_single_injection=0 # 1 means is single injection
 gl_single_injection_state=0  ## 0 not inserted, 1 = insert
 gl_cmd_line_markdown=0
 gl_markdown_file=""
-AML_INJECTOR_CURRENT_DEVICE_INDEX=""
+INJECTOR_CURRENT_DEVICE_INDEX=""
 MAPFILE=/tmp/.mapfile_$$
 TIMESTAMP_INJECTION_STARTED=0            ## control time between insert failure and restore
 WAIT_TIME_FOR_RELASE_INJECTION_DATA=90
@@ -722,11 +722,11 @@ set_failure_state()
 
    clear_deviceCore_API_defaults
 
-   CMD="echo -n \"$AML_INJECTOR_CURRENT_DEVICE_INDEX $DEVICE $AML_INJECTOR_CURRENT_INJECTION_PARAM\"  > $MCTP_WRAPPER_FILE_PARAM"
+   CMD="echo -n \"$INJECTOR_CURRENT_DEVICE_INDEX $DEVICE $INJECTOR_CURRENT_INJECTION_PARAM\"  > $MCTP_WRAPPER_FILE_PARAM"
    printBusctl $CMD
    eval $CMD
 
-   if [ "$AML_INJECTOR_CURRENT_INJECTION" = "CMDLINE" ]
+   if [ "$INJECTOR_CURRENT_INJECTION" = "CMDLINE" ]
    then
       read -r command args < <(echo $INJECTION_PARAM)
       if [ "$command" = "mctp-error-detection" ]
@@ -735,7 +735,7 @@ set_failure_state()
          printBusctl  $CMD
          eval $CMD
       fi
-   elif [ "$AML_INJECTOR_CURRENT_INJECTION" = "DeviceCoreAPI" ]
+   elif [ "$INJECTOR_CURRENT_INJECTION" = "DeviceCoreAPI" ]
    then
       [ "$INJECTION_CHECK_VALUE" = "" ] && INJECTION_CHECK_VALUE=1
       [ "$INJECTION_CHECK" = "not_equal" ] && INJECTION_CHECK_VALUE=$[ $INJECTION_CHECK_VALUE + 1]
@@ -875,7 +875,7 @@ reset_failure_state()
    CMD="/bin/rm -f $MCTP_WRAPPER_FILE_PARAM"
    printBusctl $CMD
    eval $CMD
-   if [ "$AML_INJECTOR_CURRENT_INJECTION" = "DeviceCoreAPI" ]
+   if [ "$INJECTOR_CURRENT_INJECTION" = "DeviceCoreAPI" ]
    then
       clear_Core_API_property
    fi
@@ -1051,17 +1051,17 @@ property_change() #1=object_path $2=interface, $3=property_name
        return
     fi # already inserted
 
-    AML_INJECTOR_CURRENT_DEVICE_INDEX=""
-    AML_INJECTOR_CURRENT_INJECTION="$INJECTION"        # external commands will use it
-    AML_INJECTOR_CURRENT_INJECTION_PARAM="$INJECTION_PARAM"  # external commands will use it
+    INJECTOR_CURRENT_DEVICE_INDEX=""
+    INJECTOR_CURRENT_INJECTION="$INJECTION"        # external commands will use it
+    INJECTOR_CURRENT_INJECTION_PARAM="$INJECTION_PARAM"  # external commands will use it
     if [ $gl_is_single_injection -eq 1 ]
     then
-      AML_INJECTOR_CURRENT_DEVICE_INDEX="$gl_cmd_line_device_index"
-      echo -n "$AML_INJECTOR_CURRENT_DEVICE_INDEX $DEVICE $AML_INJECTOR_CURRENT_INJECTION_PARAM"  > $MCTP_WRAPPER_FILE_PARAM
+      INJECTOR_CURRENT_DEVICE_INDEX="$gl_cmd_line_device_index"
+      echo -n "$INJECTOR_CURRENT_DEVICE_INDEX $DEVICE $INJECTOR_CURRENT_INJECTION_PARAM"  > $MCTP_WRAPPER_FILE_PARAM
     else
-      AML_INJECTOR_CURRENT_DEVICE_INDEX="$DEVICE_INDEX"  # external commands will use it
+      INJECTOR_CURRENT_DEVICE_INDEX="$DEVICE_INDEX"  # external commands will use it
     fi
-    set_global_device_core_API_index $AML_INJECTOR_CURRENT_DEVICE_INDEX
+    set_global_device_core_API_index $INJECTOR_CURRENT_DEVICE_INDEX
 
     insertMapKey $* $METHOD $METHOD_VALUE  ## save that injection
     gl_current_logging_entries=0
@@ -1072,7 +1072,7 @@ property_change() #1=object_path $2=interface, $3=property_name
     fi
 
 
-    ## necessary to restore because AML now clears calling DeviceClearData
+    ## necessary to restore because now clears calling DeviceClearData
     restore_deviceCore_API_defaults
 
     ### Set Failure state to make Event generation
