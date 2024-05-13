@@ -396,3 +396,20 @@ TEST(UtilMatchRegexString, DoublePatternDoesNotMatch)
     bool match = matchRegexString(objPattern, obj);
     EXPECT_NE(match, true);
 }
+
+using namespace util::file_util;
+
+TEST(writeJson2File, WriteFileOK)
+{
+    auto file = "/tmp/GPU_0";
+    nlohmann::json j = {
+        "Status", {
+            {"Health", "OK"},
+            {"HealthRollup", "OK"},
+            {"Conditions", {""}},
+        },
+    };
+
+    int rc = writeJson2File(file, j);
+    EXPECT_EQ(rc, 0);
+}

@@ -14,8 +14,15 @@
 
 #include "log.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/interprocess/exceptions.hpp>
+#include <boost/exception/diagnostic_information.hpp>
+
 
 #include <iostream>
 #include <thread>
@@ -542,5 +549,71 @@ std::string getDeviceHealth(const std::string& device)
     return "";
 }
 
+namespace file_util
+{
+
+/**
+ * @brief Write file content with timed lock protection
+ * @return 0 - succ; otherwise - fail
+ */
+int writeJson2File(const std::string& filePath,
+    const nlohmann::json& j)
+{
+    try
+    {
+        // Create file if not exist
+        std::ofstream outfile(filePath, std::ios_base::app);
+        outfile.close();
+
+        boost::interprocess::file_lock fileLock(filePath.c_str());
+        auto start = std::chrono::steady_clock::now();
+        auto timeout = boost::posix_time::milliseconds(FLOCK_TIMEOUT);
+
+        while (!fileLock.timed_lock(
+            boost::posix_time::microsec_clock::universal_time() + timeout))
+        {
+            auto now = std::chrono::steady_clock::now();
+            auto elapsed =
+                std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
+
+            if (elapsed >= FLOCK_TIMEOUT)
+            {
+                logs_err("Get flock of %s timeout!\n", filePath);
+                return -1;
+            }
+        }
+
+        std::ofstream ofs(filePath);
+
+        if (!ofs.is_open())
+        {
+            logs_err("Can't open file %s!\n", filePath);
+            return -2;
+        }
+
+        ofs << j.dump(2);
+        ofs.close();
+
+        fileLock.unlock();
+    }
+    catch(const std::exception& ex)
+    {
+        logs_err("A std::exception error occurred: %s\n", ex.what());
+        return -3;
+    }
+    catch(const boost::exception& ex)
+    {
+        logs_err("A boost::exception error occurred: %s\n",
+            boost::diagnostic_information(ex));
+        return -4;
+    }
+    catch(...)
+    {
+        logs_err("Caught an unknown error\n");
+        return -5;
+    }
+    return 0;
+}
+} // namespace file_util
 
 } // namespace util

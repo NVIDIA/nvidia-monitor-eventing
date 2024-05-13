@@ -12,7 +12,7 @@ option('eventing_feature_only', type : 'feature', value : 'disabled',
         description : 'Turn off self-test, origin of condition, and health rollup')
 
 # device Health service options
-option('device_health_service', type : 'feature', value : 'enabled',
+option('device_health_service', type : 'feature', value : 'disabled',
         description : 'Build Device Health Service and disable eventing service Health update')
 option('deassertion_path_enabled', type : 'feature', value : 'disabled',
         description : 'Whether Device Health Service supports error deassertion reducing device Health')
@@ -34,3 +34,9 @@ option('max_error_id_length', type : 'integer', value : 100,
         description : 'Maximum length of error_id/EventId field to support in error assertions')
 option('max_asserted_error_ids_per_dev_sev', type : 'integer', value : 50,
         description : 'Maximum number of asserted error IDs per device per severity')
+
+# Device Health Status over FS
+option('device-status-fs', type : 'feature', value : 'enabled',
+        description : 'Update Device Health Status over FS')
+option('device-status-fs-path', type : 'string', value : '/tmp/devices',
+        description : 'Specify device status filesystem top folder.')

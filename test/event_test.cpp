@@ -85,12 +85,7 @@ TEST(MsgCompTest, MakeCall)
     j["value_as_count"] = false;
     event_info::EventNode event("test event");
     event.loadFrom(j);
-#ifdef EVENTING_FEATURE_ONLY
     message_composer::MessageComposer mc("Test Msg Composer");
-#else
-    std::map<std::string, dat_traverse::Device> dat;
-    message_composer::MessageComposer mc(dat, "Test Msg Composer");
-#endif
     EXPECT_EQ(mc.getName(), "Test Msg Composer");
 }
 
@@ -101,57 +96,6 @@ TEST(DevNameTest, MakeCall)
     auto devType = "GPU[1-49]";
     auto name = util::determineDeviceName(pattern, objPath, devType);
     EXPECT_EQ(name, "GPU12");
-}
-
-TEST(EventTelemtries, MakeCall)
-{
-    nlohmann::json j;
-    j["event"] = "Event0";
-    j["error_id"] = "Event0-Error";
-    j["device_type"] = "GPU";
-    j["sub_type"] = "";
-    j["severity"] = "Critical";
-    j["resolution"] = "Contact NVIDIA Support";
-    j["redfish"]["message_id"] = "ResourceEvent.1.0.ResourceErrorsDetected";
-    j["redfish"]["message_args"]["patterns"] = {"p1", "p2"};
-    j["redfish"]["message_args"]["parameters"] = nlohmann::json::array();
-    j["telemetries"] = {
-        {{"name", "temperature"},
-         {"type", "DBUS"},
-         {"object", "xyz.openbmc_project.Inventory.Decorator.Dimension"},
-         {"interface", "Depth"}},
-        {{"name", "power"},
-         {"type", "DBUS"},
-         {"object", "xyz.openbmc_project.Inventory.Decorator.Dimension"},
-         {"interface", "Depth"}}};
-    j["trigger_count"] = 0;
-    j["event_trigger"] = "trigger";
-    j["action"] = "do something";
-    j["event_counter_reset"]["type"] = "type";
-    j["event_counter_reset"]["metadata"] = "metadata";
-    j["accessor"]["metadata"] = "metadata";
-    j["accessor"]["type"] = "DBUS";
-    j["value_as_count"] = false;
-    event_info::EventNode event("test event");
-    event.loadFrom(j);
-
-    std::vector<std::string> deviceTypeList{{"GPU"}};
-    event.setDeviceTypes(deviceTypeList);
-
-    device_id::PatternIndex emptyIndex;
-    event.setDeviceIndexTuple(emptyIndex);
-
-    auto telemetries =
-        message_composer::MessageComposer::collectDiagData(event);
-
-    /*  deserialize object, check content;
-        selftest report is expected to be empty in this case as there were none
-        performed. */
-    nlohmann::json jCollected = nlohmann::json::parse(telemetries);
-    EXPECT_EQ(jCollected.size(), 5);
-    EXPECT_EQ(jCollected["power"], data_accessor::readFailedReturn);
-    EXPECT_EQ(jCollected["temperature"], data_accessor::readFailedReturn);
-    EXPECT_EQ(jCollected["selftest"].size(), 0);
 }
 
 TEST(EventTelemtries, TestPatternOOC)

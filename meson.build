@@ -45,14 +45,14 @@ if get_option('eventing_feature_only').enabled()
     add_project_arguments('-DEVENTING_FEATURE_ONLY', language : lang)
 endif
 
+# Device Health Service options
 if(get_option('device_health_service').enabled())
     add_project_arguments('-DEVENTING_SERVICE_NO_DEVICE_HEALTH', language : lang)
 endif
 
 
-# Device Health Service options
-if get_option('device_health_service').enabled()
-    # TODO: flag in eventing service to disable Health updates
+if get_option('device-status-fs').enabled()
+    add_project_arguments('-DEVENTING_SERVICE_DEVICE_STATUS_FS', language : lang)
 endif
 
 
@@ -117,13 +117,19 @@ if cxx.has_header('nlohmann/json.hpp')
 endif
 
 # Add Include Directory
-inc = include_directories('include')
+inc = include_directories(
+    'include',
+    'config'
+    )
 
 # subdir for meson project
 subdir('include')
 subdir('src')
 subdir('tools')
 #subdir('test')
+
+subdir('config')
+mon_evt_dependencies += conf_h_dep
 
 # Pkg-config
 pkg_mod = import('pkgconfig')

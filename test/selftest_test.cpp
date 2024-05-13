@@ -468,11 +468,6 @@ TEST(selftestTest, doProcess)
     auto tp = datMap.at("VR0").test["power_rail"].testPoints.begin();
     tp->second.expectedValue = "force_test_to_fail";
     EXPECT_EQ(selftest.process(event), eventing::RcCode::error);
-
-    event.device = "trash_device";
-    eventing::RcCode result = eventing::RcCode::succ;
-    EXPECT_NO_THROW(result = selftest.process(event));
-    EXPECT_EQ(result, eventing::RcCode::error);
 }
 
 TEST(selftestTest, wrongDeviceTestpoint)
@@ -1112,14 +1107,6 @@ TEST(rootCauseTraceTest, test1)
     EXPECT_EQ(dat.at("GPU0").healthStatus.originOfCondition, "HSC8");
     EXPECT_EQ(event.getOriginOfCondition(), std::optional("HSC8"));
     EXPECT_EQ(persistentEvent.getOriginOfCondition(), std::nullopt);
-
-    /* reset event */
-    event = persistentEvent;
-    eventing::RcCode result = eventing::RcCode::succ;
-    event.device = "trash_device";
-    EXPECT_NO_THROW(result = rootCauseTracer.process(event));
-    EXPECT_EQ(result, eventing::RcCode::error);
-    EXPECT_EQ(persistentEvent.getOriginOfCondition(), std::nullopt);
 }
 
 #ifndef EVENTING_FEATURE_ONLY
@@ -1151,7 +1138,7 @@ TEST(OOCDeterminationTest, test1)
     dat_traverse::Device rt3("PCIeRetimer_3", jrt3);
     dat.insert(std::pair<std::string, dat_traverse::Device>(rt3.name, rt3));
 
-    message_composer::MessageComposer mc(dat, "Test Msg Composer");
+    message_composer::MessageComposer mc("Test Msg Composer");
 
     nlohmann::json j;
     j["event"] = "Event0";

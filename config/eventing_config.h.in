@@ -1,0 +1,8 @@
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+
+constexpr const char* monevtDeviceStatusFSPath = @MONEVT_DEVICESTATUSFS_PATH@;
+
+// clang-format on

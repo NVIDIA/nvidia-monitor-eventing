@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <nlohmann/json.hpp>
+
+#include "eventing_config.h"
 #include "log.hpp"
 
 #include <type_traits>
@@ -17,11 +20,17 @@
 namespace eventing
 {
 
+namespace profile
+{
+extern nlohmann::json deviceAssociation;
+}
+
 enum class RcCode : int
 {
     succ,
-    error,
+    error,  // no block, allow next EventHandler
     timeout,
+    block,  // stop processing next EventHanlder
 };
 
 /**

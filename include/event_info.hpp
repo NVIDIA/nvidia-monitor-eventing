@@ -288,6 +288,7 @@ struct redfish
     std::string getStringMessageArgs(const EventNode& event);
 };
 
+
 /**
  * @brief Represent a test layer the given event corresponds to
  *
@@ -346,7 +347,7 @@ class EventNode : public object::Object
      */
     void print(void) const;
 
-  private:
+  public:
     /** @brief The copy of the original json event node **/
     nlohmann::json configEventNode;
 
@@ -375,6 +376,9 @@ class EventNode : public object::Object
 
     /** @brief Error ID of the event **/
     std::string errorId;
+
+    /** @brief The Device this Error will impact **/
+    std::string rollupDevicePattern;
 
     /** @brief Type of device subtype **/
     std::string subType;

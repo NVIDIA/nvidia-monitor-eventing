@@ -328,8 +328,16 @@ class Severity
     static constexpr const char* severityLookup[SEVERITY_TOP] = {
         "OK", "Warning", "Critical"};
 
-    Severity() : severity(SEVERITY_CRITICAL)
+    Severity() : severity(SEVERITY_OK)
     {}
+
+    Severity(const Severity& other)
+    {
+        if(this != &other)
+        {
+            this->severity = other.severity;
+        }
+    }
 
     Severity(enum SEVERITY init_severity) : severity(init_severity)
     {}
@@ -337,6 +345,30 @@ class Severity
     Severity(std::string init_severity)
     {
         set_severity(init_severity);
+    }
+
+    Severity(const char* init_severity)
+    {
+        set_severity(std::string(init_severity));
+    }
+
+    bool operator<(const Severity& other) const
+    {
+        return (this->severity < other.severity);
+    }
+
+    bool operator>(const Severity& other) const
+    {
+        return (this->severity > other.severity);
+    }
+
+    Severity& operator=(const Severity& other)
+    {
+        if(this != &other)
+        {
+            this->severity = other.severity;
+        }
+        return *this;
     }
 
     void set_severity(std::string severity_str)
@@ -390,5 +422,20 @@ class Severity
   private:
     enum SEVERITY severity;
 };
+
+namespace file_util
+{
+
+#ifndef FLOCK_TIMEOUT
+#define FLOCK_TIMEOUT 100 //msec
+#endif
+
+/**
+ * @brief Write file content with timed lock protection
+ * @return 0 - succ; otherwise - fail
+ */
+int writeJson2File(const std::string& filePath,
+    const nlohmann::json& j);
+} // namespace file_util
 
 } // namespace util

@@ -35,18 +35,9 @@ namespace message_composer
 class MessageComposer : public event_handler::EventHandler
 {
   public:
-#ifdef EVENTING_FEATURE_ONLY
     MessageComposer(const std::string& name = __PRETTY_FUNCTION__) :
         event_handler::EventHandler(name)
     {}
-#else
-    MessageComposer(std::map<std::string, dat_traverse::Device>& datMap,
-                    const std::string& name = __PRETTY_FUNCTION__) :
-        event_handler::EventHandler(name),
-        dat(datMap)
-
-    {}
-#endif // EVENTING_FEATURE_ONLY
 
     ~MessageComposer();
 
@@ -84,38 +75,26 @@ class MessageComposer : public event_handler::EventHandler
     template <typename ObjectMapperType = dbus::DirectObjectMapper>
     std::string getOriginOfConditionObjectPath(const std::string& deviceId) const
     {
-#ifndef EVENTING_FEATURE_ONLY
-        if (this->dat.at(deviceId).hasDbusObjectOocSpecificExplicit())
+        ObjectMapperType om;
+        auto paths = om.getPrimaryDevIdPaths(deviceId);
+        if (paths.size() == 0)
         {
-            return *(this->dat.at(deviceId).getDbusObjectOocSpecificExplicit());
+            logs_err("No object path found in ObjectMapper subtree "
+                    "corresponding to the device '%s'. "
+                    "Returning empty origin of condition.\n",
+                    deviceId.c_str());
+            return deviceId;
         }
         else
-#endif
         {
-            // If no ooc object path was provided in dat.json explicitly then try to
-            // obtain it by looking what is available on dbus and seems to
-            // correspond to the 'deviceId' given in argument
-            ObjectMapperType om;
-            auto paths = om.getPrimaryDevIdPaths(deviceId);
-            if (paths.size() == 0)
+            if (paths.size() > 1)
             {
-                logs_err("No object path found in ObjectMapper subtree "
+                logs_wrn("Multiple object paths in ObjectMapper subtree "
                         "corresponding to the device '%s'. "
-                        "Returning empty origin of condition.\n",
+                        "Choosing the first one as origin of condition.\n",
                         deviceId.c_str());
-                return deviceId;
             }
-            else
-            {
-                if (paths.size() > 1)
-                {
-                    logs_wrn("Multiple object paths in ObjectMapper subtree "
-                            "corresponding to the device '%s'. "
-                            "Choosing the first one as origin of condition.\n",
-                            deviceId.c_str());
-                }
-                return *paths.begin();
-            }
+            return *paths.begin();
         }
     }
 
@@ -213,8 +192,6 @@ class MessageComposer : public event_handler::EventHandler
             output["accessor"] = "empty";
         }
 
-        output["selftest"] = event.selftestReport;
-
         for (auto telemetry : event.telemetries)
         {
             std::string telemetryName = telemetry[data_accessor::nameKey];
@@ -242,10 +219,6 @@ class MessageComposer : public event_handler::EventHandler
      * @return boolean for whether or not it was a success
      */
     bool createLog(event_info::EventNode& event);
-
-#ifndef EVENTING_FEATURE_ONLY
-    std::map<std::string, dat_traverse::Device>& dat;
-#endif
 };
 
 } // namespace message_composer

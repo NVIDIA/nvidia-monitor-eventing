@@ -17,6 +17,7 @@
 #include "event_detection.hpp"
 #include "event_info.hpp"
 #include "message_composer.hpp"
+#include "device_status_handler.hpp"
 #include "pc_event.hpp"
 #include "selftest.hpp"
 #include "threadpool_manager.hpp"
@@ -25,6 +26,7 @@
 #include <unistd.h>
 
 #include <boost/container/flat_map.hpp>
+#include <nlohmann/json.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 
@@ -73,7 +75,7 @@ event_info::EventTriggerView eventTriggerView;
 event_info::EventAccessorView eventAccessorView;
 event_info::EventRecoveryView eventRecoveryView;
 std::map<std::string, dat_traverse::Device> datMap;
-
+nlohmann::json deviceAssociation;
 } // namespace profile
 
 struct Configuration
@@ -103,6 +105,18 @@ int loadDAT(cmd_line::ArgFuncParamType params)
     }
 
     configuration.dat = params[0];
+
+    try
+    {
+        f >> profile::deviceAssociation;
+        f.close();
+    }
+    catch(exception& e)
+    {
+        f.close();
+        throw std::runtime_error(
+            "Load JSON from (" + params[0] + ") failed!");
+    }
 
     // dat_traverse::Device::printTree(profile::datMap);
 
@@ -280,6 +294,14 @@ int main(int argc, char* argv[])
         "instead of eventing service\n");
 #endif  // EVENTING_SERVICE_NO_DEVICE_HEALTH
 
+#ifdef EVENTING_SERVICE_DEVICE_STATUS_FS
+
+#ifdef EVENTING_SERVICE_NO_DEVICE_HEALTH
+#error "Conflicts! Please set -Ddevice_health_service=disabled!"
+#endif
+    logs_err("Device Health from FS feature enabled.\n");
+#endif  //EVENTING_SERVICE_DEVICE_STATUS_FS
+
     try
     {
         cmd_line::CmdLine cmdLine(argc, argv, eventing::cmdLineArgs);
@@ -322,42 +344,8 @@ int main(int argc, char* argv[])
 
     // event_info::printMap(eventing::profile::eventMap);
 
-#ifdef EVENTING_FEATURE_ONLY
     // Register event handlers
     message_composer::MessageComposer msgComposer("MsgComp1");
-#else
-    dat_traverse::Device::populateMap(eventing::profile::datMap,
-                                      eventing::configuration.dat);
-
-    // Register event handlers
-    message_composer::MessageComposer msgComposer(eventing::profile::datMap,
-                                                  "MsgComp1");
-    event_handler::DATTraverse datTraverser("DatTraverser1");
-    datTraverser.setDAT(eventing::profile::datMap);
-
-    int retryGettingDbusInfo = 0;
-    bool error = true;
-    while (error == true && retryGettingDbusInfo < RETRY_DBUS_INFO_COUNTER)
-    {
-        try
-        {
-            datTraverser.datToDbusAssociation();
-            error = false; // stop the loop
-        }
-        catch (const std::exception& e)
-        {
-            if (++retryGettingDbusInfo < RETRY_DBUS_INFO_COUNTER)
-            {
-                logs_wrn("waiting Dbus information ...\n");
-
-                ::sleep(RETRY_SLEEP);
-                continue;
-            }
-            logs_err(
-                "HealthRollup & OriginOfCondition can't be supported at the moment due to Dbus Error.\n");
-        }
-    }
-#endif // EVENTING_FEATURE_ONLY
 
     // Create threadpool manager
     event_detection::threadpoolManager = std::make_unique<ThreadpoolManager>(
@@ -371,6 +359,9 @@ int main(int argc, char* argv[])
     event_detection::eventAccessorView = eventing::profile::eventAccessorView;
     event_detection::eventRecoveryView = eventing::profile::eventRecoveryView;
 
+#ifdef EVENTING_SERVICE_DEVICE_STATUS_FS
+    event_handler::DeviceStatusHandler deviceStatus("DeviceStatus");
+#endif // EVENTING_SERVICE_DEVICE_STATUS_FS
     event_handler::ClearEvent clearEvent("ClearEvent");
     event_handler::EventHandlerManager eventHdlrMgr("EventHandlerManager");
 
@@ -456,6 +447,9 @@ int main(int argc, char* argv[])
     eventHdlrMgr.RegisterHandler(&rootCauseTracer);
 #endif // EVENTING_FEATURE_ONLY
     eventHdlrMgr.RegisterHandler(&msgComposer);
+#ifdef EVENTING_SERVICE_DEVICE_STATUS_FS
+    eventHdlrMgr.RegisterHandler(&deviceStatus);
+#endif // EVENTING_SERVICE_DEVICE_STATUS_FS
     eventHdlrMgr.RegisterHandler(&clearEvent);
 
     logs_dbg("Creating %s\n", (const char*)mon_evt::SERVICE_BUSNAME);

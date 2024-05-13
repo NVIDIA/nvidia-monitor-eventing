@@ -116,6 +116,7 @@ void EventDetection::workerThreadProcessEvents()
                     if (eventDetectionPtr->IsEvent(candidate, event.device,
                         eventValue))
                     {
+#ifndef EVENTING_SERVICE_DEVICE_STATUS_FS
                         event.severities.push_back(event.getSeverity());
                         auto currentDeviceHealth = util::getDeviceHealth(event.device);
 
@@ -127,7 +128,7 @@ void EventDetection::workerThreadProcessEvents()
                         {
                             logs_err("Failed to get current device health (ignored)\n");
                         }
-
+#endif // EVENTING_SERVICE_DEVICE_STATUS_FS
                         std::stringstream ss;
                         ss << "Throw out an eventHdlrMgr. device: "
                            << event.device << " event: '" << event.event << "'"
