@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+
+set -o pipefail
+
+app_name=redfish_eventing_recipe_validator
+app_ver=0.1
+
+DEFUSR=nobody
+DEFGRP=nogroup
+
+get_realuser()
+{
+    local rusr;rusr=`logname 2>/dev/null`
+    [ $? -ne 0 ] || [ -z "$rusr" ] && rusr=${LOGNAME}
+    [ -z "$rusr" ] && rusr=${USER}
+    [ -z "$rusr" ] && rusr=${DEFUSR}
+    echo $rusr
+}
+
+get_realgroup() # (user)
+{
+    local usr=$1
+    [ -z "$usr" ] && usr=${DEFUSR}
+    if [ "${DEFUSR}" = "$usr" ]; then
+        echo "${DEFGRP}"
+        return 0
+    fi
+    local grp;grp=`groups "$usr" 2>/dev/null | cut -d' ' -f3`
+    [ $? -ne 0 ] || [ -z "$grp" ] && grp=${DEFGRP}
+    echo $grp
+}
+
+REALUSER=`get_realuser`
+REALGROUP=`get_realgroup "${REALUSER}"`
+LOGPATH=/tmp/${REALUSER}_${app_name}_$$
+LOGTMP=tmp.log
+LOGAPP=app.log
+APPTMP=${LOGPATH}/${LOGTMP}
+APPLOG=${LOGPATH}/${LOGAPP}
+
+initlog()
+{
+    [ -d "${LOGPATH}" ] || mkdir -p "${LOGPATH}"
+}
+
+cleanup()
+{
+    [ -d "${LOGPATH}" ] || return
+    rm -rf "${LOGPATH}"
+    set +o pipefail
+}
+
+trap cleanup EXIT
+initlog
+###############################################################################
+
+show_help()
+{
+    echo "A tool to validate Redfish Eventing Recipes, ver=$app_ver"
+    echo "<usage>"
+    echo "  $app_name"
+    echo
+}
+
+# Format: event,recipe,key,condition
+checklist="
+PLDMT2,pldm,EXTRA_OEMESON,pldm-type2=enabled
+PLDMT2,pldm,EXTRA_OEMESON,libpldmresponder=enabled
+
+PLDMT2,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,pldm
+
+CPER,phosphor-debug-collector,[file],cper_dump.sh
+CPER,phosphor-debug-collector,EXTRA_OEMESON,faultlog-dump-extension=enabled
+CPER,phosphor-debug-collector,EXTRA_OEMESON,nvidia-dumps-extension=enabled
+CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_PATH=
+CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_MAX_SIZE=
+CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_MIN_SPACE_REQD=
+CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_TOTAL_SIZE=
+CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_MAX_LIMIT=
+CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_OBJPATH=
+CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_OBJ_ENTRY=
+CPER,phosphor-debug-collector,RDEPENDS(.*),bash
+CPER,phosphor-debug-collector,RDEPENDS(.*),nvidia-cperdecoder
+CPER,phosphor-debug-collector,[grep -E],install -m 755 (.*)/cper_dump.sh
+
+CPER,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-cperdecoder
+"
+
+main()
+{
+    echo "Checking..."
+    local chk
+    while read -r chk; do
+        [ -z "${chk}" ] && continue
+        [ "${chk:0:1}" == "#" ] && continue
+
+        local evt=`echo $chk | cut -d',' -f1`
+        local recipe=`echo $chk | cut -d',' -f2`
+        local key=`echo $chk | cut -d',' -f3`
+        local cond=`echo $chk | cut -d',' -f4`
+
+        # Cache full recipe content to file if not exist.
+        local tmp_recipe="${LOGPATH}/$recipe"
+        [ -f "$tmp_recipe" ] || bitbake -e $recipe > $tmp_recipe
+
+        local msg="$evt:$recipe:"
+
+        # Hanlde special key cases
+        if [ "$key" == "[file]" ]; then
+            msg="$msg$cond:"
+            local f;f=`find tmp/work/*-openbmc-linux-gnueabi/$recipe/ -name "$cond"`
+            [ -n "$f" ] && msg="$msg Yes" || msg="$msg No"
+            echo $msg
+            continue
+        fi
+
+        if [ "$key" == "[grep -E]" ]; then
+            msg="$msg$cond:"
+            cat $tmp_recipe | grep -E "$cond" &>/dev/null
+            [ "$?" -eq 0 ] && msg="$msg Yes" || msg="$msg No"
+            echo $msg
+            continue
+        fi
+
+
+        # Handle normal key cases
+
+        # Cache key value in file if not exist.
+        local tmp_key="${tmp_recipe}_${key}"
+        [ -f "$tmp_key" ] || cat $tmp_recipe | grep -E "^${key}=" > $tmp_key
+
+        msg="$msg$key:$cond:"
+        local val;val=`cat $tmp_key | grep "$cond"`
+        [ "$?" -eq 0 ] && msg="$msg Yes" || msg="$msg No"
+
+        echo $msg
+    done <<< $checklist
+}
+
+## MAIN ##
+main
+
