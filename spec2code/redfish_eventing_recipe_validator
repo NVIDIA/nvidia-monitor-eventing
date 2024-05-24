@@ -64,9 +64,10 @@ show_help()
 
 # Format: event,recipe,key,condition
 checklist="
+GENERAL,bmcweb,EXTRA_OEMESON,nvidia-oem-properties=enabled
+
 PLDMT2,pldm,EXTRA_OEMESON,pldm-type2=enabled
 PLDMT2,pldm,EXTRA_OEMESON,libpldmresponder=enabled
-
 PLDMT2,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,pldm
 
 CPER,phosphor-debug-collector,[file],cper_dump.sh
@@ -82,9 +83,49 @@ CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_OBJ_ENTRY=
 CPER,phosphor-debug-collector,RDEPENDS(.*),bash
 CPER,phosphor-debug-collector,RDEPENDS(.*),nvidia-cperdecoder
 CPER,phosphor-debug-collector,[grep -E],install -m 755 (.*)/cper_dump.sh
-
 CPER,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-cperdecoder
+
+XID_SMBPBI,nvidia-xid-event-handler,SRC_URI,xid_devices.csv
+XID_SMBPBI,nvidia-xid-event-handler,[file],xid_devices.csv
+XID_SMBPBI,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-xid-event-handler
+
+XID_NSM,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nsm
+
+NSM_EVENT,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nsm
+
+FPGA_ALERT,nvidia-monitor-eventing,[file],event_info.json
+FPGA_ALERT,nvidia-monitor-eventing,[file],dat.json
+FPGA_ALERT,nvidia-monitor-eventing,[file],fpga_regtbl
+FPGA_ALERT,nvidia-gpio-status-handler,[file],gpio-config.json
+FPGA_ALERT,bmcweb,EXTRA_OEMESON,nvidia-oem-logservices=enabled
+FPGA_ALERT,bmcweb,EXTRA_OEMESON,redfish-dbus-event=enabled
+FPGA_ALERT,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-gpio-status-handler
+FPGA_ALERT,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-monitor-eventing
+
+TELM_BASED,nvidia-monitor-eventing,[file],event_info.json
+TELM_BASED,nvidia-monitor-eventing,[file],dat.json
+TELM_BASED,bmcweb,EXTRA_OEMESON,nvidia-oem-logservices=enabled
+TELM_BASED,bmcweb,EXTRA_OEMESON,redfish-dbus-event=enabled
+TELM_BASED,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-monitor-eventing
+
+DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,nvidia-oem-device-status-from-file=enabled
+DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,nvidia-oem-device-status-fs-path=
+DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,health-rollup-alternative=disabled
+DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,platform-system-id=
+DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,nvidia-oem-properties=enabled
+DEVICE_HEALTH,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-monitor-eventing
+
 "
+
+msg_pass()
+{
+    echo -en "\033[1;32m$@\033[0m"
+}
+
+msg_fail()
+{
+    echo -en "\033[0;31m$@\033[0m"
+}
 
 main()
 {
@@ -107,18 +148,18 @@ main()
 
         # Hanlde special key cases
         if [ "$key" == "[file]" ]; then
-            msg="$msg$cond:"
+            echo -n "$msg$cond: "
             local f;f=`find tmp/work/*-openbmc-linux-gnueabi/$recipe/ -name "$cond"`
-            [ -n "$f" ] && msg="$msg Yes" || msg="$msg No"
-            echo $msg
+            [ -n "$f" ] && msg_pass "Yes" || msg_fail "No"
+            echo
             continue
         fi
 
         if [ "$key" == "[grep -E]" ]; then
-            msg="$msg$cond:"
+            echo -n "$msg$cond: "
             cat $tmp_recipe | grep -E "$cond" &>/dev/null
-            [ "$?" -eq 0 ] && msg="$msg Yes" || msg="$msg No"
-            echo $msg
+            [ "$?" -eq 0 ] && msg_pass "Yes" || msg_fail "No"
+            echo
             continue
         fi
 
@@ -129,14 +170,14 @@ main()
         local tmp_key="${tmp_recipe}_${key}"
         [ -f "$tmp_key" ] || cat $tmp_recipe | grep -E "^${key}=" > $tmp_key
 
-        msg="$msg$key:$cond:"
+        echo -n "$msg$key:$cond: "
         local val;val=`cat $tmp_key | grep "$cond"`
-        [ "$?" -eq 0 ] && msg="$msg Yes" || msg="$msg No"
+        [ "$?" -eq 0 ] && msg_pass "Yes" || msg_fail "No"
+        echo
 
-        echo $msg
     done <<< $checklist
 }
 
 ## MAIN ##
-main
+main $@
 
