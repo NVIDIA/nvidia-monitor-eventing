@@ -77,14 +77,24 @@ DeviceStatus deviceStatus;
 nlohmann::json lookupRollupDeviceId(const nlohmann::json& deviceAssociation,
     const std::string& deviceId)
 {
-    if (deviceAssociation.count(deviceId) > 0)
+    auto j = deviceAssociation.find(deviceId);
+    if (j != deviceAssociation.end())
     {
-        return deviceAssociation[deviceId];
+        return *j;
     }
     else
     {
-        // return the device itself as the rollup device if no association
-        return nlohmann::json::array();
+        // If deviceId not found in the list, use "[Other]" field info.
+        auto jOther = deviceAssociation.find("[Other]");
+        if (jOther != deviceAssociation.end())
+        {
+            return *jOther;
+        }
+        else
+        {
+            // If no "[Other]" either, return nothing.
+            return nlohmann::json::array();
+        }
     }
 }
 
@@ -183,8 +193,10 @@ class DeviceStatusHandler : public EventHandler
                 return eventing::RcCode::error;
             }
 
-            // Update Rollup Device Health/Rollup after the devinfofs file updated successfully.
-            dev.Health = dev.HealthRollup = event.messageRegistry.message.severity;
+            // Update Rollup Device Health/Rollup after the devinfofs file
+            // updated successfully.
+            dev.Health = dev.HealthRollup =
+                event.messageRegistry.message.severity;
         }
         return eventing::RcCode::succ;
     }
