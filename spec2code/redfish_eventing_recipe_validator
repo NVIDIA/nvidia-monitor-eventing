@@ -65,6 +65,11 @@ show_help()
 # Format: event,recipe,key,condition
 checklist="
 GENERAL,bmcweb,EXTRA_OEMESON,nvidia-oem-properties=enabled
+GENERAL,phosphor-logging,EXTRA_OEMESON,error_cap=300
+GENERAL,phosphor-logging,EXTRA_OEMESON,error_info_cap=50
+GENERAL,phosphor-logging,SRC_URI,phosphor-logging-namespace.json
+GENERAL,phosphor-logging,[file],phosphor-logging-namespace.json
+
 
 PLDMT2,pldm,EXTRA_OEMESON,pldm-type2=enabled
 PLDMT2,pldm,EXTRA_OEMESON,libpldmresponder=enabled
@@ -109,7 +114,6 @@ TELM_BASED,bmcweb,EXTRA_OEMESON,redfish-dbus-event=enabled
 TELM_BASED,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-monitor-eventing
 
 DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,nvidia-oem-device-status-from-file=enabled
-DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,nvidia-oem-device-status-fs-path=
 DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,health-rollup-alternative=disabled
 DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,platform-system-id=
 DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,nvidia-oem-properties=enabled
@@ -149,7 +153,7 @@ main()
         # Hanlde special key cases
         if [ "$key" == "[file]" ]; then
             echo -n "$msg$cond: "
-            local f;f=`find tmp/work/*-openbmc-linux-gnueabi/$recipe/ -name "$cond"`
+            local f;f=`find tmp/work/*-openbmc-linux-gnueabi/$recipe/ -name "$cond" 2>/dev/null`
             [ -n "$f" ] && msg_pass "Yes" || msg_fail "No"
             echo
             continue
