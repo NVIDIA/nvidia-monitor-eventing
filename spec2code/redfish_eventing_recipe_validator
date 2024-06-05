@@ -62,13 +62,13 @@ show_help()
     echo
 }
 
-# Format: event,recipe,key,condition
+# Format: event,recipe,key,condition,resolution
 checklist="
 GENERAL,bmcweb,EXTRA_OEMESON,nvidia-oem-properties=enabled
 GENERAL,phosphor-logging,EXTRA_OEMESON,error_cap=300
 GENERAL,phosphor-logging,EXTRA_OEMESON,error_info_cap=50
-GENERAL,phosphor-logging,SRC_URI,phosphor-logging-namespace.json
 GENERAL,phosphor-logging,[file],phosphor-logging-namespace.json
+GENERAL,phosphor-logging,[install],phosphor-logging-namespace.json
 
 
 PLDMT2,pldm,EXTRA_OEMESON,pldm-type2=enabled
@@ -76,6 +76,7 @@ PLDMT2,pldm,EXTRA_OEMESON,libpldmresponder=enabled
 PLDMT2,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,pldm
 
 CPER,phosphor-debug-collector,[file],cper_dump.sh
+CPER,phosphor-debug-collector,[install],cper_dump.sh
 CPER,phosphor-debug-collector,EXTRA_OEMESON,faultlog-dump-extension=enabled
 CPER,phosphor-debug-collector,EXTRA_OEMESON,nvidia-dumps-extension=enabled
 CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_PATH=
@@ -87,11 +88,10 @@ CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_OBJPATH=
 CPER,phosphor-debug-collector,EXTRA_OEMESON,FAULTLOG_DUMP_OBJ_ENTRY=
 CPER,phosphor-debug-collector,RDEPENDS(.*),bash
 CPER,phosphor-debug-collector,RDEPENDS(.*),nvidia-cperdecoder
-CPER,phosphor-debug-collector,[grep -E],install -m 755 (.*)/cper_dump.sh
 CPER,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-cperdecoder
 
-XID_SMBPBI,nvidia-xid-event-handler,SRC_URI,xid_devices.csv
 XID_SMBPBI,nvidia-xid-event-handler,[file],xid_devices.csv
+XID_SMBPBI,nvidia-xid-event-handler,[install],xid_devices.csv
 XID_SMBPBI,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-xid-event-handler
 
 XID_NSM,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nsm
@@ -99,16 +99,24 @@ XID_NSM,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nsm
 NSM_EVENT,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nsm
 
 FPGA_ALERT,nvidia-monitor-eventing,[file],event_info.json
+FPGA_ALERT,nvidia-monitor-eventing,[install],event_info.json
 FPGA_ALERT,nvidia-monitor-eventing,[file],dat.json
+FPGA_ALERT,nvidia-monitor-eventing,[install],dat.json
 FPGA_ALERT,nvidia-monitor-eventing,[file],fpga_regtbl
+FPGA_ALERT,nvidia-monitor-eventing,[install],fpga_regtbl
+FPGA_ALERT,nvidia-monitor-eventing,[file],fpga_regtbl_platform.conf
+FPGA_ALERT,nvidia-monitor-eventing,[install],fpga_regtbl_platform.conf
 FPGA_ALERT,nvidia-gpio-status-handler,[file],gpio-config.json
+FPGA_ALERT,nvidia-gpio-status-handler,[install],gpio-config.json
 FPGA_ALERT,bmcweb,EXTRA_OEMESON,nvidia-oem-logservices=enabled
 FPGA_ALERT,bmcweb,EXTRA_OEMESON,redfish-dbus-event=enabled
 FPGA_ALERT,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-gpio-status-handler
 FPGA_ALERT,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-monitor-eventing
 
 TELM_BASED,nvidia-monitor-eventing,[file],event_info.json
+TELM_BASED,nvidia-monitor-eventing,[install],event_info.json
 TELM_BASED,nvidia-monitor-eventing,[file],dat.json
+TELM_BASED,nvidia-monitor-eventing,[install],dat.json
 TELM_BASED,bmcweb,EXTRA_OEMESON,nvidia-oem-logservices=enabled
 TELM_BASED,bmcweb,EXTRA_OEMESON,redfish-dbus-event=enabled
 TELM_BASED,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-monitor-eventing
@@ -152,7 +160,7 @@ main()
 
         # Hanlde special key cases
         if [ "$key" == "[file]" ]; then
-            echo -n "$msg$cond: "
+            echo -n "${msg}exists?:$cond: "
             local f;f=`find tmp/work/*-openbmc-linux-gnueabi/$recipe/ -name "$cond" 2>/dev/null`
             [ -n "$f" ] && msg_pass "Yes" || msg_fail "No"
             echo
@@ -160,13 +168,20 @@ main()
         fi
 
         if [ "$key" == "[grep -E]" ]; then
-            echo -n "$msg$cond: "
+            echo -n "${msg}contains?:$cond: "
             cat $tmp_recipe | grep -E "$cond" &>/dev/null
             [ "$?" -eq 0 ] && msg_pass "Yes" || msg_fail "No"
             echo
             continue
         fi
 
+        if [ "$key" == "[install]" ]; then
+            echo -n "${msg}installed?:$cond: "
+            cat $tmp_recipe | grep "$cond" | grep "\(SRC_URI\|install -m\)" &>/dev/null
+            [ "$?" -eq 0 ] && msg_pass "Yes" || msg_fail "No"
+            echo
+            continue
+        fi
 
         # Handle normal key cases
 
