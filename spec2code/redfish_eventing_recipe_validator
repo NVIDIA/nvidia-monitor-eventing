@@ -65,8 +65,8 @@ show_help()
 # Format: event,recipe,key,condition,resolution
 checklist="
 GENERAL,bmcweb,EXTRA_OEMESON,nvidia-oem-properties=enabled
-GENERAL,phosphor-logging,EXTRA_OEMESON,error_cap=300
-GENERAL,phosphor-logging,EXTRA_OEMESON,error_info_cap=50
+GENERAL,phosphor-logging,EXTRA_OEMESON,error_cap=
+GENERAL,phosphor-logging,EXTRA_OEMESON,error_info_cap=
 GENERAL,phosphor-logging,[file],phosphor-logging-namespace.json
 GENERAL,phosphor-logging,[install],phosphor-logging-namespace.json
 
@@ -93,8 +93,10 @@ CPER,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-cperdecoder
 XID_SMBPBI,nvidia-xid-event-handler,[file],xid_devices.csv
 XID_SMBPBI,nvidia-xid-event-handler,[install],xid_devices.csv
 XID_SMBPBI,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-xid-event-handler
+XID_SMBPBI,bmcweb,EXTRA_OEMESON,nvidia-oem-logservices=enabled
 
 XID_NSM,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nsm
+XID_NSM,bmcweb,EXTRA_OEMESON,nvidia-oem-logservices=enabled
 
 NSM_EVENT,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nsm
 
@@ -127,6 +129,10 @@ DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,platform-system-id=
 DEVICE_HEALTH,bmcweb,EXTRA_OEMESON,nvidia-oem-properties=enabled
 DEVICE_HEALTH,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-monitor-eventing
 
+BOOTENTRYID,phosphor-logging,EXTRA_OEMESON,nvbmc-logging-extension=enabled
+BOOTENTRYID,bmcweb,EXTRA_OEMESON,nvidia-oem-properties=enabled
+BOOTENTRYID,bmcweb,EXTRA_OEMESON,nvidia-oem-logservices=enabled
+
 "
 
 msg_pass()
@@ -144,7 +150,7 @@ main()
     echo "Checking..."
     local chk
     while read -r chk; do
-        [ -z "${chk}" ] && continue
+        [ -z "${chk}" ] && echo && continue
         [ "${chk:0:1}" == "#" ] && continue
 
         local evt=`echo $chk | cut -d',' -f1`
