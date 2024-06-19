@@ -132,7 +132,7 @@ DEVICE_HEALTH,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,nvidia-monitor-eventi
 BOOTENTRYID,phosphor-logging,EXTRA_OEMESON,nvbmc-logging-extension=enabled
 BOOTENTRYID,bmcweb,EXTRA_OEMESON,nvidia-oem-properties=enabled
 BOOTENTRYID,bmcweb,EXTRA_OEMESON,nvidia-oem-logservices=enabled
-
+BOOTENTRYID,bmcweb,EXTRA_OEMESON,nvidia-bootentryid=enabled
 "
 
 msg_pass()
