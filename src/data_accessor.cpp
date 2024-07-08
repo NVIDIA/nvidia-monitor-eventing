@@ -303,6 +303,32 @@ std::string DataAccessor::readUsingMainAccessor(const DataAccessor& otherAcc)
     return ret;
 }
 
+std::vector<DataAccessor> DataAccessor::expand() const
+{
+    std::vector<DataAccessor> accessorList;
+    // expansionType assumes: 1 for DBUS, 2 for CMDLINE, 0 for none of them
+    auto expansionType = isTypeDbus() ? 1 : 0;
+    if (isTypeCmdline())
+    {
+        expansionType = 2;        
+    }
+    if (expansionType > 0)
+    {
+        nlohmann::json json = this->_acc;
+        std::string jKey =  expansionType == 1 ? data_accessor::objectKey :
+                                                 data_accessor::argumentsKey;
+        std::string jValue = expansionType == 1 ? this->getDbusObjectPath() :
+                                                  this->getArguments();
+        device_id::DeviceIdPattern pattern(jValue);
+        for (auto& domainItemIndex : pattern.domainVec())
+        {
+            json[jKey] = pattern.eval(domainItemIndex);           
+            accessorList.push_back(DataAccessor(json, this->getDataValue()));         
+        }
+    }
+    return accessorList;
+}
+
 std::string DataAccessor::read(const event_info::EventNode& event)
 {
     if (isTypeDeviceCoreApi() || isTypeCmdline() || isTypeDbus())

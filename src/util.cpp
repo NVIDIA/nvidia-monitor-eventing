@@ -578,7 +578,7 @@ int writeJson2File(const std::string& filePath,
 
             if (elapsed >= FLOCK_TIMEOUT)
             {
-                logs_err("Get flock of %s timeout!\n", filePath);
+                logs_err("Get flock of %s timeout!\n", filePath.c_str());
                 return -1;
             }
         }
@@ -587,7 +587,7 @@ int writeJson2File(const std::string& filePath,
 
         if (!ofs.is_open())
         {
-            logs_err("Can't open file %s!\n", filePath);
+            logs_err("Can't open file %s!\n", filePath.c_str());
             return -2;
         }
 
@@ -598,7 +598,8 @@ int writeJson2File(const std::string& filePath,
     }
     catch(const std::exception& ex)
     {
-        logs_err("A std::exception error occurred: %s\n", ex.what());
+        logs_err("A std::exception error occurred: %s on %s\n", ex.what(),
+                 filePath.c_str());
         return -3;
     }
     catch(const boost::exception& ex)

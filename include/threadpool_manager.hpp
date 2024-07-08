@@ -59,7 +59,7 @@ class ThreadpoolManager
 
     ThreadpoolManager(ThreadpoolManager const&) = delete;
     ThreadpoolManager& operator=(ThreadpoolManager const&) = delete;
-
+    
   private:
     AcquireState try_acquire()
     {

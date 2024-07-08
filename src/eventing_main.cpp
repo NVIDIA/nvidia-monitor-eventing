@@ -42,6 +42,7 @@ using namespace phosphor::logging;
 
 const auto APPNAME = "monitor-eventingd";
 const auto APPVER = "0.1";
+/** the presence of this file says it is not the first time it runs **/
 const auto HMC_BOOTUP_TMP_FILE = "/tmp/hmc_up";
 
 /**
@@ -274,6 +275,59 @@ void startWorkerThread(std::shared_ptr<boost::asio::io_context> io)
     thread->detach();
 }
 
+#ifdef EVENTING_FEATURE_ONLY
+/**
+ * @brief Runs the BootUp Event detection on a separated Thread
+ * 
+ * @param eventDetection
+ */
+void  bootUpEventsDetection(event_detection::EventDetection& eventDetection)
+{
+    auto thread = std::make_unique<std::thread>([eventDetection]() mutable {        
+        logs_wrn("started bootup eventing detection \n");
+        ThreadpoolGuard guard(event_detection::threadpoolManager.get());
+        if (!guard.was_successful())
+        {
+            // the threadpool has reached the max queued tasks limit,
+            // don't run this event thread
+            logs_err(
+                "Thread pool over maxTotal tasks limit, exiting bootup eventing thread\n");
+            return;
+        }       
+        eventDetection.bootUpEventsDetection();
+    });
+    
+    if (thread != nullptr)
+    {
+        thread->detach();
+    }
+    else
+    {
+        logs_err("Create thread to process event failed!\n");
+    }    
+}
+#endif // EVENTING_FEATURE_ONLY
+
+/**
+ * @brief isHmcBootup() checks if it is running by the first time after a boot
+ *        Is Bootup (first time it runs) when HMC_BOOTUP_TMP_FILE does not exist 
+ *        If it is Bootup the file HMC_BOOTUP_TMP_FILE is created
+ * @return true if it is Bootup, otherwise false
+ * 
+ * @sa HMC_BOOTUP_TMP_FILE
+ */
+bool isHmcBootup()
+{
+    std::ifstream infile(HMC_BOOTUP_TMP_FILE);
+    if (infile.good())
+    {
+        return false;
+    }
+    std::ofstream outfile(HMC_BOOTUP_TMP_FILE);
+    outfile.close();
+    return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /**
  * @brief Service Entry Point
@@ -392,20 +446,17 @@ int main(int argc, char* argv[])
             return;
         }
 
-        bool reEvalLogs = true;
-        std::ifstream infile(HMC_BOOTUP_TMP_FILE);
-        if (infile.good())
+        bool reEvalLogs = isHmcBootup();      
+        if (false == reEvalLogs)
         {
             logs_err(
-                "Did not detect HMC Boot-up. Will not resolve all logs.\n");
-            reEvalLogs = false;
+                "Did not detect HMC Boot-up. Will not resolve all logs.\n");          
         }
         else
         {
             logs_err(
-                "HMC Boot-up detected. All logs will be resolved. Logs will be regenerated for active conditions based on Self Test.\n");
-            std::ofstream outfile(HMC_BOOTUP_TMP_FILE);
-            outfile.close();
+                "HMC Boot-up detected. All logs will be resolved. Logs will be "
+                "regenerated for active conditions based on Self Test.\n");           
         }
 
         if (selftest.performEntireTree(rep_res,
@@ -479,6 +530,18 @@ int main(int argc, char* argv[])
 
         iface->initialize();
 
+#ifdef EVENTING_FEATURE_ONLY
+        if (isHmcBootup())
+        {
+            logs_err("Performing Eventing Bootup initial checks.\n");
+            bootUpEventsDetection(eventDetection);
+        }
+        else
+        {
+             logs_err("NOT Performing Eventing Bootup.\n");
+        }
+#endif // EVENTING_FEATURE_ONLY      
+        
         logs_err("NVIDIA Monitor and Eventing daemon is ready.\n");
         io->run();
     }

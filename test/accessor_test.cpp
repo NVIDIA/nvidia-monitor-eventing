@@ -685,3 +685,119 @@ TEST(DataAccessor, CmdLineAccessorWithDeviceShouldNotPerformLoop)
     CheckAccessor accCheckEvent("GPU_SXM_[1-8]");
     EXPECT_EQ(accCheckEvent.check(eventAccRange, selftestAccGpu2), true);
 }
+
+TEST(DataAccessor, ExpandDbusNotRange)
+{
+    auto jsonDbusNotRange =
+        R"(
+      {
+        "type": "DBUS",
+        "object": "/xyz/openbmc_project/GpioStatusHandler",
+        "interface": "xyz.openbmc_project.GpioStatus",
+        "property": "I2C4_ALERT",
+        "check": { "equal": "1"}
+      }
+    )";
+    
+    nlohmann::json dbusNotRange = nlohmann::json::parse(jsonDbusNotRange);
+    data_accessor::DataAccessor dbusNotRangeAcc(dbusNotRange);
+    auto list = dbusNotRangeAcc.expand();
+    EXPECT_EQ(list.size(), 1);
+    EXPECT_EQ(dbusNotRangeAcc, list.at(0));
+}
+
+TEST(DataAccessor, ExpandDbusSingleRange)
+{
+    auto jsonDbusSingleRange =
+        R"(
+      {
+        "type": "DBUS",
+        "object": "/xyz/openbmc_project/inventory/GPU_SXM_[1-8]",
+        "interface": "xyz.openbmc_project.State.ResetStatus",
+        "property": "DrainAndResetRequired",
+        "check": { "equal": "1"}
+      }
+    )";
+    
+    auto jsonDbusSingleRange_1 =
+        R"(
+      {
+        "type": "DBUS",
+        "object": "/xyz/openbmc_project/inventory/GPU_SXM_1",
+        "interface": "xyz.openbmc_project.State.ResetStatus",
+        "property": "DrainAndResetRequired"
+      }
+    )";
+    
+    auto jsonDbusSingleRange_8 =
+        R"(
+      {
+        "type": "DBUS",
+        "object": "/xyz/openbmc_project/inventory/GPU_SXM_8",
+        "interface": "xyz.openbmc_project.State.ResetStatus",
+        "property": "DrainAndResetRequired"
+      }
+    )";
+    
+    nlohmann::json dbusSingleRange = nlohmann::json::parse(jsonDbusSingleRange);
+    data_accessor::DataAccessor dbusSingleRangeAcc(dbusSingleRange);
+    
+    auto list = dbusSingleRangeAcc.expand();
+    EXPECT_EQ(list.size(), 8);
+    if (list.size() == 8)
+    {
+        nlohmann::json firstJson =  nlohmann::json::parse(jsonDbusSingleRange_1);
+        EXPECT_EQ(list.front(), data_accessor::DataAccessor(firstJson));
+        
+        nlohmann::json lastJson = nlohmann::json::parse(jsonDbusSingleRange_8);
+        EXPECT_EQ(list.back(), data_accessor::DataAccessor(lastJson));
+    }
+}
+
+TEST(DataAccessor, ExpandDbusDoubleRange)
+{
+    auto jsonDbusDoubleRange =
+        R"(
+      {
+        "type": "DBUS",
+        "object": "/xyz/openbmc_project/GPU_SXM_[1-8]/NVLink_[0-4]",
+        "interface": "xyz.openbmc_project.State.ResetStatus",
+        "property": "DrainAndResetRequired",
+        "check": { "equal": "1"}
+      }
+    )";
+    
+    auto jsonDbusDoubleRange_1_0 =
+        R"(
+      {
+        "type": "DBUS",
+        "object": "/xyz/openbmc_project/GPU_SXM_1/NVLink_0",
+        "interface": "xyz.openbmc_project.State.ResetStatus",
+        "property": "DrainAndResetRequired"
+      }
+    )";
+    
+    auto jsonDbusDoubleRange_8_4 =
+        R"(
+      {
+        "type": "DBUS",
+        "object": "/xyz/openbmc_project/GPU_SXM_8/NVLink_4",
+        "interface": "xyz.openbmc_project.State.ResetStatus",
+        "property": "DrainAndResetRequired"
+      }
+    )";
+    
+    nlohmann::json dbusDoubleRange = nlohmann::json::parse(jsonDbusDoubleRange);
+    data_accessor::DataAccessor dbusDoubleRangleAcc(dbusDoubleRange);
+    
+    auto list = dbusDoubleRangleAcc.expand();
+    EXPECT_EQ(list.size(), 40);
+    if (list.size() == 40)
+    {
+        nlohmann::json firstJson =  nlohmann::json::parse(jsonDbusDoubleRange_1_0);
+        EXPECT_EQ(list.front(), data_accessor::DataAccessor(firstJson));
+        
+        nlohmann::json lastJson = nlohmann::json::parse(jsonDbusDoubleRange_8_4);
+        EXPECT_EQ(list.back(), data_accessor::DataAccessor(lastJson));       
+    }
+}

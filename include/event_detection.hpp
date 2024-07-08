@@ -90,6 +90,11 @@ using EventCandidateList =
 using RegisteredObjectInterfaceMap = std::map<const std::string, int>;
 
 /**
+ *   Shared Pointers list of event_info::EventNode
+ */
+using EventNodeSharedList = std::vector<std::shared_ptr<event_info::EventNode>>;
+
+/**
  * @class EventDetection
  * @brief Responsible for catching D-Bus signals and GPIO state change
  * conditions.
@@ -121,6 +126,44 @@ class EventDetection : public object::Object
      * messages
      */
     static void workerThreadProcessEvents();
+       
+    /**
+     * @brief bootUpEventsDetection() checks all events on BootUp
+     * 
+     *        calls processEventList()
+     *        
+     *        @sa processEventList()
+     */
+    static void bootUpEventsDetection();
+    
+    /**
+     * @brief Process the list of asserted events or events to be recovered
+     *        Call handlers to process that list
+     * @param eventsCandidateList the events list
+     * @param propertyValue the Accessor value that asserted events in the list
+     */
+    static void processEventList(EventCandidateList& eventsCandidateList,
+                                 data_accessor::PropertyValue& propertyValue,
+                                 bool isMultiThread = true);
+    
+    /**
+     * @brief Pushes into the queue both @a pcTrigger and @a eventPtrs
+     *   
+     * @param pcTrigger the Accessor created from PropertyChange signal
+     * 
+     * @param eventPtrs The list of Events that match the @a pcTrigger
+     */
+    static void pushToQueue(const data_accessor::DataAccessor& pcTrigger,
+                            EventNodeSharedList eventPtrs);
+    
+    /**
+     * @brief Checks if there is data in the queue data to detect events
+     * 
+     *     If so calls EventsDetection() 
+     *     @sa EventsDetection() 
+     *     @sa processEventList()
+     */
+    static void popFromQueue();   
 
     /**
      * @brief This is the callback which handles DBUS properties changes
@@ -357,14 +400,14 @@ class EventDetection : public object::Object
      */
     EventCandidateList EventsDetection(
         const data_accessor::DataAccessor& pcTrigger,
-        const std::vector<std::shared_ptr<event_info::EventNode>>&
+        const EventNodeSharedList&
             possibleEventPatternList)
     {
         EventCandidateList eventCandidateList;
         std::stringstream ss;
         pcTrigger.print(ss);
         log_dbg("In Detect Event Method for PC trigger %s\n", ss.str().c_str());
-        std::vector<std::shared_ptr<event_info::EventNode>>  eventsOnlyPattern;
+        EventNodeSharedList  eventsOnlyPattern;
 
         std::unordered_set<std::string> recoveredEventDevices;
         std::unordered_set<std::string> rootCauseTracerDevice;
@@ -553,9 +596,25 @@ class EventDetection : public object::Object
         }
         return false;
     }
-
+    
     /**
-     * @brief Throw out a thread to run all event handlers on the Event.
+     * @brief run a single event handle on the Event (does not start new thread)
+     * @param event
+     * @param name
+     */
+    void runSingleEventHandler(event_info::EventNode& event,
+                               const std::string& name)
+    {
+        std::stringstream ss;
+        ss << "calling hdlrMgr: " << this->_hdlrMgr->getName()
+           << " event: " << event.event;
+        log_dbg("%s\n", ss.str().c_str());
+        auto hdlrMgr = *this->_hdlrMgr;
+        hdlrMgr.RunHandler(event, name);
+    }
+    
+    /**
+     * @brief Throw out a thread to run a single event handle on the Event.
      *
      * @param event
      */
@@ -573,12 +632,7 @@ class EventDetection : public object::Object
         auto thread =
             std::make_unique<std::thread>([this, event, guard, name]() mutable {
                 log_err("started event thread\n");
-                std::stringstream ss;
-                ss << "calling hdlrMgr: " << this->_hdlrMgr->getName()
-                   << " event: " << event.event;
-                log_dbg("%s\n", ss.str().c_str());
-                auto hdlrMgr = *this->_hdlrMgr;
-                hdlrMgr.RunHandler(event, name);
+                runSingleEventHandler(event, name);               
                 log_err("finished event thread\n");
             });
 
@@ -592,7 +646,21 @@ class EventDetection : public object::Object
         }
         log_err("finished RunEventHandler\n");
     }
-
+    
+    /**
+     * @brief run all event handlers on the Event (does not start new thread)
+     * @param event
+     */
+    void runAllEventHandlers(event_info::EventNode& event)
+    {
+        std::stringstream ss;
+        ss << "calling hdlrMgr: " << this->_hdlrMgr->getName()
+           << " event: " << event.event;
+        log_dbg("%s\n", ss.str().c_str());
+        auto hdlrMgr = *this->_hdlrMgr;
+        hdlrMgr.RunAllHandlers(event);
+    }
+    
     /**
      * @brief Throw out a thread to run all event handlers on the Event.
      *
@@ -618,12 +686,7 @@ class EventDetection : public object::Object
         auto thread =
             std::make_unique<std::thread>([this, event, guard]() mutable {
                 log_err("started event thread\n");
-                std::stringstream ss;
-                ss << "calling hdlrMgr: " << this->_hdlrMgr->getName()
-                   << " event: " << event.event;
-                log_dbg("%s\n", ss.str().c_str());
-                auto hdlrMgr = *this->_hdlrMgr;
-                hdlrMgr.RunAllHandlers(event);
+                runAllEventHandlers(event);                
                 log_err("finished event thread\n");
             });
 

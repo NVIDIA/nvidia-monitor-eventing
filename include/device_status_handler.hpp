@@ -140,6 +140,12 @@ class DeviceStatusHandler : public EventHandler
         for(auto& name: names)
         {
             DeviceStatus::Device& dev = deviceStatus.getDevice(name);
+            if (dev.name.empty())
+            {
+                log_err("Failed to get DeviceStatus for device='%s'\n",
+                        event.device.c_str());
+                continue;
+            }
 
             if (dev.Health > event.messageRegistry.message.severity)
             {
