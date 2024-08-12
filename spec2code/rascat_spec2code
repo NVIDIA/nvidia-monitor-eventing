@@ -170,10 +170,10 @@ class ErrorCatalog:
             return {}
 
         for wd in str(acc).strip().split(';'):
-            kv = wd.strip().strip("][").split('|')
+            kv = wd.strip().strip("][").split(" | ")
             output[kv[0].strip()] = kv[1].strip()
         if len(str(chk)) != 0:
-            kv = str(chk).strip().strip("][").split('|')
+            kv = str(chk).strip().strip("][").split(" | ")
             output['check'] = dict()
             output['check'][kv[0].strip()] = kv[1].strip()
         return output
@@ -257,7 +257,7 @@ class ErrorCatalog:
                         row = row + cell + ','
                     print(row)
 
-    def get_device_list(self, platform):
+    def get_device_list(self, platform, in_rf_prefix = False):
         output = dict()
         with open(self._devicelist, 'r', encoding='utf-8-sig') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -271,7 +271,10 @@ class ErrorCatalog:
                 if not row['Platform'] == platform:
                     continue
 
-                output[row['DevicePattern']] = row['Device In RF Content']
+                if in_rf_prefix:
+                    output[row['Device In RF Content']] = row['RF URI Prefix'] + row['RF Chassis URI Device Prefix'] + "_"
+                else:
+                    output[row['DevicePattern']] = row['Device In RF Content']
 
         return output
 
@@ -283,11 +286,12 @@ class ErrorCatalog:
 
             platform_column = platform_column_prefix + platform
 
-            if not platform_column in self._csvfields:
+            if platform_column not in self._csvfields:
                 print("[E] invalid platform: ", platform)
                 return 1
 
             device_pattern = self.get_device_list(platform)
+            device_rf_pattern = self.get_device_list(platform, True)
 
             def pattern2device(text):
                 import re
@@ -340,7 +344,7 @@ class ErrorCatalog:
                 ee["trigger_count"] = int(row["Leaky bucket trigger count"], 10) if len(row["Leaky bucket trigger count"]) > 0 else 0
                 ee["event_counter_reset"] = self.fc_expr_to_json_acc(row["Leaky bucket reset type"])
                 ee["redfish"]["message_id"] = row["RF Log Message ID"]
-                ee["redfish"]["origin_of_condition"] = row["RF Log Origin Of Condition"]
+                ee["redfish"]["origin_of_condition"] = device_rf_pattern[row["RF Log Origin Of Condition"]] + row["RF Log Origin Of Condition"]
                 ee["redfish"]["message_args"]["patterns"] = self.fc_expr_to_json_list(row["RF Log Message Args"])
                 ee["redfish"]["message_args"]["parameters"] = self.fc_expr_to_json_acc_list(row["MessageArgs Parameters"])
                 ee["telemetries"] = self.fc_expr_to_json_acc_list(row["AdditionalData data config (possibly multiple)"])
