@@ -9,7 +9,7 @@
 #  license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 """
-A Error Catalog spec2code tool for device monitor & eventing support, ver=0.1.
+A Error Catalog spec2code tool for device monitor & eventing support, ver=0.2.
 """
 
 import sys
@@ -105,23 +105,38 @@ spec2code_dict = {
 }
 
 platform_nvbmc2errcat = {
-"Umbriel" : ["Umbriel", "Applicable for Umbriel"],
+"Umbriel" : ["Umbriel", "Applicable for Blackwell-HGX-8-GPU"],
 "GH200 NVL" : ["OberonGH", "Applicable for GH200 NVL"],
 "GB200 NVL" : ["OberonGB", "Applicable for GB200 NVL"],
 }
 
+platform_column_prefix = "Applicable for "
+
 class ErrorCatalog:
-    def __init__(self, filename):
+    def __init__(self, errorlist, devicelist):
         # csv.DictReader is a lazy dict, need to reload its content from
-        # file after each iteration. So only cache filename here for reloading.
-        self._filename = filename
+        # file after each iteration. So only cache errorlist here for reloading.
+        self._errorlist = errorlist
         self._csvfields = self.get_columns()
+        self._devicelist = devicelist
 
     def get_columns(self):
-        with open(self._filename, 'r', encoding='utf-8-sig') as csvfile:
+        with open(self._errorlist, 'r', encoding='utf-8-sig') as csvfile:
             reader = csv.DictReader(csvfile)
 
             return reader.fieldnames
+
+    def get_platforms(self):
+        output = []
+        with open(self._errorlist, 'r', encoding='utf-8-sig') as csvfile:
+            reader = csv.DictReader(csvfile)
+
+            for field in reader.fieldnames:
+                if not field.startswith(platform_column_prefix):
+                    continue
+
+                output.append(field[len(platform_column_prefix):])
+        return output
 
     def json_acc_to_fc_expr(self, accessor):
         output = ""
@@ -194,7 +209,7 @@ class ErrorCatalog:
         else:
             return self.dot_query_json(json[keys[0]], '.'.join(keys[1:]))
 
-    def to_error_catalog(self, evt_inf_json):
+    def to_ras_catalog(self, evt_inf_json):
         with open(evt_inf_json, "r") as f:
             evt_inf = json.load(f)
             print(','.join(self._csvfields))
@@ -242,20 +257,50 @@ class ErrorCatalog:
                         row = row + cell + ','
                     print(row)
 
+    def get_device_list(self, platform):
+        output = dict()
+        with open(self._devicelist, 'r', encoding='utf-8-sig') as csvfile:
+            reader = csv.DictReader(csvfile)
+
+            id = 0
+            for row in reader:
+                id = id + 1
+                if id == 1:
+                    continue
+
+                if not row['Platform'] == platform:
+                    continue
+
+                output[row['DevicePattern']] = row['Device In RF Content']
+
+        return output
+
     def to_event_info_json(self, platform):
-        with open(self._filename, "r", encoding='iso-8859-1') as f:
+        with open(self._errorlist, "r", encoding='iso-8859-1') as f:
             fc = csv.DictReader(f)
 
             ei_json = copy.deepcopy(event_info_json)
 
-            platform_column=""
-            for clm in platform_nvbmc2errcat[platform]:
-                if clm in self._csvfields:
-                    platform_column = clm
-                    break
-            if len(platform_column) == 0:
+            platform_column = platform_column_prefix + platform
+
+            if not platform_column in self._csvfields:
                 print("[E] invalid platform: ", platform)
                 return 1
+
+            device_pattern = self.get_device_list(platform)
+
+            def pattern2device(text):
+                import re
+
+                pattern = r"\{(.*?)\}"
+                matches = re.findall(pattern, text)
+                for i, match in enumerate(matches):
+                    key = "{" + match + "}"
+                    if key not in device_pattern:
+                        continue
+                    text = text.replace(key, device_pattern[key])
+                
+                return text
 
             id = 0
             for row in fc:
@@ -271,6 +316,8 @@ class ErrorCatalog:
 
                 if row["To Customer Doc?"].lower() != "yes" or row["To HMC Code?"].lower() != "yes":
                     continue
+
+                row = {key: pattern2device(value) for key, value in row.items()}
 
                 ee = copy.deepcopy(event_entry_json)
 
@@ -310,9 +357,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument(
-        "error_catalog",
-        metavar="error_catalog",
-        help="Error Catalog file in csv format.")
+        "ras_catalog",
+        metavar="ras_catalog",
+        help="Server RAS Catalog - 'Error List' tab in .csv format.")
 
     parser.add_argument(
         "event_info",
@@ -331,21 +378,31 @@ def main():
         metavar="platform",
         help="Specify the platform code name for to_event_info_json to work on. Options:\n  " + ",".join(platform_nvbmc2errcat.keys()) + "\n")
 
+    parser.add_argument(
+        "device_catalog",
+        metavar="device_catalog",
+        help="Server RAS Catalog - 'Devices' tab in .csv format.")
+
     args = parser.parse_args()
 
-    csv = args.error_catalog
+    csv_errorlist = args.ras_catalog
+    csv_devicelist = args.device_catalog
     evt_inf_json = args.event_info
 
-    error_catalog = ErrorCatalog(csv)
+    ras_catalog = ErrorCatalog(csv_errorlist, csv_devicelist)
 
     rc = 0
 
-    if args.conv_method == "to_error_catalog":
-        rc = error_catalog.to_error_catalog(evt_inf_json)
+    if args.conv_method == "to_ras_catalog":
+        rc = ras_catalog.to_ras_catalog(evt_inf_json)
     elif args.conv_method == "to_event_info_json":
-        rc = error_catalog.to_event_info_json(args.platform)
+        rc = ras_catalog.to_event_info_json(args.platform)
     elif args.conv_method == "get_columns":
-        rc = print(error_catalog.get_columns())
+        rc = print(ras_catalog.get_columns())
+    elif args.conv_method == "get_platforms":
+        rc = print("\n".join(ras_catalog.get_platforms()))
+    elif args.conv_method == "get_device_list":
+        rc = print(ras_catalog.get_device_list('Blackwell-HGX-8-GPU'))
     else:
         print("Wrong args: ", args.conv_method)
         rc = 1
