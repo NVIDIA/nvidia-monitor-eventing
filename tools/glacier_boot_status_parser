@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Parse Glacier boot status code per Glacier spec
+
+set -o pipefail
+
+APP_NAME="glacier_boot_status_parser"
+APP_VER="0.1"
+
+# Platform dependent profile.
+# Use Case 1:
+# In OpenBMC recipe, replace DEVICENAME_EID_LIST with device_mctp_eid.csv
+# content.
+#
+# Use Case 2:
+# From cmdline, define DEV_EID_PROFILE=<path of device_mctp_eid.csv> before
+# calling this script.
+[ -z "$DEV_EID_PROFILE" ] && DEV_EID_PROFILE="device_mctp_eid.csv"
+DEVICENAME_EID_LIST=`cat "$DEV_EID_PROFILE"`
+
+DEVNAME=""
+
+getDeviceEid() #(device_name)
+{
+    local device_name=$1;shift
+    local eid=-1
+
+    local row
+    for row in $DEVICENAME_EID_LIST; do
+        local name="${row%%,*}"
+        ## comparing with ignorecase
+        [ "${name,,}" == "${device_name,,}" ] && echo "${row##*,}" && return 0
+    done
+    return 1
+}
+
+get_boot_status() #(device)
+{
+    local device=$1;shift
+
+    local svr="com.Nvidia.FWStatus"
+    local obj="/xyz/openbmc_project/inventory/system/chassis/HGX_ERoT_${device}"
+    local intf="com.nvidia.RoT.BootStatus"
+    local prop="BootStatus"
+
+    local rc=0
+    local value;value=`busctl get-property $svr $obj $intf $prop`;rc=$?
+    [ "$rc" -ne 0 ] && return 1
+
+    value=($value)
+    value=${value[@]:2} # remove the leading "ay (byte count)"
+
+    value=($value)
+
+    local data=0
+    for byte in "${value[@]}"; do
+        data=$(( (data < 8) | byte ))
+    done
+
+    echo $data # in dec
+}
+
+## MAIN
+DRY_RUN=0
+
+if [ ! -f "$DEV_EID_PROFILE" ] && [ -z "$DEVICENAME_EID_LIST" ]; then
+    >&2 echo "Error: [$DEV_EID_PROFILE] not found!"
+    exit 1
+fi
+
+## -dry-run just prints the mctp-vdm-util command line
+if [ "$1"  = "-dry-run" ]; then
+   DRY_RUN=1
+   shift
+fi
+
+if [ "$1" = "-invalidate" ]; then
+    shift
+    invalidate "$@";rc=$?
+    exit $rc
+fi
+
+if [ $# -ne 2 ]; then
+    show_help
+    exit 1
+fi
+
+PCOMMAND="$1";shift
+DEVNAME="$1"
+
+rc=0
+device_id=`getDeviceEid ${DEVNAME}`;rc=$? # Find the right device eid for it
+if [ $rc -ne 0 ]; then
+    >&2 echo "Error: EID of ${DEVNAME} not found, rc=$rc!"
+    exit $rc
+fi
+mctp_access $device_id "$PCOMMAND";rc=$?
+if [ $rc -ne 0 ]; then
+    >&2 echo "Error: MCTP cmd for ${PCOMMAND} on ${device_id} failed, rc=$rc!"
+    exit $rc
+fi
+
+exit $rc
+

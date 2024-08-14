@@ -1,0 +1,54 @@
+#! /usr/bin/env python3
+
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+"""
+A Glacier spec2code tool for boot status parser, ver=0.1.
+"""
+
+import sys
+import argparse
+import csv, json
+import re
+import copy
+
+
+def to_glacier_boot_status_parser(boot_status_table_csv):
+    with open(boot_status_table_csv, "r", encoding='iso-8859-1') as f:
+        reader = csv.DictReader(f)
+
+        id = 0
+        for row in reader:
+            id = id + 1
+            if id == 1:
+                continue
+
+            if row['Is Error?'].lower() != "yes":
+                continue
+
+            print(row['Field']+"_bitmask=0x"+row['Bitmask'])
+            print(row['Field']+"_Bitoffset="+row['Bitoffset'])
+            print(row['Field']+"_value="+row['Error Value (Dec)'])
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument(
+        "glacier_boot_status",
+        metavar="glacier_boot_status",
+        help="glacier_boot_status in .csv format.")
+
+    args = parser.parse_args()
+
+    to_glacier_boot_status_parser(args.glacier_boot_status)
+
+    return 0
+
+if __name__ == "__main__":
+    main()
