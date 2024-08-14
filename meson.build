@@ -241,6 +241,10 @@ install_data('tools/device_id_mapping/device-id-norm.sh',
 install_data('monitor-eventing-memory-watcher/monitor-eventing-memory-watcher',
              install_dir : bindir)
 
+## install glacier boot status parser
+install_data('tools/glacier_boot_status_parser',
+             install_dir : bindir)
+
 if(get_option('tests').enabled())
     # generate the test executable
     ut_bin = executable(

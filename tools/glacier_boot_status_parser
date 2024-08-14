@@ -1,0 +1,239 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Parse Glacier boot status code per Glacier spec
+
+set -o pipefail
+
+app_name="glacier_boot_status_parser"
+app_ver="0.1"
+
+# Per Boot Status Code table in Glacier Firmware Design Document:
+# https://docs.google.com/document/d/12VnlI_eX4hvsMVXzOhS4SkwLsvUHZEl5-g-OEBJhGRw/edit
+EC_TAG0_AUTH_ERROR_bitmask=0x1
+EC_TAG0_AUTH_ERROR_bitoffset=0
+EC_TAG0_AUTH_ERROR_value=1
+EC_TAG1_COPY_ERROR_bitmask=0x2
+EC_TAG1_COPY_ERROR_bitoffset=1
+EC_TAG1_COPY_ERROR_value=1
+EC_OTP_MISMATCH_ERROR_bitmask=0x4
+EC_OTP_MISMATCH_ERROR_bitoffset=2
+EC_OTP_MISMATCH_ERROR_value=1
+EC_STRAP_MISMATCH_bitmask=0x40
+EC_STRAP_MISMATCH_bitoffset=6
+EC_STRAP_MISMATCH_value=1
+AP0_PRIMARY_ValidatePublicKeyError_bitmask=0xF00
+AP0_PRIMARY_ValidatePublicKeyError_bitoffset=8
+AP0_PRIMARY_ValidatePublicKeyError_value=2
+AP0_PRIMARY_KeyRevokeCheckError_bitmask=0xF00
+AP0_PRIMARY_KeyRevokeCheckError_bitoffset=8
+AP0_PRIMARY_KeyRevokeCheckError_value=3
+AP0_PRIMARY_RollbackProtectionCheckError_bitmask=0xF00
+AP0_PRIMARY_RollbackProtectionCheckError_bitoffset=8
+AP0_PRIMARY_RollbackProtectionCheckError_value=4
+AP0_PRIMARY_AuthenticateError_bitmask=0xF00
+AP0_PRIMARY_AuthenticateError_bitoffset=8
+AP0_PRIMARY_AuthenticateError_value=6
+AP0_PRIMARY_SpiReadError_bitmask=0xF00
+AP0_PRIMARY_SpiReadError_bitoffset=8
+AP0_PRIMARY_SpiReadError_value=7
+AP0_SECONDARY_ValidatePublicKeyError_bitmask=0xF000
+AP0_SECONDARY_ValidatePublicKeyError_bitoffset=12
+AP0_SECONDARY_ValidatePublicKeyError_value=2
+AP0_SECONDARY_KeyRevokeCheckError_bitmask=0xF000
+AP0_SECONDARY_KeyRevokeCheckError_bitoffset=12
+AP0_SECONDARY_KeyRevokeCheckError_value=3
+AP0_SECONDARY_RollbackProtectionCheckError_bitmask=0xF000
+AP0_SECONDARY_RollbackProtectionCheckError_bitoffset=12
+AP0_SECONDARY_RollbackProtectionCheckError_value=4
+AP0_SECONDARY_AuthenticateError_bitmask=0xF000
+AP0_SECONDARY_AuthenticateError_bitoffset=12
+AP0_SECONDARY_AuthenticateError_value=6
+AP0_SECONDARY_SpiReadError_bitmask=0xF000
+AP0_SECONDARY_SpiReadError_bitoffset=12
+AP0_SECONDARY_SpiReadError_value=7
+AP0_RECOVERY_ValidatePublicKeyError_bitmask=0xF0000
+AP0_RECOVERY_ValidatePublicKeyError_bitoffset=16
+AP0_RECOVERY_ValidatePublicKeyError_value=2
+AP0_RECOVERY_KeyRevokeCheckError_bitmask=0xF0000
+AP0_RECOVERY_KeyRevokeCheckError_bitoffset=16
+AP0_RECOVERY_KeyRevokeCheckError_value=3
+AP0_RECOVERY_RollbackProtectionCheckError_bitmask=0xF0000
+AP0_RECOVERY_RollbackProtectionCheckError_bitoffset=16
+AP0_RECOVERY_RollbackProtectionCheckError_value=4
+AP0_RECOVERY_AuthenticateError_bitmask=0xF0000
+AP0_RECOVERY_AuthenticateError_bitoffset=16
+AP0_RECOVERY_AuthenticateError_value=6
+AP0_RECOVERY_SpiReadError_bitmask=0xF0000
+AP0_RECOVERY_SpiReadError_bitoffset=16
+AP0_RECOVERY_SpiReadError_value=7
+AP0_SPI_READ_FAILURE_bitmask=0x200000
+AP0_SPI_READ_FAILURE_bitoffset=21
+AP0_SPI_READ_FAILURE_value=1
+AP0_SPI_ACCESS_VIOLATION_OPCODE_bitmask=0x1000000
+AP0_SPI_ACCESS_VIOLATION_OPCODE_bitoffset=24
+AP0_SPI_ACCESS_VIOLATION_OPCODE_value=1
+AP0_SPI_ACCESS_VIOLATION_RANGE_bitmask=0x2000000
+AP0_SPI_ACCESS_VIOLATION_RANGE_bitoffset=25
+AP0_SPI_ACCESS_VIOLATION_RANGE_value=1
+AP0_HEARTBEAT_TIMEOUT_bitmask=0x4000000
+AP0_HEARTBEAT_TIMEOUT_bitoffset=26
+AP0_HEARTBEAT_TIMEOUT_value=1
+AP0_BOOTCOMPLETE_TIMEOUT_bitmask=0x8000000
+AP0_BOOTCOMPLETE_TIMEOUT_bitoffset=27
+AP0_BOOTCOMPLETE_TIMEOUT_value=1
+FATAL_ERROR_CODE_ErrorAuthApFw_bitmask=0xF0000000
+FATAL_ERROR_CODE_ErrorAuthApFw_bitoffset=28
+FATAL_ERROR_CODE_ErrorAuthApFw_value=1
+FATAL_ERROR_CODE_ErrorInitResetEvent_bitmask=0xF0000000
+FATAL_ERROR_CODE_ErrorInitResetEvent_bitoffset=28
+FATAL_ERROR_CODE_ErrorInitResetEvent_value=2
+FATAL_ERROR_CODE_ErrorSetupSpimon_bitmask=0xF0000000
+FATAL_ERROR_CODE_ErrorSetupSpimon_bitoffset=28
+FATAL_ERROR_CODE_ErrorSetupSpimon_value=3
+FATAL_ERROR_CODE_ErrorGrantApSpiAccess_bitmask=0xF0000000
+FATAL_ERROR_CODE_ErrorGrantApSpiAccess_bitoffset=28
+FATAL_ERROR_CODE_ErrorGrantApSpiAccess_value=4
+FATAL_ERROR_CODE_ErrorTryReleaseOnInvalidSlot_bitmask=0xF0000000
+FATAL_ERROR_CODE_ErrorTryReleaseOnInvalidSlot_bitoffset=28
+FATAL_ERROR_CODE_ErrorTryReleaseOnInvalidSlot_value=6
+FATAL_ERROR_CODE_ErrorBootCompleteMsgFromInvalidSlot_bitmask=0xF0000000
+FATAL_ERROR_CODE_ErrorBootCompleteMsgFromInvalidSlot_bitoffset=28
+FATAL_ERROR_CODE_ErrorBootCompleteMsgFromInvalidSlot_value=7
+FATAL_ERROR_CODE_ErrorBootCompleteTimeoutMaxAttempt_bitmask=0xF0000000
+FATAL_ERROR_CODE_ErrorBootCompleteTimeoutMaxAttempt_bitoffset=28
+FATAL_ERROR_CODE_ErrorBootCompleteTimeoutMaxAttempt_value=8
+FATAL_ERROR_CODE_ErrorSetTimer_bitmask=0xF0000000
+FATAL_ERROR_CODE_ErrorSetTimer_bitoffset=28
+FATAL_ERROR_CODE_ErrorSetTimer_value=9
+FATAL_ERROR_CODE_ErrorGetStrapSettingFromMetadata_bitmask=0xF0000000
+FATAL_ERROR_CODE_ErrorGetStrapSettingFromMetadata_bitoffset=28
+FATAL_ERROR_CODE_ErrorGetStrapSettingFromMetadata_value=10
+AP0_RELEASE_SLOT_FatalError_bitmask=0x3000000000000
+AP0_RELEASE_SLOT_FatalError_bitoffset=48
+AP0_RELEASE_SLOT_FatalError_value=0
+REGION_CP_FAIL_StrapSetting_bitmask=0x3C000000000000
+REGION_CP_FAIL_StrapSetting_bitoffset=50
+REGION_CP_FAIL_StrapSetting_value=1
+REGION_CP_FAIL_NoBootCompleteSlot_bitmask=0x3C000000000000
+REGION_CP_FAIL_NoBootCompleteSlot_bitoffset=50
+REGION_CP_FAIL_NoBootCompleteSlot_value=2
+REGION_CP_FAIL_Timeout_bitmask=0x3C000000000000
+REGION_CP_FAIL_Timeout_bitoffset=50
+REGION_CP_FAIL_Timeout_value=3
+REGION_CP_FAIL_OtherReason_bitmask=0x3C000000000000
+REGION_CP_FAIL_OtherReason_bitoffset=50
+REGION_CP_FAIL_OtherReason_value=4
+STAGE_DL_FAILED_BackgroundCopyToGoldFailed_bitmask=0x3C0000000000000
+STAGE_DL_FAILED_BackgroundCopyToGoldFailed_bitoffset=54
+STAGE_DL_FAILED_BackgroundCopyToGoldFailed_value=2
+STAGE_DL_FAILED_BackgroundCopyToInactiveFailed_bitmask=0x3C0000000000000
+STAGE_DL_FAILED_BackgroundCopyToInactiveFailed_bitoffset=54
+STAGE_DL_FAILED_BackgroundCopyToInactiveFailed_value=3
+
+show_help()
+{
+    echo "Version: $app_ver"
+    echo "Usage:"
+    echo " $app_name <boot_status_field_name> <device_id>"
+    echo
+    echo "Output:"
+    echo " 0 - field has no error"
+    echo " 1 - field has error"
+    echo
+}
+
+err() #msg
+{
+    echo "$app_name:[E]$*" >&2
+}
+
+get_boot_status() #(device)
+{
+    local device=$1;shift
+
+    [ -z "$device" ] && return 1
+
+    # Go to U/T routine if ut_file exists.
+    # ut_file should contain boot status code in hex leading with "0x".
+    local ut_file="/tmp/${device}_bootstatus.einj"
+    if [ -f "$ut_file" ]; then
+        cat $ut_file
+        return 0
+    fi
+
+    local svr="com.Nvidia.FWStatus"
+    local obj="/xyz/openbmc_project/inventory/system/chassis/HGX_ERoT_${device}"
+    local intf="com.nvidia.RoT.BootStatus"
+    local prop="BootStatus"
+
+    # Get BootStatus Dbus property (array of bytes) from FWStatus service
+    local rc=0
+    local value;value=`busctl get-property $svr $obj $intf $prop`;rc=$?
+    [ "$rc" -ne 0 ] && return 2
+
+    value=($value)
+    value=${value[@]:2} # remove the leading "ay (byte count)"
+
+    value=($value)
+
+    local data=0
+    # convert array byte into integer in big endian order
+    for byte in "${value[@]}"; do
+        data=$(( (data < 8) | byte ))
+    done
+
+    echo $data # in dec
+    return 0
+}
+
+check_boot_status_field() #(bootstatus, fieldname)
+{
+    local bootstatus=$1;shift
+    local fieldname=$1;shift
+
+    [ -z "$bootstatus" ] && return 1
+    [ -z "$fieldname" ] && return 2
+
+    local var
+    var="${fieldname}_bitmask"
+    local bitmask=${!var};[ -z "$bitmask" ] && return 3
+    var="${fieldname}_bitoffset"
+    local bitoffset=${!var};[ -z "$bitoffset" ] && return 4
+    var="${fieldname}_value"
+    local value=${!var};[ -z "$value" ] && return 5
+
+    # Get the field data from bootstatus per its bit(mask/offset)
+    local data=$(( (bootstatus & bitmask) >> bitoffset ))
+
+    # Check if the field data match the value indicating error.
+    # print: 1 - field has error; 0 - field has no error.
+    [ "$data" == "$value" ] && echo 1 || echo 0
+    return 0
+}
+
+## MAIN ##
+[ "$#" -ne 2 ] && show_help && exit 1
+
+fieldname=$1;shift
+deviceid=$1;shift
+
+rc=0
+
+bootstatus=`get_boot_status "$deviceid"`;rc=$?
+[ "$rc" -ne 0 ] && err "Get boot status failed, rc=$rc!" && exit $rc
+
+output=`check_boot_status_field "$bootstatus" "$fieldname"`;rc=$?
+[ "$rc" -ne 0 ] && err "Check boot status field[$fieldname] failed, rc=$rc!" && exit $rc
+
+echo $output
+
+exit 0
+
