@@ -137,9 +137,10 @@ void EventDetection::dbusEventHandlerCallback(sdbusplus::message::message& msg)
         data_accessor::DataAccessor accessor(j, propertyValue);
 
         logs_dbg(
-            "Got PC Trigger ... Path: %s, Intf: %s, Prop: '%s', VarIndex: %d\n",
+            "Got PC Trigger ... Path: %s, Intf: %s, Prop: '%s', VarIndex: %d, "
+            "PropertyValue: '%s'\n",
             objectPath.c_str(), msgInterface.c_str(), eventProperty.c_str(),
-            index);
+            index, propertyValue.getString().c_str());
         logs_dbg("Passing PC Trigger into Event Discovery phase\n");
 
         eventDiscovery(accessor);

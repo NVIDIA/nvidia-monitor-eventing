@@ -223,7 +223,23 @@ void PropertyValue::getPropertyDataFromVariant(const PropertyVariant& varVar)
             PropertyValueDataHelper<double>::setInteger(varVar, &_data) ||
             PropertyValueDataHelper<bool>::setBoolean(varVar, &_data) ||
             PropertyValueDataHelper<std::vector<std::string>>::setVectorStrings(
-                                                             varVar, &_data);
+                varVar, &_data) ||            
+            PropertyValueDataHelper<std::vector<uint8_t>>::keepVectorsAsString(
+                varVar, &_data) ||
+            PropertyValueDataHelper<std::vector<int16_t>>::keepVectorsAsString(
+                varVar, &_data) ||
+            PropertyValueDataHelper<std::vector<uint16_t>>::keepVectorsAsString(
+                varVar, &_data) ||
+            PropertyValueDataHelper<std::vector<int32_t>>::keepVectorsAsString(
+                varVar, &_data) ||
+            PropertyValueDataHelper<std::vector<uint32_t>>::keepVectorsAsString(
+                varVar, &_data) ||
+            PropertyValueDataHelper<std::vector<int64_t>>::keepVectorsAsString(
+                varVar, &_data) ||
+            PropertyValueDataHelper<std::vector<uint64_t>>::keepVectorsAsString(
+                varVar, &_data) ||
+            PropertyValueDataHelper<std::vector<double>>::keepVectorsAsString(
+                varVar, &_data);            
     }
     if (done == false) // varVar.index() == 0 or type not handled above
     {

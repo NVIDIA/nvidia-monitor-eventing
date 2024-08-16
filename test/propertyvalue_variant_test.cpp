@@ -295,3 +295,32 @@ TEST(PropertyValue, NotBitmask)
     EXPECT_EQ(bits_0_1_2.notBitmask(bit_3), true);
     EXPECT_EQ(bits_0_1_2.notBitmask(bit_4), true);
 }
+
+TEST(PropertyValueArray, Byte)
+{
+    std::vector<uint8_t> array{0x01, 0x02, 0x04, 0x08};
+    PropertyValue intArrayh(array);
+    EXPECT_EQ(intArrayh.getString(), "1 2 4 8");
+}
+
+TEST(PropertyValueArray, Word16)
+{
+    std::vector<int16_t> array{0x555, 0x323};
+    PropertyValue intArrayh(array);
+    EXPECT_EQ(intArrayh.getString(), "1365 803");
+}
+
+TEST(PropertyValueArray, Word64)
+{
+    std::vector<int64_t> array{0x555, 0x323};
+    PropertyValue intArrayh(array);
+    EXPECT_EQ(intArrayh.getString(), "1365 803");
+}
+
+TEST(PropertyValueArray, Double)
+{
+    std::vector<double> array{3568.300000, 59832.600000};
+    PropertyValue intArrayh(array);
+    EXPECT_EQ(intArrayh.getString(), "3568.300000 59832.600000");
+}
+

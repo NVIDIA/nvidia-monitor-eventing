@@ -159,7 +159,48 @@ class PropertyValueDataHelper
         }
         return false;
     }
-
+    /**
+     * @brief Convert an array of integers intp a single string.
+     * @param varVar
+     * @param [out] data where to store values
+     * @return true 
+     */
+    static bool keepVectorsAsString(const PropertyVariant& varVar,
+                                  PropertyValueData* data)
+    {
+        char temp[64];
+        data->value64 = 0;
+        data->state = PropertyValueData::StringOnly;
+        if (std::holds_alternative<std::vector<double>>(varVar) == true)
+        {
+            auto array = std::get<std::vector<double>>(varVar);
+            for (auto value : array)
+            {                
+                if (false == data->strValue.empty())
+                {
+                    data->strValue.push_back(' ');
+                }
+                data->strValue.append(std::to_string(value));
+            }            
+            return true;
+        }
+        else if (std::holds_alternative<T>(varVar) == true)
+        {                
+            auto array = std::get<T>(varVar);
+            for (auto integer : array)
+            {
+                std::snprintf(temp, sizeof(temp) -1, "%llu",
+                              static_cast<long long unsigned int>(integer));
+                if (false == data->strValue.empty())
+                {
+                    data->strValue.push_back(' ');
+                }
+                data->strValue.append(std::string{temp});
+            }           
+            return true;
+        }
+        return false;
+    }
     /**
      * @brief  gets the list of strings from varVar and puts it in a
      *           PropertyValueData
