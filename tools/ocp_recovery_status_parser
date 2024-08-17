@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Parse Glacier boot status code per Glacier spec
+
+set -o pipefail
+
+app_name="ocp_recovery_status_parser"
+app_ver="0.1"
+
+# Per Device Status Code in OCP Recovery spec:
+# https://www.opencompute.org/documents/ocp-recovery-document-1p0-final-1-pdf
+## Byte0
+DeviceStatus_0x2="Device Error"
+DeviceStatus_0x3="Recovery Mode"
+DeviceStatus_0x4="Recovery Pending"
+DeviceStatus_0xE="Boot Failure"
+DeviceStatus_0xF="Fatal Error"
+HasReason_0x3="yes"
+HasReason_0x4="yes"
+HasReason_0xE="yes"
+
+## Byte2-3
+RecoveryReason_0x1="Generic hardware error"
+RecoveryReason_0x2="Generic hardware soft error"
+RecoveryReason_0x3="Self-test failure"
+RecoveryReason_0x4="Corrupted/missing critical data"
+RecoveryReason_0x5="Missing/corrupt key manifest"
+RecoveryReason_0x6="Authentication Failure on key manifest"
+RecoveryReason_0x7="Anti-rollback failure on key manifest"
+RecoveryReason_0x8="Missing/corrupt boot loader (1st mutable code) firmware image"
+RecoveryReason_0x9="Authentication failure on boot loader (1st mutable code) firmware image"
+RecoveryReason_0xA="Anti-rollback failure boot loader (1st mutable code) firmware image"
+RecoveryReason_0xB="Missing/corrupt main/management firmware image"
+RecoveryReason_0xC="Authentication Failure main/management firmware image"
+RecoveryReason_0xD="Anti-rollback Failure main/management firmware image"
+RecoveryReason_0xE="Missing/corrupt recovery firmware"
+RecoveryReason_0xF="Authentication Failure recovery firmware"
+RecoveryReason_0x10="Anti-rollback Failure on recovery firmware"
+RecoveryReason_0x11="Forced Recovery"
+
+
+
+show_help()
+{
+    echo "Version: $app_ver"
+    echo "Usage:"
+    echo " $app_name <device_id>"
+    echo
+    echo "Output:"
+    echo " device status string"
+    echo
+}
+
+err() #msg
+{
+    echo "$app_name:[E]$*" >&2
+}
+
+get_ocp_status() #(device)
+{
+    local device=$1;shift
+
+    [ -z "$device" ] && return 1
+
+    # Go to U/T routine if ut_file exists.
+    # ut_file should contain ocp status code in array of byte (dec).
+    local ut_file="/tmp/${device}_ocpstatus.einj"
+    if [ -f "$ut_file" ]; then
+        cat $ut_file
+        return 0
+    fi
+
+    local svr="com.Nvidia.FWStatus"
+    local obj="/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_${device}"
+    local intf="com.nvidia.RoT.BootStatus"
+    local prop="BootStatus"
+
+    # Get BootStatus Dbus property (array of bytes) from FWStatus service
+    local rc=0
+    local value;value=`busctl get-property $svr $obj $intf $prop`;rc=$?
+    [ "$rc" -ne 0 ] && return 2
+
+    value=($value)
+    value=${value[@]:2} # remove the leading "ay (byte count)"
+
+    echo $value # array of bytes
+
+    return 0
+}
+
+get_device_status() #(ocp_status[])
+{
+    local byte0=$1;shift
+    local byte1=$1;shift
+    local byte2=$1;shift
+    local byte3=$1;shift
+
+    [ -z "$byte0" ] && return 1
+    [ -z "$byte2" ] && return 2
+    [ -z "$byte3" ] && return 3
+
+    local byte2_3=$(( (byte2 << 8) | byte3 ))
+
+    byte0=`printf "0x%X" "$byte0"`
+    byte2_3=`printf "0x%X" "$byte2_3"`
+
+    local var="DeviceStatus_$byte0"
+    local status=${!var}
+
+    var="HasReason_$byte0"
+    local has_reason=${!var}
+
+    # if the status not populate reason code, print status directly and quit.
+    [ "${has_reason,,}" != "yes" ] && echo $status && return 0
+
+    # else, print status + reason.
+    var="RecoveryReason_$byte2_3"
+    local reason=${!var}
+
+    echo "$status - $reason"
+    return 0
+}
+
+## MAIN ##
+[ "$#" -ne 1 ] && show_help && exit 1
+
+deviceid=$1;shift
+
+rc=0
+
+ocpstatus=`get_ocp_status "$deviceid"`;rc=$?
+[ "$rc" -ne 0 ] && err "Get OCP status failed, rc=$rc!" && exit $rc
+
+output=`get_device_status $ocpstatus`;rc=$?
+[ "$rc" -ne 0 ] && err "Get device status failed, rc=$rc!" && exit $rc
+
+echo $output
+
+exit 0
+
