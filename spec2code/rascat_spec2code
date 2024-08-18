@@ -17,6 +17,8 @@ import argparse
 import csv, json
 import re
 import copy
+import io
+import os
 
 event_info_json = {
     "Device": []
@@ -105,7 +107,7 @@ spec2code_dict = {
 }
 
 platform_nvbmc2errcat = {
-"Umbriel" : ["Umbriel", "Applicable for Blackwell-HGX-8-GPU"],
+"Blackwell-HGX-8-GPU" : ["Umbriel", "Applicable for Blackwell-HGX-8-GPU"],
 "GH200 NVL" : ["OberonGH", "Applicable for GH200 NVL"],
 "GB200 NVL" : ["OberonGB", "Applicable for GB200 NVL"],
 }
@@ -121,14 +123,14 @@ class ErrorCatalog:
         self._devicelist = devicelist
 
     def get_columns(self):
-        with open(self._errorlist, 'r', encoding='utf-8-sig') as csvfile:
+        with open(self._errorlist, 'r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
 
             return reader.fieldnames
 
     def get_platforms(self):
         output = []
-        with open(self._errorlist, 'r', encoding='utf-8-sig') as csvfile:
+        with open(self._errorlist, 'r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
 
             for field in reader.fieldnames:
@@ -259,7 +261,7 @@ class ErrorCatalog:
 
     def get_device_list(self, platform, in_rf_prefix = False):
         output = dict()
-        with open(self._devicelist, 'r', encoding='utf-8-sig') as csvfile:
+        with open(self._devicelist, 'r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
 
             id = 0
@@ -279,7 +281,7 @@ class ErrorCatalog:
         return output
 
     def to_event_info_json(self, platform):
-        with open(self._errorlist, "r", encoding='iso-8859-1') as f:
+        with open(self._errorlist, "r", encoding = 'utf-8') as f:
             fc = csv.DictReader(f)
 
             ei_json = copy.deepcopy(event_info_json)
@@ -357,41 +359,52 @@ class ErrorCatalog:
             print(json.dumps(ei_json, indent = 2))
             return 0
 
+def convert_xlsx_to_csv(xlsx_file, sheet_name):
+    import pandas as pd
+
+    # Read the specified sheet from the Excel file
+    df = pd.read_excel(xlsx_file, sheet_name = sheet_name)
+
+    # Make the csv file path.
+    csv_file = "/tmp/" + sheet_name.replace(" ", "_") + ".csv"
+
+    # Convert the DataFrame to a CSV file
+    df.to_csv(csv_file, index = False, encoding = 'utf-8')
+
+    return csv_file
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawTextHelpFormatter
+    )
 
     parser.add_argument(
         "ras_catalog",
         metavar="ras_catalog",
-        help="Server RAS Catalog - 'Error List' tab in .csv format.")
-
-    parser.add_argument(
-        "event_info",
-        metavar="event_info",
-        help="event_info.json file for conversion.")
+        help="Server-RAS-Catalog.xlsx downloaded from \n'https://docs.google.com/spreadsheets/d/1X1eSW7A6ai5VwzTiytt5PouGiz7KvxmR4VFfsZ9bP_Q'."
+    )
 
     conv_method_help_msg = [method for method in dir(ErrorCatalog) if method.startswith("to_")]
 
     parser.add_argument(
         "conv_method", default="",
         metavar="conv_method",
-        help="Specify how to convert the spec to code. Options:\n  " + ",".join(conv_method_help_msg) + "\n")
+        help="Specify how to convert the spec to code. Options:\n  " + "\n  ".join(conv_method_help_msg) + "\n"
+    )
 
     parser.add_argument(
         "platform", default="",
         metavar="platform",
-        help="Specify the platform code name for to_event_info_json to work on. Options:\n  " + ",".join(platform_nvbmc2errcat.keys()) + "\n")
-
-    parser.add_argument(
-        "device_catalog",
-        metavar="device_catalog",
-        help="Server RAS Catalog - 'Devices' tab in .csv format.")
+        help="Specify the platform code name for to_event_info_json to work on. Options:\n  " + "\n  ".join(platform_nvbmc2errcat.keys()) + "\n"
+    )
 
     args = parser.parse_args()
 
-    csv_errorlist = args.ras_catalog
-    csv_devicelist = args.device_catalog
-    evt_inf_json = args.event_info
+    ras_catalog = args.ras_catalog
+
+    csv_errorlist = convert_xlsx_to_csv(ras_catalog, "Error List")
+    csv_devicelist = convert_xlsx_to_csv(ras_catalog, "Devices")
 
     ras_catalog = ErrorCatalog(csv_errorlist, csv_devicelist)
 
@@ -410,6 +423,10 @@ def main():
     else:
         print("Wrong args: ", args.conv_method)
         rc = 1
+
+    # Clean up
+    os.remove(csv_errorlist)
+    os.remove(csv_devicelist)
 
     return rc
 
