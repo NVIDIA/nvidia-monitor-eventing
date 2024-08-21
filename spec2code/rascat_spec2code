@@ -349,6 +349,7 @@ class ErrorCatalog:
                 ee["redfish"]["origin_of_condition"] = device_rf_pattern[row["RF Log Origin Of Condition"]] + row["RF Log Origin Of Condition"]
                 ee["redfish"]["message_args"]["patterns"] = self.fc_expr_to_json_list(row["RF Log Message Args"])
                 ee["redfish"]["message_args"]["parameters"] = self.fc_expr_to_json_acc_list(row["MessageArgs Parameters"])
+                ee["log_namespace"] = row["RF Log Namespace"]
                 ee["telemetries"] = self.fc_expr_to_json_acc_list(row["AdditionalData data config (possibly multiple)"])
                 ee["action"] = ""
                 ee["value_as_count"] = row["Data value is event count"].strip().lower() == "true"
