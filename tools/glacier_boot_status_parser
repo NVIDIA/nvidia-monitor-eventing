@@ -116,15 +116,9 @@ FATAL_ERROR_CODE_ErrorSetTimer_value=9
 FATAL_ERROR_CODE_ErrorGetStrapSettingFromMetadata_bitmask=0xF0000000
 FATAL_ERROR_CODE_ErrorGetStrapSettingFromMetadata_bitoffset=28
 FATAL_ERROR_CODE_ErrorGetStrapSettingFromMetadata_value=10
-AP0_RELEASE_SLOT_FatalError_bitmask=0x3000000000000
-AP0_RELEASE_SLOT_FatalError_bitoffset=48
-AP0_RELEASE_SLOT_FatalError_value=0
-REGION_CP_FAIL_StrapSetting_bitmask=0x3C000000000000
-REGION_CP_FAIL_StrapSetting_bitoffset=50
-REGION_CP_FAIL_StrapSetting_value=1
-REGION_CP_FAIL_NoBootCompleteSlot_bitmask=0x3C000000000000
-REGION_CP_FAIL_NoBootCompleteSlot_bitoffset=50
-REGION_CP_FAIL_NoBootCompleteSlot_value=2
+FATAL_ERROR_CODE_ErrorFirmwareRestriction_bitmask=0xF0000000
+FATAL_ERROR_CODE_ErrorFirmwareRestriction_bitoffset=28
+FATAL_ERROR_CODE_ErrorFirmwareRestriction_value=11
 REGION_CP_FAIL_Timeout_bitmask=0x3C000000000000
 REGION_CP_FAIL_Timeout_bitoffset=50
 REGION_CP_FAIL_Timeout_value=3
@@ -164,10 +158,7 @@ get_boot_status() #(device)
     # Go to U/T routine if ut_file exists.
     # ut_file should contain boot status code in hex leading with "0x".
     local ut_file="/tmp/${device}_bootstatus.einj"
-    if [ -f "$ut_file" ]; then
-        cat $ut_file
-        return 0
-    fi
+    [ -f "$ut_file" ] && cat $ut_file && return 0
 
     local svr="com.Nvidia.FWStatus"
     local obj="/xyz/openbmc_project/inventory/system/chassis/HGX_ERoT_${device}"
@@ -186,6 +177,7 @@ get_boot_status() #(device)
 
     local data=0
     # convert array byte into integer in big endian order
+    local byte
     for byte in "${value[@]}"; do
         data=$(( (data < 8) | byte ))
     done
