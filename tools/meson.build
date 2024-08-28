@@ -40,7 +40,8 @@ scripts = [
     'device_id_mapping/device-id-norm.sh',
 
     'glacier_boot_status_parser',
-    'ocp_recovery_status_parser'
+    'ocp_recovery_status_parser',
+    'gb200_pwrfail_parser'
 ]
 
 install_data(scripts, install_dir: bindir)

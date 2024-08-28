@@ -1,0 +1,376 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Parse GB200 PwrFail registers
+
+set -o pipefail
+
+app_name="gb200_pwrfail_parser"
+app_ver="0.1"
+
+# Per GB200 FPGA Regtbl spreadsheet, Column[Int for HMC]=PF,
+# https://nvidia.sharepoint.com/:x:/r/sites/DGX-FPGA/DGX-FPGA-Atlas_SJ/Shared%20Documents/BIANCA_FILES/bianca_regtbl_i2c_info_v1.xlsx?d=w6dfe5c49ed6c415db585d9987bfb9f80&csf=1&web=1&e=24X8gt&nav=MTVfezY3Qzg2QzM5LTBENDUtNDA5RC1CNDQxLUIwMjJGQTk0NDdEQ30
+# Format,
+#   reg_name, byte_off, byte_len, bit_mask(hex), byte_range, bit_range
+pf_reg=(
+PWR_FAIL_TRAY_FAST_SHDN,1248,2,0x4,416,2
+PWR_FAIL_GPU,1248,2,0x2,416,1
+PWR_FAIL_CPU,1248,2,0x1,416,0
+PWRSEQ_STATE,1251,2,0x1f,417,0-4
+PWRSEQ_FAIL_STATE,1254,2,0x1f,418,0-4
+PWRSEQ_GPU_FAIL_STATE,1257,2,0xf0,419,4-7
+PWRSEQ_GPU_STATE,1257,2,0xf,419,0-3
+PWR_FAIL_CPU_DVDD_0,1260,2,0x80,420,7
+PWR_FAIL_CPUVDD_0,1260,2,0x40,420,6
+PWR_FAIL_SOCVDD_0,1260,2,0x20,420,5
+PWR_FAIL_1V8_MOD_0,1260,2,0x10,420,4
+PWR_FAIL_PEX_SW_0V95_MOD_0,1260,2,0x8,420,3
+PWR_FAIL_1V2_MOD_0,1260,2,0x4,420,2
+PWR_FAIL_12V_MOD_0,1260,2,0x3,420,0-1
+PWR_FAIL_CPU_THERM_OVERT_0,1263,2,0x20,421,5
+PWR_FAIL_FBVDDQ_0,1263,2,0x10,421,4
+PWR_FAIL_FBVDDP_0,1263,2,0x8,421,3
+PWR_FAIL_FBVDD2_0,1263,2,0x4,421,2
+PWR_FAIL_FBVDD1_0,1263,2,0x2,421,1
+PWR_FAIL_C2C_0,1263,2,0x1,421,0
+PWR_FAIL_CPU_DVDD_1,1266,2,0x80,422,7
+PWR_FAIL_CPUVDD_1,1266,2,0x40,422,6
+PWR_FAIL_SOCVDD_1,1266,2,0x20,422,5
+PWR_FAIL_1V8_MOD_1,1266,2,0x10,422,4
+PWR_FAIL_PEX_SW_0V95_MOD_1,1266,2,0x8,422,3
+PWR_FAIL_1V2_MOD_1,1266,2,0x4,422,2
+PWR_FAIL_12V_MOD_1,1266,2,0x3,422,0-1
+PWR_FAIL_CPU_THERM_OVERT_1,1269,2,0x20,423,5
+PWR_FAIL_FBVDDQ_1,1269,2,0x10,423,4
+PWR_FAIL_FBVDDP_1,1269,2,0x8,423,3
+PWR_FAIL_FBVDD2_1,1269,2,0x4,423,2
+PWR_FAIL_FBVDD1_1,1269,2,0x2,423,1
+PWR_FAIL_C2C_1,1269,2,0x1,423,0
+PWR_FAIL_CPU_DVDD_2,1272,2,0x80,424,7
+PWR_FAIL_CPUVDD_2,1272,2,0x40,424,6
+PWR_FAIL_SOCVDD_2,1272,2,0x20,424,5
+PWR_FAIL_CPU_THERM_OVERT_2,1275,2,0x20,425,5
+PWR_FAIL_FBVDDQ_2,1275,2,0x10,425,4
+PWR_FAIL_FBVDDP_2,1275,2,0x8,425,3
+PWR_FAIL_FBVDD2_2,1275,2,0x4,425,2
+PWR_FAIL_FBVDD1_2,1275,2,0x2,425,1
+PWR_FAIL_C2C_2,1275,2,0x1,425,0
+PWR_FAIL_CPU_DVDD_3,1278,2,0x80,426,7
+PWR_FAIL_CPUVDD_3,1278,2,0x40,426,6
+PWR_FAIL_SOCVDD_3,1278,2,0x20,426,5
+PWR_FAIL_CPU_THERM_OVERT_3,1281,2,0x20,427,5
+PWR_FAIL_FBVDDQ_3,1281,2,0x10,427,4
+PWR_FAIL_FBVDDP_3,1281,2,0x8,427,3
+PWR_FAIL_FBVDD2_3,1281,2,0x4,427,2
+PWR_FAIL_FBVDD1_3,1281,2,0x2,427,1
+PWR_FAIL_C2C_3,1281,2,0x1,427,0
+PWR_FAIL_HBMVDD_GPU_0,1284,2,0xc0,428,6-7
+PWR_FAIL_HBMVDDQL_GPU_0,1284,2,0x20,428,5
+PWR_FAIL_HBMVPP_GPU_0,1284,2,0x10,428,4
+PWR_FAIL_PEXDVDD_GPU_0,1284,2,0x8,428,3
+PWR_FAIL_HBIVDD_GPU_0,1284,2,0x4,428,2
+PWR_FAIL_NVVDD_GPU_0,1284,2,0x3,428,0-1
+PWR_FAIL_HBMVDD_GPU_1,1287,2,0xc0,429,6-7
+PWR_FAIL_HBMVDDQL_GPU_1,1287,2,0x20,429,5
+PWR_FAIL_HBMVPP_GPU_1,1287,2,0x10,429,4
+PWR_FAIL_PEXDVDD_GPU_1,1287,2,0x8,429,3
+PWR_FAIL_HBIVDD_GPU_1,1287,2,0x4,429,2
+PWR_FAIL_NVVDD_GPU_1,1287,2,0x3,429,0-1
+PWR_FAIL_HBMVDD_GPU_2,1290,2,0xc0,430,6-7
+PWR_FAIL_HBMVDDQL_GPU_2,1290,2,0x20,430,5
+PWR_FAIL_HBMVPP_GPU_2,1290,2,0x10,430,4
+PWR_FAIL_PEXDVDD_GPU_2,1290,2,0x8,430,3
+PWR_FAIL_HBIVDD_GPU_2,1290,2,0x4,430,2
+PWR_FAIL_NVVDD_GPU_2,1290,2,0x3,430,0-1
+PWR_FAIL_HBMVDD_GPU_3,1293,2,0xc0,431,6-7
+PWR_FAIL_HBMVDDQL_GPU_3,1293,2,0x20,431,5
+PWR_FAIL_HBMVPP_GPU_3,1293,2,0x10,431,4
+PWR_FAIL_PEXDVDD_GPU_3,1293,2,0x8,431,3
+PWR_FAIL_HBIVDD_GPU_3,1293,2,0x4,431,2
+PWR_FAIL_NVVDD_GPU_3,1293,2,0x3,431,0-1
+GPU_RIR_MAX_RETRY,1296,2,0x1,432,0
+GPU0_IFF_FAIL_CNT,1299,2,0xf0,433,4-7
+GPU0_FW_RIR_FAIL_CNT,1299,2,0xf,433,0-3
+GPU1_IFF_FAIL_CNT,1302,2,0xf0,434,4-7
+GPU1_FW_RIR_FAIL_CNT,1302,2,0xf,434,0-3
+GPU2_IFF_FAIL_CNT,1305,2,0xf0,435,4-7
+GPU2_FW_RIR_FAIL_CNT,1305,2,0xf,435,0-3
+GPU3_IFF_FAIL_CNT,1308,2,0xf0,436,4-7
+GPU3_FW_RIR_FAIL_CNT,1308,2,0xf,436,0-3
+PWR_FAIL_5V1_ALWAYS_ON,1311,2,0x30,437,4-5
+PWR_FAIL_3V3_ALWAYS_ON,1311,2,0xc,437,2-3
+PWR_FAIL_RUN_ALWAYS_ON,1311,2,0x3,437,0-1
+PWR_FAIL_GPU_THERM_ALERT,1314,2,0xf0,438,4-7
+PWR_FAIL_GPU_THERM_OVERT,1314,2,0xf,438,0-3
+)
+
+REGTBL_BUS=0x01
+REGTBL_SADDR=0x11
+REGTBL_PAGES=4
+
+show_help()
+{
+    echo "Version: $app_ver"
+    echo "Usage:"
+    echo " $app_name"
+    echo
+    echo "Output:"
+    echo " pwrfail_reg_names{pwr_value} (separated by ;)"
+    echo
+}
+
+err() #msg
+{
+    echo "$app_name:[E]$*" >&2
+}
+
+regtbl_einj="/tmp/regtbl.einj"
+
+REGT_CACHE="/tmp/regtbl.cache"
+dump_regtbl()
+{
+    # For EINJ and UT
+    [ -f "$regtbl_einj" ] && cat $regtbl_einj && return 0
+
+    local rc=0
+    # Read all regtbl pages from FPGA and combine them as one
+    local cur_data
+    local page
+    for page in $(seq 0 $(($REGTBL_PAGES-1))); do
+        local cmd="i2ctransfer -y $REGTBL_BUS w2@$REGTBL_SADDR 0x00 $page r256"
+        local s_data;s_data=$($cmd | sed 's/0x//g');rc=$?
+        [ "$rc" -ne 0 ] && return $rc
+        cur_data="$cur_data $s_data"
+    done
+    cur_data=${cur_data:1} # remove the leading ' '
+    echo $cur_data > $REGT_CACHE # cur_data has the whole regtbl now
+
+    echo $cur_data
+    return 0
+}
+
+get_reg_data() #(byte_off, byte_len, bit_mask, regtbl_data)
+{
+    local byte_off=$1;shift
+    local byte_len=$1;shift
+    local bit_mask=$1;shift
+    local regtbl_data="$*"
+
+    # Get reg data from regblt per its position info
+    local reg_bytes=${regtbl_data:$byte_off:$byte_len}
+
+    local b
+    local reg_value
+    # reg may cross multiple bytes, combine them as one
+    for b in ${reg_bytes}; do
+        reg_value=${b}${reg_value}
+    done
+
+    # Get the reg value per its bit_mask
+    local reg_value=$((0x$reg_value & $bit_mask))
+
+    # Account for any bit offsets in the masked reg data
+    while [ $(($bit_mask & 1)) -eq  0 ];do
+        bit_mask=$(($bit_mask>>1))
+        reg_value=$(($reg_value>>1))
+    done
+
+    echo $reg_value
+
+    return 0
+}
+
+get_all_pwrfail()
+{
+    local rc=0
+
+    # Dump regtbl
+    local regtbl_data;regtbl_data=$(dump_regtbl);rc=$?
+    [ "$rc" -ne 0 ] && return $rc
+
+    local output
+    # Loop through all pwrfail regs to check if asserted
+    local line
+    for line in "${pf_reg[@]}"; do
+        [ -z "$line" ] && continue
+
+        local field=(${line//,/ })
+        local value;value=$(get_reg_data "${field[1]}" "${field[2]}" "${field[3]}" "$regtbl_data");rc=$?
+        [ "$rc" -ne 0 ] && return $rc
+
+        # if reg not assert, skip
+        [ "$value" == "0" ] && continue
+
+        # otherwise, prepare the output string
+        output="${output};${field[0]}{$(printf "0x%x" $value)}"
+    done
+
+    echo ${output:1} # remove the leading ";" and return out
+    return 0
+}
+
+# UT
+list_pwrfail()
+{
+    local reg
+    for reg in ${pf_reg[@]}; do
+        echo ${reg%%,*}
+    done
+}
+
+show_regtbl()
+{
+    xxd -r -p "$1" | xxd -g 1 -c 16
+}
+
+einj_pwrfail() #(pf_reg_name)
+{
+    local pf_reg_name=$*
+
+    local rc=0
+
+    # Backup regtbl.einj
+    [ -f "${regtbl_einj}.bkp" ] || cp -f $regtbl_einj ${regtbl_einj}.bkp 2>/dev/null
+
+    # Dump regtbl
+    local regtbl_data;regtbl_data=$(cat "$regtbl_einj" 2>/dev/null);rc=$?
+    if [ "$rc" -ne 0 -o -z "$regtbl_data" ]; then
+        regtbl_data=$(printf "ff %.0s" {1..1024})
+    fi
+    local regtbl=($regtbl_data)
+
+    if [ "$*" == "all" -o -z "$*" ]; then
+        local reg
+        for reg in ${pf_reg[@}]}; do
+            [ -z "$line" ] && continue
+            pf_reg_name="${pf_reg_name} ${reg%%,*}"
+        done
+    fi
+
+    # Inject target reg and clear the rest
+    for line in ${pf_reg[@]}; do
+        [ -z "$line" ] && continue
+
+        local field=(${line//,/ })
+        local name=${field[0]}
+        local byte_range=${field[4]}
+        local byte="0x${regtbl[$byte_range]}"
+        local mask="${field[3]}"
+
+        local found=0
+        local reg_name
+        for reg_name in $pf_reg_name; do
+            if [ "$name" == "$reg_name" ]; then
+                echo "Injecting: $name"
+                regtbl[$byte_range]=$(printf "%02x" $((byte | mask)))
+                found=1
+                break
+            fi
+        done
+        [ "$found" == "1" ] && continue
+        echo "Clearing: $name"
+        regtbl[$byte_range]=$(printf "%02x" $((byte & ~mask)))
+    done
+    echo ${regtbl[*]} > $regtbl_einj
+}
+
+start_ut()
+{
+    local pass=0
+    local fail=0
+    ## Single EINJ Test
+    echo "## Single Injection Test ##"
+    echo "----------------------------"
+
+    local line
+    for line in ${pf_reg[@]};do
+        local field=(${line//,/ })
+        local reg=${field[0]}
+        local mask=${field[3]}
+        while [ $((mask & 1)) -eq 0 ]; do mask=$((mask>>1)); done # Move any position bitmask to bit0
+        local exp="${reg}{$(printf "0x%x" $mask)}"
+
+        # Do injection
+        einj_pwrfail $reg >/dev/null
+
+        # Get pwrfail messages (the test target)
+        local rc=0
+        local rslt;rslt=$(get_all_pwrfail);rc=$?
+
+        # Test result evaluation
+        if [ "$rc" -ne "0" ]; then
+            echo -e "Test [$exp] rc=$rc: \e[1;31mFAIL\e[0m"
+            fail=$((fail+1))
+            continue
+        fi
+
+        if [ "${exp}" != "${rslt}" ]; then
+            echo -e "Test [$exp] mismatch with [$rslt]: \e[1;31mFAIL\e[0m"
+            fail=$((fail+1))
+            continue
+        fi
+
+        echo -e "Test [$exp] match with [$rslt]: \e[1;92mPASS\e[0m"
+        pass=$((pass+1))
+    done
+    echo
+
+    ## Multi-EINJ Test
+    echo "## Multi-Injection Test ##"
+    echo "----------------------------"
+
+    local i
+    for i in 1; do
+        # Do Injection
+        einj_pwrfail PWR_FAIL_CPU_THERM_OVERT_3 GPU2_FW_RIR_FAIL_CNT >/dev/null
+        local exp="PWR_FAIL_CPU_THERM_OVERT_3{0x1};GPU2_FW_RIR_FAIL_CNT{0xf}"
+
+        # Get pwrfail messages (the test target)
+        local rc=0
+        local rslt;rslt=$(get_all_pwrfail);rc=$?
+
+        # Test result evaluation
+        if [ "$rc" -ne "0" ]; then
+            echo -e "Test [$exp] rc=$rc: \e[1;31mFAIL\e[0m"
+            fail=$((fail+1))
+            continue
+        fi
+
+        if [ "${exp}" != "${rslt}" ]; then
+            echo -e "Test [$exp] mismatch with [$rslt]: \e[1;31mFAIL\e[0m"
+            fail=$((fail+1))
+            continue
+        fi
+
+        echo -e "Test [$exp] match with [$rslt]: \e[1;92mPASS\e[0m"
+        pass=$((pass+1))
+    done
+
+    # Test summary
+    echo "==================================="
+    echo "Pass: $pass, Fail: $fail, Fail Rate: $((fail * 100 / (fail + pass)))%"
+    echo "==================================="
+
+    return $fail
+}
+
+## MAIN ##
+[ $# -ne 0 ] && if grep "^$1()" $(which $0) &> /dev/null; then func=$1;shift;$func "$@";exit $?; fi
+
+[ "$*" == "--help" ] && show_help && exit 1
+
+rc=0
+pf_msg=$(get_all_pwrfail);rc=$?
+[ "$rc" -ne 0 ] && err "Check PwrFail regs failed, rc=$rc!" && exit $rc
+
+echo $pf_msg
+
+exit 0
+
