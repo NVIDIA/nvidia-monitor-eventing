@@ -209,40 +209,8 @@ selftestlib_sources = ['src/selftest.cpp']
 
 bindir = get_option('prefix') + '/' + get_option('bindir')
 
-## install mctp wrapper
-install_data('tools/mctp-vdm-util-wrapper',
-             install_dir : bindir)
-
-## install mctp-error-detection tool
-install_data('tools/mctp-error-detection',
-             install_dir : bindir)
-
-## install fpga wrapper
-install_data('tools/wrapper_fpga_register_table/fpga_regtbl_wrapper',
-             install_dir : bindir)
-
-## install pcie wrapper
-install_data('tools/wrapper_pcie_status/pcie_wrapper',
-             install_dir : bindir)
-
-## install i2c wrapper
-install_data('tools/wrapper_i2c_status/i2c_wrapper',
-             install_dir : bindir)
-
-## install nvlink / write protected status wrapper
-install_data('tools/wrapper_nvlink_wp_status/nvlink-wp-status-wrapper',
-             install_dir : bindir)
-
-## install device ID resolving script
-install_data('tools/device_id_mapping/device-id-norm.sh',
-             install_dir : bindir)
-
 ## install memory watcher service
 install_data('monitor-eventing-memory-watcher/monitor-eventing-memory-watcher',
-             install_dir : bindir)
-
-## install glacier boot status parser
-install_data('tools/glacier_boot_status_parser',
              install_dir : bindir)
 
 if(get_option('tests').enabled())

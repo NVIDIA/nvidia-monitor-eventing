@@ -27,5 +27,20 @@ if get_option('eventing_feature_only').disabled()
         install: false,
     )
 endif
+
 subdir('jtag')
 
+bindir = get_option('prefix') + '/' + get_option('bindir')
+scripts = [
+    'mctp-error-detection',
+    'wrapper_fpga_register_table/fpga_regtbl_wrapper',
+    'wrapper_pcie_status/pcie_wrapper',
+    'wrapper_i2c_status/i2c_wrapper',
+    'wrapper_nvlink_wp_status/nvlink-wp-status-wrapper',
+    'device_id_mapping/device-id-norm.sh',
+
+    'glacier_boot_status_parser',
+    'ocp_recovery_status_parser'
+]
+
+install_data(scripts, install_dir: bindir)
