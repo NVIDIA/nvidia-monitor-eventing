@@ -320,7 +320,7 @@ class ErrorCatalog:
                 if row["RF Log Producer"].lower() != "eventingservice":
                     continue
 
-                if row["To Customer Doc?"].lower() != "yes" or row["To HMC Code?"].lower() != "yes":
+                if row["To HMC Code?"].lower() != "yes":
                     continue
 
                 row = {key: pattern2device(value) for key, value in row.items()}
@@ -374,10 +374,17 @@ def convert_xlsx_to_csv(xlsx_file, sheet_name):
 
     return csv_file
 
+help_example="\
+Examples,\n \
+  ./rascat_spec2code Server-RAS-Catalog.xlsx to_event_info_json Blackwell-HGX-8-GPU > event_info.json\n \
+  ./rascat_spec2code Server-RAS-Catalog.xlsx to_event_info_json \"GB200 NVL\" > event_info.json\n \
+"
+
 def main():
     parser = argparse.ArgumentParser(
         description=__doc__,
-        formatter_class=argparse.RawTextHelpFormatter
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog=help_example
     )
 
     parser.add_argument(
