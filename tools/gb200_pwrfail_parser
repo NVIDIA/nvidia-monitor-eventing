@@ -15,6 +15,8 @@ set -o pipefail
 app_name="gb200_pwrfail_parser"
 app_ver="0.1"
 
+app_tmp="/tmp/$app_name"
+
 # Per GB200 FPGA Regtbl spreadsheet, Column[Int for HMC]=PF,
 # https://nvidia.sharepoint.com/:x:/r/sites/DGX-FPGA/DGX-FPGA-Atlas_SJ/Shared%20Documents/BIANCA_FILES/bianca_regtbl_i2c_info_v1.xlsx?d=w6dfe5c49ed6c415db585d9987bfb9f80&csf=1&web=1&e=24X8gt&nav=MTVfezY3Qzg2QzM5LTBENDUtNDA5RC1CNDQxLUIwMjJGQTk0NDdEQ30
 # Format,
@@ -114,6 +116,7 @@ PWR_FAIL_GPU_THERM_OVERT,1314,2,0xf,438,0-3
 REGTBL_BUS=0x01
 REGTBL_SADDR=0x11
 REGTBL_PAGES=4
+REGTBL_PAGE_SIZE=256
 
 show_help()
 {
@@ -131,9 +134,6 @@ err() #msg
     echo "$app_name:[E]$*" >&2
 }
 
-regtbl_einj="/tmp/regtbl.einj"
-
-REGT_CACHE="/tmp/regtbl.cache"
 dump_regtbl()
 {
     # For EINJ and UT
@@ -144,13 +144,12 @@ dump_regtbl()
     local cur_data
     local page
     for page in $(seq 0 $(($REGTBL_PAGES-1))); do
-        local cmd="i2ctransfer -y $REGTBL_BUS w2@$REGTBL_SADDR 0x00 $page r256"
+        local cmd="i2ctransfer -y $REGTBL_BUS w2@$REGTBL_SADDR 0x00 $page r$REGTBL_PAGE_SIZE"
         local s_data;s_data=$($cmd | sed 's/0x//g');rc=$?
         [ "$rc" -ne 0 ] && return $rc
         cur_data="$cur_data $s_data"
     done
     cur_data=${cur_data:1} # remove the leading ' '
-    echo $cur_data > $REGT_CACHE # cur_data has the whole regtbl now
 
     echo $cur_data
     return 0
@@ -216,45 +215,73 @@ get_all_pwrfail()
     return 0
 }
 
-# UT
-list_pwrfail()
+# EINJ capability
+regtbl_dev="FPGA_0"
+regtbl_einj="$app_tmp/$regtbl_dev/regtbl.einj"
+regtbl_size=$((REGTBL_PAGES * REGTBL_PAGE_SIZE))
+
+einj_cap()
+{
+    echo "list_errors"
+    echo "list_devices"
+    grep -E "^einj_*()" $(which $0) | cut -d'(' -f1 2>/dev/null
+
+    return 0
+}
+
+list_errors()
 {
     local reg
     for reg in ${pf_reg[@]}; do
         echo ${reg%%,*}
     done
+
+    return 0
 }
 
-show_regtbl()
+list_devices()
+{
+    echo "$regtbl_dev"
+}
+
+show_regtbl() #(regtbl_dummy)
 {
     xxd -r -p "$1" | xxd -g 1 -c 16
 }
 
-einj_pwrfail() #(pf_reg_name)
+einj_start()
 {
+    # Create all deassert dummy FPGA regtbl
+    mkdir -p ${regtbl_einj%/*}
+    printf "00 %.0s" {1..1024} > "$regtbl_einj"
+    return 0
+}
+
+einj_stop()
+{
+    rm -rf "$regtbl_einj" &>/dev/null
+    return 0
+}
+
+einj_error() #(dev_id, errors[])
+{
+    local dev_id=$1;shift
     local pf_reg_name=$*
 
     local rc=0
 
     # Backup regtbl.einj
-    [ -f "${regtbl_einj}.bkp" ] || cp -f $regtbl_einj ${regtbl_einj}.bkp 2>/dev/null
+    #[ -f "${regtbl_einj}.bkp" ] || cp -f $regtbl_einj ${regtbl_einj}.bkp 2>/dev/null
 
     # Dump regtbl
     local regtbl_data;regtbl_data=$(cat "$regtbl_einj" 2>/dev/null);rc=$?
     if [ "$rc" -ne 0 -o -z "$regtbl_data" ]; then
-        regtbl_data=$(printf "ff %.0s" {1..1024})
+        regtbl_data=$(printf "00 %.0s" {1..1024})
     fi
     local regtbl=($regtbl_data)
 
-    if [ "$*" == "all" -o -z "$*" ]; then
-        local reg
-        for reg in ${pf_reg[@}]}; do
-            [ -z "$line" ] && continue
-            pf_reg_name="${pf_reg_name} ${reg%%,*}"
-        done
-    fi
-
-    # Inject target reg and clear the rest
+    # Inject target reg
+    local line
     for line in ${pf_reg[@]}; do
         [ -z "$line" ] && continue
 
@@ -264,25 +291,93 @@ einj_pwrfail() #(pf_reg_name)
         local byte="0x${regtbl[$byte_range]}"
         local mask="${field[3]}"
 
-        local found=0
+        # Caller wants to inject all errors
+        if [ "$pf_reg_name" == "all" -o -z "$pf_reg_name" ]; then
+            echo "Injecting: $name"
+            regtbl[$byte_range]=$(printf "%02x" $((byte | mask)))
+            continue
+        fi
+
+        # Caller wants to inject specific errors
         local reg_name
         for reg_name in $pf_reg_name; do
             if [ "$name" == "$reg_name" ]; then
                 echo "Injecting: $name"
                 regtbl[$byte_range]=$(printf "%02x" $((byte | mask)))
-                found=1
                 break
             fi
         done
-        [ "$found" == "1" ] && continue
-        echo "Clearing: $name"
-        regtbl[$byte_range]=$(printf "%02x" $((byte & ~mask)))
     done
     echo ${regtbl[*]} > $regtbl_einj
+    return 0
 }
 
+einj_error_all() #(dev_id)
+{
+    einj_error "$1" "all"
+    return $?
+}
+
+einj_clear() #(dev_id, errors[])
+{
+    local dev_id=$1;shift
+    local pf_reg_name=$*
+
+    local rc=0
+
+    # Backup regtbl.einj
+    #[ -f "${regtbl_einj}.bkp" ] || cp -f $regtbl_einj ${regtbl_einj}.bkp 2>/dev/null
+
+    # Dump regtbl
+    local regtbl_data;regtbl_data=$(cat "$regtbl_einj" 2>/dev/null);rc=$?
+    if [ "$rc" -ne 0 -o -z "$regtbl_data" ]; then
+        regtbl_data=$(printf "ff %.0s" {1..1024})
+    fi
+    local regtbl=($regtbl_data)
+
+    # Clear the target reg
+    local line
+    for line in ${pf_reg[@]}; do
+        [ -z "$line" ] && continue
+
+        local field=(${line//,/ })
+        local name=${field[0]}
+        local byte_range=${field[4]}
+        local byte="0x${regtbl[$byte_range]}"
+        local mask="${field[3]}"
+
+        # Caller wants to inject all errors
+        if [ "$pf_reg_name" == "all" -o -z "$pf_reg_name" ]; then
+            echo "Injecting: $name"
+            regtbl[$byte_range]=$(printf "%02x" $((byte & ~mask)))
+            continue
+        fi
+
+        # Caller wants to inject specific errors
+        local reg_name
+        for reg_name in $pf_reg_name; do
+            if [ "$name" == "$reg_name" ]; then
+                echo "Injecting: $name"
+                regtbl[$byte_range]=$(printf "%02x" $((byte & ~mask)))
+                break
+            fi
+        done
+    done
+    echo ${regtbl[*]} > $regtbl_einj
+    return 0
+}
+
+einj_clear_all() #(dev_id)
+{
+    einj_start
+    return 0
+}
+
+# UT
 start_ut()
 {
+    einj_start
+
     local pass=0
     local fail=0
     ## Single EINJ Test
@@ -297,8 +392,11 @@ start_ut()
         while [ $((mask & 1)) -eq 0 ]; do mask=$((mask>>1)); done # Move any position bitmask to bit0
         local exp="${reg}{$(printf "0x%x" $mask)}"
 
+        # Clear all previous injections first
+        einj_clear_all "$regtbl_dev" >/dev/null
+
         # Do injection
-        einj_pwrfail $reg >/dev/null
+        einj_error "$regtbl_dev" $reg >/dev/null
 
         # Get pwrfail messages (the test target)
         local rc=0
@@ -328,8 +426,11 @@ start_ut()
 
     local i
     for i in 1; do
+        # Clear all previous injections first
+        einj_clear_all "$regtbl_dev" >/dev/null
+
         # Do Injection
-        einj_pwrfail PWR_FAIL_CPU_THERM_OVERT_3 GPU2_FW_RIR_FAIL_CNT >/dev/null
+        einj_error "$regtbl_dev" PWR_FAIL_CPU_THERM_OVERT_3 GPU2_FW_RIR_FAIL_CNT >/dev/null
         local exp="PWR_FAIL_CPU_THERM_OVERT_3{0x1};GPU2_FW_RIR_FAIL_CNT{0xf}"
 
         # Get pwrfail messages (the test target)
@@ -353,16 +454,18 @@ start_ut()
         pass=$((pass+1))
     done
 
+    einj_stop
+
     # Test summary
     echo "==================================="
-    echo "Pass: $pass, Fail: $fail, Fail Rate: $((fail * 100 / (fail + pass)))%"
+    echo "Pass: $pass, Fail: $fail, Pass Rate: $((pass * 100 / (fail + pass)))%"
     echo "==================================="
 
     return $fail
 }
 
 ## MAIN ##
-[ $# -ne 0 ] && if grep "^$1()" $(which $0) &> /dev/null; then func=$1;shift;$func "$@";exit $?; fi
+[ $# -ne 0 ] && if grep "^$1()" $(which $0) &> /dev/null; then func=$1;shift;$func "$@";exit $?; else exit 255; fi
 
 [ "$*" == "--help" ] && show_help && exit 1
 
