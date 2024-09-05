@@ -15,6 +15,7 @@ A FPGA alert spec2code tool for device monitor & eventing support, ver=0.1
 import sys
 import argparse
 import csv
+import os
 
 FPGA_REGTBL_CONF_NAME = "fpga_regtbl_platform.conf"
 
@@ -284,13 +285,13 @@ class FpgaRegtbl:
             output += "\n  ]\n}\n"
             print(output)
 
-    def get_reg_list(self):
+    def get_reg_list(self, new_format=False):
         reg_info_list = ""
-        with open(self._regtbl_file, "r", encoding='utf-8-sig') as f:
+        with open(self._regtbl_file, "r", encoding='utf-8') as f:
             regtbl = csv.DictReader(f)
 
             for row in regtbl:
-                intr_gpio = row["Int for HMC"]
+                intr_gpio = row["Int for HMC"].strip()
                 if intr_gpio == "":
                     continue
 
@@ -298,22 +299,25 @@ class FpgaRegtbl:
                 gpio = self.intr_to_gpio_name(intr_gpio)
 
                 # get interrupt name
-                intr_name = row["Reg Name"].split('[')[0]  # e.g. MOD_VR_FAULT[7:0] => MOD_VR_FAULT
+                intr_name = row["Reg Name"].strip().split('[')[0]  # e.g. MOD_VR_FAULT[7:0] => MOD_VR_FAULT
+
+                if intr_name == "RSVD":
+                    continue
 
                 # get intr mask name and def_value
                 rc, mask_name, intr_mask = self.get_intr_mask_info(intr_name)
                 if rc != 0:
-                    print("[E] Can't find mask for intr: ", intr_name)
-                    continue
+                    print("[W] Can't find mask for intr: ", intr_name)
+                    intr_mask = 0
 
                 # format byte range in "min(dec)-max(dec)"
-                byte_min=int(row["Address Start"], 16)
+                byte_min=int(row["Address Start"].strip(), 16)
                 byte_max=byte_min
 
                 byte_range = str(byte_min)
 
-                if row["Address End"] != "":
-                    byte_max = int(row["Address End"], 16)
+                if row["Address End"].strip() != "":
+                    byte_max = int(row["Address End"].strip(), 16)
                     byte_range = byte_range + '-' + str(byte_max)
 
 
@@ -326,7 +330,7 @@ class FpgaRegtbl:
 
                 # convert bit range to bit mask
                 # get bit range
-                bits = row["Bits"]
+                bits = row["Bits"].strip()
 
                 # get bitmask
                 rc, bitmask, bit_range = bitrange_to_bitmask(bits)
@@ -341,13 +345,23 @@ class FpgaRegtbl:
                 bitmask = hex(bitmask)
 
                 # This format needs to be aligned with the 'fpga_regtbl' logic
-                reg_info_list += '{0}{1},{2},{3},{4},{5},{6}\n'.format(prefix,
-                    intr_name, byte_off, byte_len, bitmask, byte_range, bit_range)
+                if new_format:
+                    reg_info_list += '{0}{1}_{2}={3}\n'.format(prefix, intr_name, 'byte_off', byte_off)
+                    reg_info_list += '{0}{1}_{2}={3}\n'.format(prefix, intr_name, 'byte_len', byte_len)
+                    reg_info_list += '{0}{1}_{2}={3}\n'.format(prefix, intr_name, 'bitmask', bitmask)
+                    reg_info_list += '{0}{1}_{2}={3}\n'.format(prefix, intr_name, 'byte_range', byte_range)
+                    reg_info_list += '{0}{1}_{2}={3}\n'.format(prefix, intr_name, 'bit_range', bit_range)
+                else:
+                    reg_info_list += '{0}{1},{2},{3},{4},{5},{6}\n'.format(prefix,
+                        intr_name, byte_off, byte_len, bitmask, byte_range, bit_range)
 
         return reg_info_list
 
     def get_intr_clr_cmds(self):
         intr_clr_cmds = ""
+        if not os.path.exists(self._intr_clr_cmds):
+            return ""
+
         with open(self._intr_clr_cmds, "r") as f:
             clr_cmd_list = csv.DictReader(f)
 
@@ -430,9 +444,44 @@ class FpgaRegtbl:
 
                 print('{0},{1},{2},{3},{4}'.format(intr_name, byte, hex(bitmask), mask_name, hex(intr_mask)))
 
+def convert_xlsx_to_csv(xlsx_file, sheet_name):
+    import pandas as pd
+
+    # Read the specified sheet from the Excel file
+    df = pd.read_excel(xlsx_file, header=4, sheet_name=sheet_name)
+
+    # Make the csv file path.
+    csv_file = "/tmp/" + os.path.splitext(os.path.basename(xlsx_file))[0] + "_" + sheet_name.replace(" ", "_") + ".csv"
+
+    # Convert the DataFrame to a CSV file
+    df.to_csv(csv_file, index = False, encoding = 'utf-8')
+
+    return csv_file
+
+help_example="\
+Examples,\n \
+  For GB200 NVL fpga_regtbl_platform.conf,\n \
+  ./fpga_alert_spec2code bianca_regtbl_i2c_info_v1.xlsx \"\" 0x01 0x11 4 to_regtbl_platform_conf\n \
+\n \
+  fpga_regtbl_platform.conf will be generated in current folder.\n \
+"
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog=help_example
+    )
+
+    parser.add_argument(
+        "regtbl_file",
+        metavar="REGTBL_FILE",
+        help="FPGA register table definition file in .xlsx format.")
+
+    parser.add_argument(
+        "intr_clr_cmds",
+        metavar="INTR_CLR_CMDS",
+        help="Interrupt clearing command definition file in .csv format.")
 
     parser.add_argument(
         "regtbl_i2c_bus",
@@ -449,29 +498,20 @@ def main():
         metavar="REGTBL_PAGES",
         help="Total number of FPGA register table pages")
 
-    parser.add_argument(
-        "regtbl_file",
-        metavar="REGTBL_FILE",
-        help="FPGA register table definition file in csv format.")
-
-    parser.add_argument(
-        "intr_clr_cmds",
-        metavar="INTR_CLR_CMDS",
-        help="Interrupt clearing command definition file in csv format.")
 
     conv_method_help_msg = [method for method in dir(FpgaRegtbl) if method.startswith("to_")]
 
     parser.add_argument(
         "conv_method",
         metavar="conv_method",
-        help="Specify how to convert the spec to code. Options:\n  " + ",".join(conv_method_help_msg) + "\n")
+        help="Specify how to convert the spec to code. Options:\n  " + "\n  ".join(conv_method_help_msg) + "\n")
 
     args = parser.parse_args()
 
     i2c_bus = args.regtbl_i2c_bus
     i2c_addr = args.regtbl_i2c_addr
     regtbl_pages = args.regtbl_pages
-    regtbl_csv = args.regtbl_file
+    regtbl_csv = convert_xlsx_to_csv(args.regtbl_file, "REGTBL")
     intr_clr_csv = args.intr_clr_cmds
     
     fpga_regtbl = FpgaRegtbl(i2c_bus, i2c_addr, regtbl_pages, regtbl_csv, intr_clr_csv)
@@ -486,8 +526,10 @@ def main():
         rc = fpga_regtbl.to_event_info_json()
     elif args.conv_method == "list_all_reg":
         rc = fpga_regtbl.get_reg_defvalue("not exist")
-    elif args.conv_func == "to_regtbl_platform_conf":
+    elif args.conv_method == "to_regtbl_platform_conf":
         rc = fpga_regtbl.to_regtbl_platform_conf(FPGA_REGTBL_CONF_NAME)
+    elif args.conv_method == "to_intr_varlist":
+        rc = fpga_regtbl.get_reg_list(True)
     else:
         print("Wrong args: ", args.conv_method)
         rc = 1
