@@ -39,6 +39,7 @@ scripts = [
     'wrapper_nvlink_wp_status/nvlink-wp-status-wrapper',
     'device_id_mapping/device-id-norm.sh',
 
+    'fpga_regtbl',
     'glacier_boot_status_parser',
     'ocp_recovery_status_parser',
     'gb200_pwrfail_parser'
