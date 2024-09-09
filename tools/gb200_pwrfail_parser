@@ -263,6 +263,11 @@ einj_stop()
     return 0
 }
 
+einj_is_running()
+{
+    [ -f "$regtbl_einj" ]
+}
+
 einj_error() #(dev_id, errors[])
 {
     local dev_id=$1;shift
