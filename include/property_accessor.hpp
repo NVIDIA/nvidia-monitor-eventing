@@ -163,10 +163,10 @@ class PropertyValueDataHelper
      * @brief Convert an array of integers intp a single string.
      * @param varVar
      * @param [out] data where to store values
-     * @return true 
+     * @return true
      */
     static bool keepVectorsAsString(const PropertyVariant& varVar,
-                                  PropertyValueData* data)
+                                    PropertyValueData* data)
     {
         char temp[64];
         data->value64 = 0;
@@ -175,28 +175,28 @@ class PropertyValueDataHelper
         {
             auto array = std::get<std::vector<double>>(varVar);
             for (auto value : array)
-            {                
+            {
                 if (false == data->strValue.empty())
                 {
                     data->strValue.push_back(' ');
                 }
                 data->strValue.append(std::to_string(value));
-            }            
+            }
             return true;
         }
         else if (std::holds_alternative<T>(varVar) == true)
-        {                
+        {
             auto array = std::get<T>(varVar);
             for (auto integer : array)
             {
-                std::snprintf(temp, sizeof(temp) -1, "%llu",
+                std::snprintf(temp, sizeof(temp) - 1, "%llu",
                               static_cast<long long unsigned int>(integer));
                 if (false == data->strValue.empty())
                 {
                     data->strValue.push_back(' ');
                 }
                 data->strValue.append(std::string{temp});
-            }           
+            }
             return true;
         }
         return false;
@@ -214,16 +214,16 @@ class PropertyValueDataHelper
     static bool setVectorStrings(const PropertyVariant& varVar,
                                  PropertyValueData* data)
     {
-         if (std::holds_alternative<std::vector<std::string>>(varVar) == true)
-         {
-             std::vector<std::string> list =
-                        std::get<std::vector<std::string>>(varVar);
-             data->strValue = boost::join(list, " ");
-             data->value64 = 0;
-             data->state = PropertyValueData::StringOnly;
-             return true;
-         }
-         return false;
+        if (std::holds_alternative<std::vector<std::string>>(varVar) == true)
+        {
+            std::vector<std::string> list =
+                std::get<std::vector<std::string>>(varVar);
+            data->strValue = boost::join(list, " ");
+            data->value64 = 0;
+            data->state = PropertyValueData::StringOnly;
+            return true;
+        }
+        return false;
     }
 };
 
@@ -301,7 +301,7 @@ class PropertyValue
      * @param other other PropertyValue object to compare
      *
      * @return  returns true if both data have equal values even strings differ
-    */
+     */
     inline bool operator==(const PropertyValue& other) const
     {
         if (this->isValidInteger() == true && other.isValidInteger() == true)
@@ -505,4 +505,3 @@ PropertyValue getValueFromCriteria(const PropertyVariant& redefCriteria,
 } // namespace criteria
 
 } // namespace data_accessor
-

@@ -10,14 +10,14 @@
 
 #include "eventing_main.hpp"
 
-#include "common.hpp"
 #include "cmd_line.hpp"
+#include "common.hpp"
 #include "dat_traverse.hpp"
+#include "device_status_handler.hpp"
 #include "diagnostics.hpp"
 #include "event_detection.hpp"
 #include "event_info.hpp"
 #include "message_composer.hpp"
-#include "device_status_handler.hpp"
 #include "pc_event.hpp"
 #include "selftest.hpp"
 #include "threadpool_manager.hpp"
@@ -112,11 +112,10 @@ int loadDAT(cmd_line::ArgFuncParamType params)
         f >> profile::deviceAssociation;
         f.close();
     }
-    catch(exception& e)
+    catch (exception& e)
     {
         f.close();
-        throw std::runtime_error(
-            "Load JSON from (" + params[0] + ") failed!");
+        throw std::runtime_error("Load JSON from (" + params[0] + ") failed!");
     }
 
     // dat_traverse::Device::printTree(profile::datMap);
@@ -278,12 +277,12 @@ void startWorkerThread(std::shared_ptr<boost::asio::io_context> io)
 #ifdef EVENTING_FEATURE_ONLY
 /**
  * @brief Runs the BootUp Event detection on a separated Thread
- * 
+ *
  * @param eventDetection
  */
-void  bootUpEventsDetection(event_detection::EventDetection& eventDetection)
+void bootUpEventsDetection(event_detection::EventDetection& eventDetection)
 {
-    auto thread = std::make_unique<std::thread>([eventDetection]() mutable {        
+    auto thread = std::make_unique<std::thread>([eventDetection]() mutable {
         logs_wrn("started bootup eventing detection \n");
         ThreadpoolGuard guard(event_detection::threadpoolManager.get());
         if (!guard.was_successful())
@@ -293,10 +292,10 @@ void  bootUpEventsDetection(event_detection::EventDetection& eventDetection)
             logs_err(
                 "Thread pool over maxTotal tasks limit, exiting bootup eventing thread\n");
             return;
-        }       
+        }
         eventDetection.bootUpEventsDetection();
     });
-    
+
     if (thread != nullptr)
     {
         thread->detach();
@@ -304,16 +303,16 @@ void  bootUpEventsDetection(event_detection::EventDetection& eventDetection)
     else
     {
         logs_err("Create thread to process event failed!\n");
-    }    
+    }
 }
 #endif // EVENTING_FEATURE_ONLY
 
 /**
  * @brief isHmcBootup() checks if it is running by the first time after a boot
- *        Is Bootup (first time it runs) when HMC_BOOTUP_TMP_FILE does not exist 
+ *        Is Bootup (first time it runs) when HMC_BOOTUP_TMP_FILE does not exist
  *        If it is Bootup the file HMC_BOOTUP_TMP_FILE is created
  * @return true if it is Bootup, otherwise false
- * 
+ *
  * @sa HMC_BOOTUP_TMP_FILE
  */
 bool isHmcBootup()
@@ -344,9 +343,9 @@ int main(int argc, char* argv[])
 #endif // EVENTING_FEATURE_ONLY
 
 #ifdef EVENTING_SERVICE_NO_DEVICE_HEALTH
-    logs_err("Device Health will be managed by Device Health service " \
-        "instead of eventing service\n");
-#endif  // EVENTING_SERVICE_NO_DEVICE_HEALTH
+    logs_err("Device Health will be managed by Device Health service "
+             "instead of eventing service\n");
+#endif // EVENTING_SERVICE_NO_DEVICE_HEALTH
 
 #ifdef EVENTING_SERVICE_DEVICE_STATUS_FS
 
@@ -354,7 +353,7 @@ int main(int argc, char* argv[])
 #error "Conflicts! Please set -Ddevice_health_service=disabled!"
 #endif
     logs_err("Device Health from FS feature enabled.\n");
-#endif  //EVENTING_SERVICE_DEVICE_STATUS_FS
+#endif // EVENTING_SERVICE_DEVICE_STATUS_FS
 
     try
     {
@@ -393,7 +392,8 @@ int main(int argc, char* argv[])
     // Initialization
     event_info::loadFromFile(
         eventing::profile::eventMap, eventing::profile::propertyFilterSet,
-        eventing::profile::eventTriggerView, eventing::profile::eventAccessorView,
+        eventing::profile::eventTriggerView,
+        eventing::profile::eventAccessorView,
         eventing::profile::eventRecoveryView, eventing::configuration.event);
 
     // event_info::printMap(eventing::profile::eventMap);
@@ -446,17 +446,17 @@ int main(int argc, char* argv[])
             return;
         }
 
-        bool reEvalLogs = isHmcBootup();      
+        bool reEvalLogs = isHmcBootup();
         if (false == reEvalLogs)
         {
             logs_err(
-                "Did not detect HMC Boot-up. Will not resolve all logs.\n");          
+                "Did not detect HMC Boot-up. Will not resolve all logs.\n");
         }
         else
         {
             logs_err(
                 "HMC Boot-up detected. All logs will be resolved. Logs will be "
-                "regenerated for active conditions based on Self Test.\n");           
+                "regenerated for active conditions based on Self Test.\n");
         }
 
         if (selftest.performEntireTree(rep_res,
@@ -538,10 +538,10 @@ int main(int argc, char* argv[])
         }
         else
         {
-             logs_err("NOT Performing Eventing Bootup.\n");
+            logs_err("NOT Performing Eventing Bootup.\n");
         }
-#endif // EVENTING_FEATURE_ONLY      
-        
+#endif // EVENTING_FEATURE_ONLY
+
         logs_err("NVIDIA Monitor and Eventing daemon is ready.\n");
         io->run();
     }

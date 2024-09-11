@@ -8,16 +8,15 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-
 #include "event_detection.hpp"
 
 #include "common.hpp"
-#include "eventing_main.hpp"
 #include "data_accessor.hpp"
 #include "event_handler.hpp"
 #include "event_info.hpp"
-#include "pc_event.hpp"
+#include "eventing_main.hpp"
 #include "log.hpp"
+#include "pc_event.hpp"
 
 #include <boost/container/flat_map.hpp>
 #include <nlohmann/json.hpp>
@@ -55,7 +54,7 @@ void EventDetection::workerThreadProcessEvents()
     while (true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        popFromQueue();      
+        popFromQueue();
     }
 }
 
@@ -214,22 +213,20 @@ void EventDetection::popFromQueue()
         return;
     }
     data_accessor::DataAccessor accessor = pc.accessor;
-    data_accessor::PropertyValue propertyValue =
-        accessor.getDataValue();
+    data_accessor::PropertyValue propertyValue = accessor.getDataValue();
     EventNodeSharedList eventPtrs = pc.eventPtrs;
-    
+
     auto eventsCandidateList =
         eventDetectionPtr->EventsDetection(accessor, eventPtrs);
-    
+
     if (true == eventsCandidateList.empty())
     {
         return;
     }
     std::stringstream ss;
     accessor.print(ss);
-    logs_err(
-        "Event Candidate List has events from PC Trigger/Accessor %s\n",
-        ss.str().c_str());
+    logs_err("Event Candidate List has events from PC Trigger/Accessor %s\n",
+             ss.str().c_str());
     logs_err("Data value: %s \n", propertyValue.getString().c_str());
     processEventList(eventsCandidateList, propertyValue);
 }
@@ -260,7 +257,7 @@ void EventDetection::pushToQueue(const data_accessor::DataAccessor& pcTrigger,
 }
 
 int EventDetection::eventDiscovery(const data_accessor::DataAccessor& accessor,
-                                    const bool& bootup)
+                                   const bool& bootup)
 {
     EventNodeSharedList eventPtrs{};
     std::stringstream ss;
@@ -289,15 +286,16 @@ int EventDetection::eventDiscovery(const data_accessor::DataAccessor& accessor,
             // do not allow a single event going more than once
             if (uniqueEvents.count(recvIt->second.get()) == 0)
             {
-                 logs_dbg("Discovered event with matching recovery: %s\n",
-                          recvIt->second->event.c_str());
-                 eventPtrs.push_back(recvIt->second);
+                logs_dbg("Discovered event with matching recovery: %s\n",
+                         recvIt->second->event.c_str());
+                eventPtrs.push_back(recvIt->second);
             }
         }
         if (eventPtrs.empty())
         {
             logs_dbg("Not found neither in eventTriggerView nor in "
-                     "eventRecoveryView PC Trigger %s", ss.str().c_str());
+                     "eventRecoveryView PC Trigger %s",
+                     ss.str().c_str());
         }
     }
     else
@@ -318,14 +316,15 @@ int EventDetection::eventDiscovery(const data_accessor::DataAccessor& accessor,
             {
                 for (auto it = itr.first; it != itr.second; it++)
                 {
-                    logs_err("Discovered bootup event with matching accessor: %s\n",
-                             it->second->event.c_str());
+                    logs_err(
+                        "Discovered bootup event with matching accessor: %s\n",
+                        it->second->event.c_str());
                     eventPtrs.push_back(it->second);
                 }
             }
         }
     }
-    auto pushed =  eventPtrs.size();
+    auto pushed = eventPtrs.size();
     if (pushed > 0)
     {
         pushToQueue(accessor, eventPtrs);
@@ -370,10 +369,10 @@ bool EventDetection::getIsAccessorInteresting(
     }
 }
 
-void EventDetection::processEventList(EventCandidateList& eventsCandidateList,
-                                      data_accessor::PropertyValue& propertyValue,
-                                      bool isMultiThread)
-{    
+void EventDetection::processEventList(
+    EventCandidateList& eventsCandidateList,
+    data_accessor::PropertyValue& propertyValue, bool isMultiThread)
+{
     for (auto& assertedEvent : eventsCandidateList)
     {
         auto& candidate = *std::get<0>(assertedEvent);
@@ -398,12 +397,11 @@ void EventDetection::processEventList(EventCandidateList& eventsCandidateList,
             event.trigger = assertedDevice.trigger;
             event.accessor = assertedDevice.accessor;
             event.setDeviceIndexTuple(assertedDevice.deviceIndexTuple);
-            
+
             if (isRecovery)
             {
-                logs_err(
-                    "performing RootCauseTracer due to recovery on %s\n",
-                    event.device.c_str());
+                logs_err("performing RootCauseTracer due to recovery on %s\n",
+                         event.device.c_str());
                 if (isMultiThread)
                 {
                     eventDetectionPtr->RunEventHandler(event,
@@ -412,18 +410,17 @@ void EventDetection::processEventList(EventCandidateList& eventsCandidateList,
                 else
                 {
                     eventDetectionPtr->runSingleEventHandler(event,
-                                                       "RootCauseTracer");
+                                                             "RootCauseTracer");
                 }
                 continue;
             }
-            
-            if (eventDetectionPtr->IsEvent(candidate, event.device,
-                                           eventValue))
+
+            if (eventDetectionPtr->IsEvent(candidate, event.device, eventValue))
             {
 #ifndef EVENTING_SERVICE_DEVICE_STATUS_FS
                 event.severities.push_back(event.getSeverity());
                 auto currentDeviceHealth = util::getDeviceHealth(event.device);
-                
+
                 if (!currentDeviceHealth.empty())
                 {
                     event.severities.push_back(currentDeviceHealth);
@@ -434,10 +431,9 @@ void EventDetection::processEventList(EventCandidateList& eventsCandidateList,
                 }
 #endif // EVENTING_SERVICE_DEVICE_STATUS_FS
                 std::stringstream ss;
-                ss << "Throw out an eventHdlrMgr. device: "
-                   << event.device << " event: '" << event.event << "'"
-                   << " deviceIndex: "
-                   << assertedDevice.deviceIndexTuple;
+                ss << "Throw out an eventHdlrMgr. device: " << event.device
+                   << " event: '" << event.event << "'"
+                   << " deviceIndex: " << assertedDevice.deviceIndexTuple;
                 logs_err("%s\n", ss.str().c_str());
                 if (isMultiThread)
                 {
@@ -457,20 +453,19 @@ void EventDetection::processEventList(EventCandidateList& eventsCandidateList,
 }
 
 void EventDetection::bootUpEventsDetection()
-{  
+{
     EventCandidateList eventCandidateList{};
     data_accessor::PropertyValue propertyValue(int(0));
     const bool doNotUseMultiThread = false;
-        
+
     for (auto& accViewItem : eventAccessorView)
     {
         auto& accessor = accViewItem.first;
         auto& eventPtr = accViewItem.second;
         auto deviceType = eventPtr->getStringifiedDeviceType();
-        
-        logs_dbg("BootUp check for event %s\n",
-                eventPtr->event.c_str());
-        
+
+        logs_dbg("BootUp check for event %s\n", eventPtr->event.c_str());
+
         std::vector<data_accessor::DataAccessor> accList{};
         if (accessor.isTypeDbus())
         {
@@ -484,13 +479,13 @@ void EventDetection::bootUpEventsDetection()
         {
             accList.push_back(accessor);
         }
-        
+
         for (auto& accData : accList)
         {
-            std::unique_ptr<data_accessor::CheckAccessor>
-                checkObj(new data_accessor::CheckAccessor(deviceType));
-            
-            checkObj->check(eventPtr->accessor, accData);                       
+            std::unique_ptr<data_accessor::CheckAccessor> checkObj(
+                new data_accessor::CheckAccessor(deviceType));
+
+            checkObj->check(eventPtr->accessor, accData);
             auto check = checkObj.get();
             if (check != nullptr && check->passed())
             {
@@ -498,18 +493,17 @@ void EventDetection::bootUpEventsDetection()
                 accData.print(ss);
                 logs_err("BootUp asserted Event:'%s' acc=%s",
                          eventPtr->event.c_str(), ss.str().c_str());
-                eventCandidateList.push_back(
-                    std::make_tuple(
-                        eventPtr, check->getAssertedDevices(),false));
+                eventCandidateList.push_back(std::make_tuple(
+                    eventPtr, check->getAssertedDevices(), false));
             }
         }
     }
     if (false == eventCandidateList.empty())
     {
         // forcing single thread ThreadpoolManager seems to not work on big list
-        processEventList(eventCandidateList, propertyValue, doNotUseMultiThread);
-    }   
+        processEventList(eventCandidateList, propertyValue,
+                         doNotUseMultiThread);
+    }
 }
-
 
 } // namespace event_detection

@@ -382,8 +382,8 @@ std::string JsonReadTest::getDescription() const
            "' file can be read properly into nlohmann::json object";
 }
 
-JsonReadTest::ResultExt JsonReadTest::rawRunWithArtifact([
-    [maybe_unused]] const nlohmann::json& resultsSoFar)
+JsonReadTest::ResultExt JsonReadTest::rawRunWithArtifact(
+    [[maybe_unused]] const nlohmann::json& resultsSoFar)
 {
     nlohmann::ordered_json json;
     std::ifstream fileStream(jsonFileName);
@@ -418,8 +418,8 @@ std::string JsonSchemaTest::getDescription() const
            "' conforms to its schema";
 }
 
-Test::Result JsonSchemaTest::rawRun([
-    [maybe_unused]] const nlohmann::json& resultsSoFar)
+Test::Result
+    JsonSchemaTest::rawRun([[maybe_unused]] const nlohmann::json& resultsSoFar)
 {
     std::vector<json_proc::JsonFormatProblem> problems;
     if (schema->check(Dependency<JsonReadTest>::get()->getArtifact(), problems))
@@ -470,8 +470,8 @@ std::string DatParseTest::getDescription() const
            "function";
 }
 
-DatParseTest::ResultExt DatParseTest::rawRunWithArtifact([
-    [maybe_unused]] const nlohmann::json& resultsSoFar)
+DatParseTest::ResultExt DatParseTest::rawRunWithArtifact(
+    [[maybe_unused]] const nlohmann::json& resultsSoFar)
 {
     DatType dat;
     dat_traverse::Device::populateMap(
@@ -573,8 +573,8 @@ bool checkBracketsConsistency(const nlohmann::json& eventNode,
                jsPattern, json_proc::JsonPath{"accessor", "object"}, problems);
 }
 
-Test::Result EventInfoInnerConsistencyTest::rawRun([
-    [maybe_unused]] const nlohmann::json& resultsSoFar)
+Test::Result EventInfoInnerConsistencyTest::rawRun(
+    [[maybe_unused]] const nlohmann::json& resultsSoFar)
 {
     return Result(Status(Status::passed),
                   nlohmann::json("WIP, always ending with succeess for now"));
@@ -643,8 +643,8 @@ std::string EventInfoParseTest::getDescription() const
             "'event_info::loadFromJson(...)' function");
 }
 
-EventInfoParseTest::ResultExt EventInfoParseTest::rawRunWithArtifact([
-    [maybe_unused]] const nlohmann::json& resultsSoFar)
+EventInfoParseTest::ResultExt EventInfoParseTest::rawRunWithArtifact(
+    [[maybe_unused]] const nlohmann::json& resultsSoFar)
 {
     event_info::EventMap eventMap;
     event_info::PropertyFilterSet propertyFilterSet;
@@ -677,8 +677,8 @@ EventInfoDatInterConsistencyTest::EventInfoDatInterConsistencyTest(
     Test("EventInfoDatInterConsistencyTest: TODO",
          "EventInfoDatInterConsistencyTest instance: TODO",
          {datParseTest, eventInfoParseTest}),
-    Dependency<DatParseTest>(datParseTest), Dependency<EventInfoParseTest>(
-                                                eventInfoParseTest)
+    Dependency<DatParseTest>(datParseTest),
+    Dependency<EventInfoParseTest>(eventInfoParseTest)
 {}
 
 std::string EventInfoDatInterConsistencyTest::getDescription() const
@@ -686,8 +686,8 @@ std::string EventInfoDatInterConsistencyTest::getDescription() const
     return "TODO";
 }
 
-Test::Result EventInfoDatInterConsistencyTest::rawRun([
-    [maybe_unused]] const nlohmann::json& resultsSoFar)
+Test::Result EventInfoDatInterConsistencyTest::rawRun(
+    [[maybe_unused]] const nlohmann::json& resultsSoFar)
 {
     return Result(Status(Status::passed));
 }
@@ -833,8 +833,8 @@ nlohmann::json tmp(const nlohmann::json& jsonEventNode,
     return nodeResult;
 }
 
-Test::Result PossibleOriginsOfConditionTest::rawRun([
-    [maybe_unused]] const nlohmann::json& resultsSoFar)
+Test::Result PossibleOriginsOfConditionTest::rawRun(
+    [[maybe_unused]] const nlohmann::json& resultsSoFar)
 {
     DatType dat = Dependency<EventInfoDatInterConsistencyTest>::get()
                       ->Dependency<DatParseTest>::get()

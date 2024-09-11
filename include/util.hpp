@@ -81,22 +81,24 @@ struct DeviceIdData
 
     DeviceIdData() = default;
 
-    explicit DeviceIdData(const std::string& deviceType)
-        : pattern{device_id::DeviceIdPattern(deviceType)}
+    explicit DeviceIdData(const std::string& deviceType) :
+        pattern{device_id::DeviceIdPattern(deviceType)}
     {
         // Empty
     }
 
     explicit DeviceIdData(const std::string& deviceType,
-                          const device_id::PatternIndex& idx)
-        : pattern{device_id::DeviceIdPattern(deviceType)}, index(idx)
+                          const device_id::PatternIndex& idx) :
+        pattern{device_id::DeviceIdPattern(deviceType)},
+        index(idx)
     {
-      // Empty
+        // Empty
     }
 
     explicit DeviceIdData(const device_id::DeviceIdPattern& ptrn,
-                          const device_id::PatternIndex& idx)
-        : pattern(ptrn), index(idx)
+                          const device_id::PatternIndex& idx) :
+        pattern(ptrn),
+        index(idx)
     {
         // Empty
     }
@@ -320,10 +322,10 @@ class Severity
   public:
     enum SEVERITY
     {
-      SEVERITY_OK = 0,
-      SEVERITY_WARNING = 1,
-      SEVERITY_CRITICAL = 2,
-      SEVERITY_TOP = 3
+        SEVERITY_OK = 0,
+        SEVERITY_WARNING = 1,
+        SEVERITY_CRITICAL = 2,
+        SEVERITY_TOP = 3
     };
     static constexpr const char* severityLookup[SEVERITY_TOP] = {
         "OK", "Warning", "Critical"};
@@ -333,7 +335,7 @@ class Severity
 
     Severity(const Severity& other)
     {
-        if(this != &other)
+        if (this != &other)
         {
             this->severity = other.severity;
         }
@@ -364,7 +366,7 @@ class Severity
 
     Severity& operator=(const Severity& other)
     {
-        if(this != &other)
+        if (this != &other)
         {
             this->severity = other.severity;
         }
@@ -408,13 +410,13 @@ class Severity
         return severity;
     }
 
-    static std::string findMaxSeverity(std::vector<Severity>severities)
+    static std::string findMaxSeverity(std::vector<Severity> severities)
     {
         Severity maxSev("OK");
         for (auto sev : severities)
         {
-            maxSev.set_severity(sev.value() > maxSev.value() ?
-                                    sev.value() : maxSev.value());
+            maxSev.set_severity(sev.value() > maxSev.value() ? sev.value()
+                                                             : maxSev.value());
         }
         return maxSev.string();
     }
@@ -427,15 +429,14 @@ namespace file_util
 {
 
 #ifndef FLOCK_TIMEOUT
-#define FLOCK_TIMEOUT 100 //msec
+#define FLOCK_TIMEOUT 100 // msec
 #endif
 
 /**
  * @brief Write file content with timed lock protection
  * @return 0 - succ; otherwise - fail
  */
-int writeJson2File(const std::string& filePath,
-    const nlohmann::json& j);
+int writeJson2File(const std::string& filePath, const nlohmann::json& j);
 } // namespace file_util
 
 } // namespace util

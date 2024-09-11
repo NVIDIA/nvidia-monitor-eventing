@@ -11,11 +11,11 @@
 #pragma once
 
 #include "common.hpp"
-#include "util.hpp"
 #include "data_accessor.hpp"
 #include "dbus_accessor.hpp"
 #include "event_handler.hpp"
 #include "event_info.hpp"
+#include "util.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <nlohmann/json.hpp>
@@ -39,7 +39,8 @@ class DeviceStatus
     };
 
   public:
-    DeviceStatus() {}
+    DeviceStatus()
+    {}
 
     /**
      * @brief Get Device object from cache by device name. If not exist, create
@@ -75,7 +76,7 @@ class DeviceStatus
 DeviceStatus deviceStatus;
 
 nlohmann::json lookupRollupDeviceId(const nlohmann::json& deviceAssociation,
-    const std::string& deviceId)
+                                    const std::string& deviceId)
 {
     auto j = deviceAssociation.find(deviceId);
     if (j != deviceAssociation.end())
@@ -109,7 +110,7 @@ class DeviceStatusHandler : public EventHandler
         EventHandler(name)
     {}
 
-    ~DeviceStatusHandler() {};
+    ~DeviceStatusHandler(){};
 
   public:
     /**
@@ -119,25 +120,26 @@ class DeviceStatusHandler : public EventHandler
      * @param event
      * @return eventing::RcCode
      */
-    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode
+        process([[maybe_unused]] event_info::EventNode& event) override
     {
         if (event.configEventNode.count("managed") == 0)
         {
             log_dbg("Event (%s) is unmanaged by default, no health rollup.\n",
-                event.errorId);
+                    event.errorId);
             return eventing::RcCode::succ;
         }
 
         if (event.configEventNode["managed"] != "yes")
         {
             log_dbg("Event (%s) is unmanaged, no health rollup.\n",
-                event.errorId);
+                    event.errorId);
             return eventing::RcCode::succ;
         }
 
         auto names = lookupRollupDeviceId(eventing::profile::deviceAssociation,
-            event.device);
-        for(auto& name: names)
+                                          event.device);
+        for (auto& name : names)
         {
             DeviceStatus::Device& dev = deviceStatus.getDevice(name);
             if (dev.name.empty())
@@ -149,7 +151,8 @@ class DeviceStatusHandler : public EventHandler
 
             if (dev.Health > event.messageRegistry.message.severity)
             {
-                log_dbg("Lower severity event, no need to update status of (%s).",
+                log_dbg(
+                    "Lower severity event, no need to update status of (%s).",
                     dev.name.c_str());
                 return eventing::RcCode::succ;
             }
@@ -164,7 +167,7 @@ class DeviceStatusHandler : public EventHandler
 
             std::vector<std::string> tokens;
             boost::algorithm::split(tokens, event.getStringMessageArgs(),
-                boost::is_any_of(","));
+                                    boost::is_any_of(","));
             for (auto& token : tokens)
             {
                 boost::algorithm::trim(token);
@@ -185,17 +188,17 @@ class DeviceStatusHandler : public EventHandler
             std::lock_guard<std::mutex> guard(_mutex);
             std::filesystem::create_directories(monevtDeviceStatusFSPath);
 
-            std::string filePath = monevtDeviceStatusFSPath + std::string("/")
-                 + dev.name;
+            std::string filePath =
+                monevtDeviceStatusFSPath + std::string("/") + dev.name;
 
-            log_dbg("DevInfoFS path for device(%s): %s.\n",
-                dev.name.c_str(), filePath.c_str());
+            log_dbg("DevInfoFS path for device(%s): %s.\n", dev.name.c_str(),
+                    filePath.c_str());
 
             int rc = util::file_util::writeJson2File(filePath, j);
-            if(rc != 0)
+            if (rc != 0)
             {
                 log_err("Save device (%s) status failed, rc = %d!\n",
-                    dev.name.c_str(), rc);
+                        dev.name.c_str(), rc);
                 return eventing::RcCode::error;
             }
 

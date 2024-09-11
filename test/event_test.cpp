@@ -9,11 +9,11 @@
  */
 
 #include "common.hpp"
-#include "eventing_main.hpp"
 #include "dat_traverse.hpp"
 #include "data_accessor.hpp"
 #include "event_detection.hpp"
 #include "event_info.hpp"
+#include "eventing_main.hpp"
 #include "message_composer.hpp"
 #include "tests_common_defs.hpp"
 #include "util.hpp"
@@ -24,8 +24,8 @@ TEST(JsonSchemaTest, Default)
 {
     using namespace json_schema;
     auto ev = event_GPU_VRFailure();
-    (void) ev;
-    // eventing::eventInfoJsonSchema() NOT defined    
+    (void)ev;
+    // eventing::eventInfoJsonSchema() NOT defined
     // commented to avoid compiler error
     /**
     auto eventSchema = eventing::eventInfoJsonSchema();

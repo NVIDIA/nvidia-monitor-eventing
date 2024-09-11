@@ -343,42 +343,41 @@ TEST(DatTraverseTest, testLoadSeverity)
 TEST(DatTraverseTest, testFindMaxSeverity)
 {
     using namespace std::string_literals;
-    EXPECT_EQ("Critical", util::Severity::findMaxSeverity({
-                              "Critical"s, "OK"s, "Warning"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Critical"s, "Critical"s, "Critical"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Critical"s, "Critical"s, "Warning"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Critical"s, "Warning"s, "OK"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Critical"s, "Warning"s, "Warning"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Critical"s, "OK"s, "Warning"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Critical"s, "OK"s, "OK"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Warning"s, "Critical"s, "Warning"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Warning"s, "Critical"s, "OK"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Warning"s, "Warning"s, "Critical"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Warning"s, "OK"s, "Critical"s}));
-    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity({
-                              "Warning"s, "Warning"s, "Critical"s}));
-    EXPECT_EQ("Warning"s, util::Severity::findMaxSeverity({
-                             "OK"s, "Warning"s, "Warning"s}));
-    EXPECT_EQ("Warning"s, util::Severity::findMaxSeverity({
-                             "OK"s, "Warning"s, "OK"s}));
-    EXPECT_EQ("Warning"s, util::Severity::findMaxSeverity({
-                            "OK"s, "OK"s, "Warning"s}));
-    EXPECT_EQ("Warning"s, util::Severity::findMaxSeverity({
-                             "Warning"s, "Warning"s, "Warning"s}));
-    EXPECT_EQ("Warning"s, util::Severity::findMaxSeverity({
-                             "Warning"s, "Warning"s, "OK"s}));
-    EXPECT_EQ("Warning"s, util::Severity::findMaxSeverity({
-                             "Warning"s, "OK"s, "Warning"s}));
-    EXPECT_EQ("OK"s, util::Severity::findMaxSeverity({
-                             "OK"s, "OK"s, "OK"s}));
+    EXPECT_EQ("Critical", util::Severity::findMaxSeverity(
+                              {"Critical"s, "OK"s, "Warning"s}));
+    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity(
+                               {"Critical"s, "Critical"s, "Critical"s}));
+    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity(
+                               {"Critical"s, "Critical"s, "Warning"s}));
+    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity(
+                               {"Critical"s, "Warning"s, "OK"s}));
+    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity(
+                               {"Critical"s, "Warning"s, "Warning"s}));
+    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity(
+                               {"Critical"s, "OK"s, "Warning"s}));
+    EXPECT_EQ("Critical"s,
+              util::Severity::findMaxSeverity({"Critical"s, "OK"s, "OK"s}));
+    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity(
+                               {"Warning"s, "Critical"s, "Warning"s}));
+    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity(
+                               {"Warning"s, "Critical"s, "OK"s}));
+    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity(
+                               {"Warning"s, "Warning"s, "Critical"s}));
+    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity(
+                               {"Warning"s, "OK"s, "Critical"s}));
+    EXPECT_EQ("Critical"s, util::Severity::findMaxSeverity(
+                               {"Warning"s, "Warning"s, "Critical"s}));
+    EXPECT_EQ("Warning"s,
+              util::Severity::findMaxSeverity({"OK"s, "Warning"s, "Warning"s}));
+    EXPECT_EQ("Warning"s,
+              util::Severity::findMaxSeverity({"OK"s, "Warning"s, "OK"s}));
+    EXPECT_EQ("Warning"s,
+              util::Severity::findMaxSeverity({"OK"s, "OK"s, "Warning"s}));
+    EXPECT_EQ("Warning"s, util::Severity::findMaxSeverity(
+                              {"Warning"s, "Warning"s, "Warning"s}));
+    EXPECT_EQ("Warning"s,
+              util::Severity::findMaxSeverity({"Warning"s, "Warning"s, "OK"s}));
+    EXPECT_EQ("Warning"s,
+              util::Severity::findMaxSeverity({"Warning"s, "OK"s, "Warning"s}));
+    EXPECT_EQ("OK"s, util::Severity::findMaxSeverity({"OK"s, "OK"s, "OK"s}));
 }

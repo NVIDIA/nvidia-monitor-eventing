@@ -31,8 +31,8 @@ std::string CheckAccessor::getCurrentDevice()
     std::string currentDevice{""};
     if (_devIdData.pattern.dim() > 0)
     {
-        currentDevice = util::determineDeviceName(
-            _devIdData.pattern, _devIdData.index);
+        currentDevice =
+            util::determineDeviceName(_devIdData.pattern, _devIdData.index);
     }
     if (currentDevice.empty() && false == _triggerAssertedDevice.empty())
     {
@@ -82,7 +82,7 @@ bool CheckAccessor::check(const DataAccessor& jsonAcc, // template Accessor
                           const DataAccessor& dataAcc) // trigger  Accessor
 {
     auto tempAccData = dataAcc;
-     _lastStatus = NotPassed;
+    _lastStatus = NotPassed;
     // both are DBUS, as dataAcc is always DBUS,
     // calls util::determineDeviceIndex only if device_type also has range
     if (jsonAcc.isTypeDbus())
@@ -95,8 +95,8 @@ bool CheckAccessor::check(const DataAccessor& jsonAcc, // template Accessor
             if (!templateAccessorObj.empty() && !triggerAccessorObj.empty())
             {
                 device_id::DeviceIdPattern jsonObjPattern(templateAccessorObj);
-                _devIdData.index =
-                 util::determineDeviceIndex(jsonObjPattern, triggerAccessorObj);
+                _devIdData.index = util::determineDeviceIndex(
+                    jsonObjPattern, triggerAccessorObj);
             }
         }
     }
@@ -108,13 +108,13 @@ bool CheckAccessor::check(const DataAccessor& jsonAcc, // template Accessor
             false == util::existsRange(dataArgPattern))
         {
             _devIdData.index = util::determineDeviceIndex(
-                              jsonArgPattern, dataAcc.getArguments());
+                jsonArgPattern, dataAcc.getArguments());
             if (dataAcc.hasData())
             {
                 auto device = util::determineDeviceName(_devIdData.pattern,
                                                         _devIdData.index);
-                return
-                    subCheck(jsonAcc, tempAccData, device, _devIdData.index[0]);
+                return subCheck(jsonAcc, tempAccData, device,
+                                _devIdData.index[0]);
             }
         }
     }
@@ -194,7 +194,7 @@ bool CheckAccessor::privCheck(const DataAccessor& jsonAcc,
         if (true == deviceToRead.empty())
         {
             if (jsonAcc.isTypeCmdline() &&
-                    util::existsRange(jsonAcc.getArguments()))
+                util::existsRange(jsonAcc.getArguments()))
             {
                 devRange = _devIdData.pattern.domainVec();
             }
@@ -301,7 +301,8 @@ bool CheckAccessor::subCheck(const DataAccessor& jsonAcc, DataAccessor& dataAcc,
             int zero_index_bit_shift = 0;
             for (auto& index : devRange)
             {
-                PropertyVariant bitmask(bitmapValue.getInteger() << zero_index_bit_shift++);
+                PropertyVariant bitmask(bitmapValue.getInteger()
+                                        << zero_index_bit_shift++);
                 if (dataAcc.getDataValue().check(checkMap, bitmask) == true)
                 {
                     ret = true;

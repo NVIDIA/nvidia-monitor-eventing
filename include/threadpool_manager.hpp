@@ -15,7 +15,8 @@
 #include <semaphore>
 
 /**
- * The compile-time minimum number of concurrent threads the semaphore must support.
+ * The compile-time minimum number of concurrent threads the semaphore must
+ * support.
  */
 #ifndef THREADPOOL_SEMAPHORE_MIN_CAPABILITY
 #define THREADPOOL_SEMAPHORE_MIN_CAPABILITY 32
@@ -35,31 +36,31 @@ enum class AcquireState : int
 {
     succ,
     error,
-    timeout,  // currently unused, as timeout will now cancel thread creation
+    timeout, // currently unused, as timeout will now cancel thread creation
 };
 
 class ThreadpoolManager
 {
   public:
     ThreadpoolManager(const int maxRunning, const int maxTotal) :
-        _sem(maxRunning),
-        _waiting(0),
-        _maxTotal(maxTotal)
+        _sem(maxRunning), _waiting(0), _maxTotal(maxTotal)
     {
         log_err("maxRunning %i, maxTotal %i\n", maxRunning, maxTotal);
         if (maxRunning > THREADPOOL_SEMAPHORE_MIN_CAPABILITY)
         {
-            throw std::runtime_error("ThreadpoolManager: maxRunning cannot be greater than THREADPOOL_SEMAPHORE_MIN_CAPABILITY");
+            throw std::runtime_error(
+                "ThreadpoolManager: maxRunning cannot be greater than THREADPOOL_SEMAPHORE_MIN_CAPABILITY");
         }
         if (_maxTotal < maxRunning)
         {
-            throw std::runtime_error("ThreadpoolManager: maxTotal cannot be less than maxRunning");
+            throw std::runtime_error(
+                "ThreadpoolManager: maxTotal cannot be less than maxRunning");
         }
     }
 
     ThreadpoolManager(ThreadpoolManager const&) = delete;
     ThreadpoolManager& operator=(ThreadpoolManager const&) = delete;
-    
+
   private:
     AcquireState try_acquire()
     {
@@ -70,18 +71,18 @@ class ThreadpoolManager
         {
             _waiting--;
             log_err("thread cap reached: %i waiting, %i limit\n",
-                _waiting.load(),
-                _maxTotal);
+                    _waiting.load(), _maxTotal);
             return AcquireState::error;
         }
         log_wrn("there are now %i threads waiting\n", _waiting.load());
         AcquireState rc = AcquireState::succ;
         // try_acquire_for returns true if acquired, false if timeout
-        if (!_sem.try_acquire_for(std::chrono::seconds(THREADPOOL_QUEUED_THREAD_TIMEOUT)))
+        if (!_sem.try_acquire_for(
+                std::chrono::seconds(THREADPOOL_QUEUED_THREAD_TIMEOUT)))
         {
-            log_err("try_acquire_for reached timeout, not creating thread! %i waiting, %i limit\n",
-                _waiting.load(),
-                _maxTotal);
+            log_err(
+                "try_acquire_for reached timeout, not creating thread! %i waiting, %i limit\n",
+                _waiting.load(), _maxTotal);
             _waiting--;
             return AcquireState::error;
         }
@@ -90,7 +91,8 @@ class ThreadpoolManager
         return rc;
     }
 
-    void release() {
+    void release()
+    {
         log_wrn("releasing semaphore, %i threads waiting\n", _waiting.load());
         _sem.release();
     }
@@ -104,12 +106,10 @@ class ThreadpoolManager
     // friend ThreadpoolGuard::~ThreadpoolGuard();
 };
 
-
 class ThreadpoolGuard
 {
   public:
-    ThreadpoolGuard(ThreadpoolManager* threadpool) :
-        _threadpool(threadpool)
+    ThreadpoolGuard(ThreadpoolManager* threadpool) : _threadpool(threadpool)
     {
         AcquireState rc = _threadpool->try_acquire();
         switch (rc)
@@ -137,7 +137,8 @@ class ThreadpoolGuard
     ~ThreadpoolGuard()
     {
         // Only call release if we actually acquired the semaphore.
-        // Even if _success is true, that may be due to timing out but continuing anyway.
+        // Even if _success is true, that may be due to timing out but
+        // continuing anyway.
         if (_acquired)
         {
             _threadpool->release();

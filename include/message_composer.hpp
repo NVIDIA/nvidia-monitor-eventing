@@ -49,7 +49,8 @@ class MessageComposer : public event_handler::EventHandler
      * @param event
      * @return eventing::RcCode
      */
-    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode
+        process([[maybe_unused]] event_info::EventNode& event) override
     {
         bool success = createLog(event);
         if (success)
@@ -73,16 +74,17 @@ class MessageComposer : public event_handler::EventHandler
      * If no associated object path could be found return an empty string.
      */
     template <typename ObjectMapperType = dbus::DirectObjectMapper>
-    std::string getOriginOfConditionObjectPath(const std::string& deviceId) const
+    std::string
+        getOriginOfConditionObjectPath(const std::string& deviceId) const
     {
         ObjectMapperType om;
         auto paths = om.getPrimaryDevIdPaths(deviceId);
         if (paths.size() == 0)
         {
             logs_err("No object path found in ObjectMapper subtree "
-                    "corresponding to the device '%s'. "
-                    "Returning empty origin of condition.\n",
-                    deviceId.c_str());
+                     "corresponding to the device '%s'. "
+                     "Returning empty origin of condition.\n",
+                     deviceId.c_str());
             return deviceId;
         }
         else
@@ -90,9 +92,9 @@ class MessageComposer : public event_handler::EventHandler
             if (paths.size() > 1)
             {
                 logs_wrn("Multiple object paths in ObjectMapper subtree "
-                        "corresponding to the device '%s'. "
-                        "Choosing the first one as origin of condition.\n",
-                        deviceId.c_str());
+                         "corresponding to the device '%s'. "
+                         "Choosing the first one as origin of condition.\n",
+                         deviceId.c_str());
             }
             return *paths.begin();
         }
@@ -117,7 +119,7 @@ class MessageComposer : public event_handler::EventHandler
             if (boost::starts_with(val, "/redfish/v1"))
             {
                 logs_dbg("Message Composer to use fixed redfish URI OOC '%s'\n",
-                            val.c_str());
+                         val.c_str());
                 return val;
             }
             else
@@ -128,14 +130,16 @@ class MessageComposer : public event_handler::EventHandler
 
         if (!oocDevice.empty())
         {
-            std::string path = getOriginOfConditionObjectPath<ObjectMapperType>(oocDevice);
+            std::string path =
+                getOriginOfConditionObjectPath<ObjectMapperType>(oocDevice);
             logs_dbg("Got path '%s' from oocDevice '%s'\n", path.c_str(),
-                oocDevice.c_str());
+                     oocDevice.c_str());
             return path;
         }
-        logs_err("Invalid JSON definition!! No fixed or dynamic OOC found for event: "
-                "'%s', device: '%s' !\n",
-                event.getName().c_str(), event.device.c_str());
+        logs_err(
+            "Invalid JSON definition!! No fixed or dynamic OOC found for event: "
+            "'%s', device: '%s' !\n",
+            event.getName().c_str(), event.device.c_str());
         return event.device;
     }
 

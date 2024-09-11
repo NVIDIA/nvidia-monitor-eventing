@@ -10,10 +10,11 @@
 
 #pragma once
 
-#include <nlohmann/json.hpp>
-
 #include "eventing_config.h"
+
 #include "log.hpp"
+
+#include <nlohmann/json.hpp>
 
 #include <type_traits>
 
@@ -28,9 +29,9 @@ extern nlohmann::json deviceAssociation;
 enum class RcCode : int
 {
     succ,
-    error,  // no block, allow next EventHandler
+    error, // no block, allow next EventHandler
     timeout,
-    block,  // stop processing next EventHanlder
+    block, // stop processing next EventHanlder
 };
 
 /**

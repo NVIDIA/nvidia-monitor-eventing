@@ -60,20 +60,20 @@ TEST(UtilExpandDeviceRange, RangeAtEnd)
 
 TEST(UtilExpandDeviceRange, DeviceType)
 {
-   auto list =  expandDeviceRange("GPU_SXM_[1-8]");
-   EXPECT_EQ(list.size(), 8);
-   EXPECT_EQ(list.count(1), 1);
-   EXPECT_EQ(list.count(8), 1);
-   EXPECT_EQ(list.at(1), "GPU_SXM_1");
-   EXPECT_EQ(list.at(8), "GPU_SXM_8");
+    auto list = expandDeviceRange("GPU_SXM_[1-8]");
+    EXPECT_EQ(list.size(), 8);
+    EXPECT_EQ(list.count(1), 1);
+    EXPECT_EQ(list.count(8), 1);
+    EXPECT_EQ(list.at(1), "GPU_SXM_1");
+    EXPECT_EQ(list.at(8), "GPU_SXM_8");
 
-   auto dobuleList = expandDeviceRange("NVSwitch_[0-3]/NVLink_[0-39]");
-   EXPECT_EQ(dobuleList.size(), 160);
-   EXPECT_EQ(dobuleList.at(0), "NVSwitch_0/NVLink_0");
-   EXPECT_EQ(dobuleList.at(40), "NVSwitch_1/NVLink_0");
-   EXPECT_EQ(dobuleList.at(80), "NVSwitch_2/NVLink_0");
-   EXPECT_EQ(dobuleList.at(120), "NVSwitch_3/NVLink_0");
-   EXPECT_EQ(dobuleList.at(159), "NVSwitch_3/NVLink_39");
+    auto dobuleList = expandDeviceRange("NVSwitch_[0-3]/NVLink_[0-39]");
+    EXPECT_EQ(dobuleList.size(), 160);
+    EXPECT_EQ(dobuleList.at(0), "NVSwitch_0/NVLink_0");
+    EXPECT_EQ(dobuleList.at(40), "NVSwitch_1/NVLink_0");
+    EXPECT_EQ(dobuleList.at(80), "NVSwitch_2/NVLink_0");
+    EXPECT_EQ(dobuleList.at(120), "NVSwitch_3/NVLink_0");
+    EXPECT_EQ(dobuleList.at(159), "NVSwitch_3/NVLink_39");
 }
 
 TEST(UtilExpandDeviceRange, LS10)
@@ -108,10 +108,9 @@ TEST(UtilExpandDeviceRange, DoubleRange)
     EXPECT_EQ(devMap.count(32), 1);
     EXPECT_EQ(devMap.count(64), 1);
 
-    EXPECT_EQ(devMap.at(1),  "GPU_SXM_1_DRAM_1");
+    EXPECT_EQ(devMap.at(1), "GPU_SXM_1_DRAM_1");
     EXPECT_EQ(devMap.at(32), "GPU_SXM_4_DRAM_8");
     EXPECT_EQ(devMap.at(64), "GPU_SXM_8_DRAM_8");
-
 
     devMap = expandDeviceRange("GPU_SXM_[0-3]_DRAM_[0-3]");
     EXPECT_EQ(devMap.size(), 16);
@@ -123,13 +122,12 @@ TEST(UtilExpandDeviceRange, DoubleRange)
     EXPECT_EQ(devMap.at(0), "GPU_SXM_0_DRAM_0");
     EXPECT_EQ(devMap.at(7), "GPU_SXM_1_DRAM_3");
     EXPECT_EQ(devMap.at(15), "GPU_SXM_3_DRAM_3");
-
 }
 
 TEST(UtilRemoveRangeFollowed, OneOccurrence)
 {
-   auto str = revertRangeRepeated("/xyz/first_[0-3]/second_()/third_()");
-   EXPECT_EQ(str, "/xyz/first_[0-3]/second_[0-3]/third_[0-3]");
+    auto str = revertRangeRepeated("/xyz/first_[0-3]/second_()/third_()");
+    EXPECT_EQ(str, "/xyz/first_[0-3]/second_[0-3]/third_[0-3]");
 
 #if 0 // TODO there is another TODO on revertRangeFollowed() function
    str = revertRangeFollowed("1_[0-3]/2_()/3_()/[0-1]/_()");
@@ -235,22 +233,24 @@ TEST(Util, GetRangeInformation)
 
 TEST(IntroduceDeviceInObjectpath, TrainingError)
 {
-    std::string obj{"nvlink-training-error-wrapper TRAINING GPU_SXM_[0|1-8] NVLink_[1|0-17]"};
-    device_id::DeviceIdPattern  objPattern(obj);
+    std::string obj{
+        "nvlink-training-error-wrapper TRAINING GPU_SXM_[0|1-8] NVLink_[1|0-17]"};
+    device_id::DeviceIdPattern objPattern(obj);
     EXPECT_EQ(objPattern.dim(), 2);
 
     device_id::DeviceIdPattern devType("GPU_SXM_[0|1-8]/NVLink_[1|0-17]");
     EXPECT_EQ(devType.dim(), 2);
 
-    device_id::PatternIndex index(3,15);
+    device_id::PatternIndex index(3, 15);
     auto result = util::introduceDeviceInObjectpath(obj, index);
-    EXPECT_EQ(result, "nvlink-training-error-wrapper TRAINING GPU_SXM_3 NVLink_15");
+    EXPECT_EQ(result,
+              "nvlink-training-error-wrapper TRAINING GPU_SXM_3 NVLink_15");
 }
 
 TEST(IntroduceDeviceInObjectpath, PatternIndex)
 {
     std::string obj{"FPGA_SXM[0|1-8:0-7]_EROT_RECOV_L GPU_SXM_[0|1-8]"};
-    device_id::DeviceIdPattern  objPattern(obj);
+    device_id::DeviceIdPattern objPattern(obj);
     EXPECT_EQ(objPattern.dim(), 1);
 
     std::string pcsw{"PCIeSwitch_0"};
@@ -262,7 +262,7 @@ TEST(IntroduceDeviceInObjectpath, PatternIndex)
 TEST(IntroduceDeviceInObjectpath, DoubleRangeDoubleRangeViewWithDeviceData)
 {
     std::string obj{"FPGA_SXM[0|1-8:0-7]_EROT_RECOV_L GPU_SXM_[0|1-8]"};
-    device_id::DeviceIdPattern  objPattern(obj);
+    device_id::DeviceIdPattern objPattern(obj);
 
     device_id::PatternIndex index(6);
     auto ret = introduceDeviceInObjectpath(obj, index);
@@ -272,40 +272,41 @@ TEST(IntroduceDeviceInObjectpath, DoubleRangeDoubleRangeViewWithDeviceData)
 TEST(IntroduceDeviceInObjectpath, SingleRangeWithDeviceData)
 {
     device_id::PatternIndex index(3);
-    std::string obj= "/xyz/HGX_GPU_SXM_[1-8]/PCIeDevices";
+    std::string obj = "/xyz/HGX_GPU_SXM_[1-8]/PCIeDevices";
     auto result = util::introduceDeviceInObjectpath(obj, index);
     EXPECT_EQ(result, "/xyz/HGX_GPU_SXM_3/PCIeDevices");
 }
 
 TEST(IntroduceDeviceInObjectpath, DoubleDeviceWithDeviceData)
 {
-    std::string obj= "/processors/GPU_SXM_[1-8]/Ports/NVLink_[0-17]";
-    device_id::PatternIndex index(3,15);
+    std::string obj = "/processors/GPU_SXM_[1-8]/Ports/NVLink_[0-17]";
+    device_id::PatternIndex index(3, 15);
     auto result = util::introduceDeviceInObjectpath(obj, index);
     EXPECT_EQ(result, "/processors/GPU_SXM_3/Ports/NVLink_15");
 }
 
 TEST(IntroduceDeviceInObjectpath, NoRangeWithDeviceIdData)
 {
-    std::string obj= "/processors/GPU_SXM_1/Ports/NVLink_7";
-    device_id::PatternIndex index(3,15);
+    std::string obj = "/processors/GPU_SXM_1/Ports/NVLink_7";
+    device_id::PatternIndex index(3, 15);
     auto result = util::introduceDeviceInObjectpath(obj, index);
     EXPECT_EQ(result, obj);
 }
 
-TEST(ExistsRange,  EmptyString)
+TEST(ExistsRange, EmptyString)
 {
     EXPECT_NE(existsRange(""), true);
 }
 
-TEST(ExistsRange,  NoRange)
+TEST(ExistsRange, NoRange)
 {
     EXPECT_NE(existsRange("no-range"), true);
 }
 
-TEST(ExistsRange,  Range)
+TEST(ExistsRange, Range)
 {
-    auto str = "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_[1-8]";
+    auto str =
+        "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_[1-8]";
     EXPECT_EQ(existsRange(str), true);
 }
 
@@ -336,49 +337,56 @@ TEST(DetermineDeviceName, NoPattern)
 
 TEST(DetermineDeviceName, Pattern)
 {
-    auto objPattern = "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_[1-8]";
+    auto objPattern =
+        "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_[1-8]";
     auto obj = "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_8";
     auto devName = determineDeviceName(objPattern, obj, "GPU_SXM_[1-8]");
     EXPECT_EQ(devName, "GPU_SXM_8");
 }
 
-
 TEST(DetermineDeviceName, DeviceIdPattern)
 {
-    auto objPattern = "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_[1-8]";
+    auto objPattern =
+        "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_[1-8]";
     auto obj = "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_3";
     device_id::DeviceIdPattern deviceObjPattern(objPattern);
     device_id::DeviceIdPattern deviceTypePattern("GPU_SXM_[1-8]");
-    auto devName = determineDeviceName(deviceObjPattern, obj, deviceTypePattern);
+    auto devName =
+        determineDeviceName(deviceObjPattern, obj, deviceTypePattern);
     EXPECT_EQ(devName, "GPU_SXM_3");
 }
 
 TEST(DetermineDeviceName, DeviceIdDoublePattern)
 {
-    auto objPattern = "/xyz/openbmc_project/inventory/system/fabrics/HGX_NVLinkFabric_0/Switches/NVSwitch_[0-3]/Ports/NVLink_[0-39]";
-    auto obj = "/xyz/openbmc_project/inventory/system/fabrics/HGX_NVLinkFabric_0/Switches/NVSwitch_1/Ports/NVLink_21";
+    auto objPattern =
+        "/xyz/openbmc_project/inventory/system/fabrics/HGX_NVLinkFabric_0/Switches/NVSwitch_[0-3]/Ports/NVLink_[0-39]";
+    auto obj =
+        "/xyz/openbmc_project/inventory/system/fabrics/HGX_NVLinkFabric_0/Switches/NVSwitch_1/Ports/NVLink_21";
     device_id::DeviceIdPattern deviceObjPattern(objPattern);
-    device_id::DeviceIdPattern deviceTypePattern("NVSwitch_[0-3]/NVLink_[0-39]");
-    auto devName = determineDeviceName(deviceObjPattern, obj, deviceTypePattern);
+    device_id::DeviceIdPattern deviceTypePattern(
+        "NVSwitch_[0-3]/NVLink_[0-39]");
+    auto devName =
+        determineDeviceName(deviceObjPattern, obj, deviceTypePattern);
     EXPECT_EQ(devName, "NVSwitch_1");
 }
 
 TEST(UtilMatchRegexString, NoPatternMatches)
 {
-   bool match = matchRegexString("YES", "YES");
-   EXPECT_EQ(match, true);
+    bool match = matchRegexString("YES", "YES");
+    EXPECT_EQ(match, true);
 }
 
 TEST(UtilMatchRegexString, NoPatternDoesNotMatch)
 {
-   bool match = matchRegexString("YES", "No");
-   EXPECT_NE(match, true);
+    bool match = matchRegexString("YES", "No");
+    EXPECT_NE(match, true);
 }
 
 TEST(UtilMatchRegexString, DoublePatternMatches)
 {
-    auto objPattern = "/xyz/openbmc_project/inventory/system/fabrics/"
-              "HGX_NVLinkFabric_0/Switches/NVSwitch_[0-3]/Ports/NVLink_[0-39]";
+    auto objPattern =
+        "/xyz/openbmc_project/inventory/system/fabrics/"
+        "HGX_NVLinkFabric_0/Switches/NVSwitch_[0-3]/Ports/NVLink_[0-39]";
     auto obj = "/xyz/openbmc_project/inventory/system/fabrics/"
                "HGX_NVLinkFabric_0/Switches/NVSwitch_1/Ports/NVLink_21";
 
@@ -388,8 +396,9 @@ TEST(UtilMatchRegexString, DoublePatternMatches)
 
 TEST(UtilMatchRegexString, DoublePatternDoesNotMatch)
 {
-    auto objPattern = "/xyz/openbmc_project/inventory/system/fabrics/"
-              "HGX_NVLinkFabric_0/Switches/NVSwitch_[0-3]/Ports/NVLink_[0-39]";
+    auto objPattern =
+        "/xyz/openbmc_project/inventory/system/fabrics/"
+        "HGX_NVLinkFabric_0/Switches/NVSwitch_[0-3]/Ports/NVLink_[0-39]";
     auto obj = "/xyz/openbmc_project/inventory/system/fabrics/"
                "HGX_NVLinkFabric_0/Switches/NVSwitch_1/";
 
@@ -403,7 +412,8 @@ TEST(writeJson2File, WriteFileOK)
 {
     auto file = "/tmp/GPU_0";
     nlohmann::json j = {
-        "Status", {
+        "Status",
+        {
             {"Health", "OK"},
             {"HealthRollup", "OK"},
             {"Conditions", {""}},

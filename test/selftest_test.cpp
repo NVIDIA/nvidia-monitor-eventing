@@ -8,11 +8,11 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
+#include "message_composer.hpp"
 #include "nlohmann/json.hpp"
 #include "printing_util.hpp"
 #include "selftest.hpp"
 #include "tests_common_defs.hpp"
-#include "message_composer.hpp"
 
 #include <iostream>
 
@@ -242,7 +242,8 @@ TEST(selftestTest, doPerform)
     // dat_traverse::Device::printTree(datMap);
     selftest::Selftest selftest("selftestObj", datMap);
     selftest::ReportResult rep_res;
-    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), eventing::RcCode::succ);
+    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res),
+              eventing::RcCode::succ);
     EXPECT_EQ(rep_res.size(), 2);
     EXPECT_EQ(rep_res.find("GPU0") != rep_res.end(), true);
     EXPECT_EQ(rep_res.find("VR0") != rep_res.end(), true);
@@ -258,7 +259,8 @@ TEST(selftestTest, doPerform)
     selftest::ReportResult otherRep;
     auto tp = datMap.at("VR0").test["power_rail"].testPoints.begin();
     tp->second.expectedValue = "force_test_to_fail";
-    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), otherRep), eventing::RcCode::succ);
+    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), otherRep),
+              eventing::RcCode::succ);
     EXPECT_EQ(otherRep["VR0"].layer["power_rail"][0].result, false);
     EXPECT_EQ(otherRep["GPU0"].layer["power_rail"][0].result, false);
 }
@@ -474,7 +476,8 @@ TEST(selftestTest, wrongDeviceTestpoint)
 {
     /* Device_A: (dummy TP's) + TP pointing to wrong device,
        which is not present in DAT map.
-       Expected: no exception is thrown but the result is eventing::RcCode::error */
+       Expected: no exception is thrown but the result is
+       eventing::RcCode::error */
     nlohmann::json jdat;
     nlohmann::json jgpu0;
     nlohmann::json jvr0;
@@ -584,7 +587,8 @@ TEST(selftestTest, cachesReports)
     // dat_traverse::Device::printTree(datMap);
     selftest::Selftest selftest("selftestObj", datMap);
     selftest::ReportResult rep_res;
-    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), eventing::RcCode::succ);
+    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res),
+              eventing::RcCode::succ);
     EXPECT_EQ(rep_res.size(), 3);
     EXPECT_EQ(rep_res.find("GPU0") != rep_res.end(), true);
     EXPECT_EQ(rep_res.find("VR0") != rep_res.end(), true);
@@ -684,7 +688,8 @@ TEST(selftestTest, highlyRecursedDevices)
     // dat_traverse::Device::printTree(datMap);
     selftest::Selftest selftest("selftestObj", datMap);
     selftest::ReportResult rep_res;
-    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), eventing::RcCode::succ);
+    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res),
+              eventing::RcCode::succ);
     EXPECT_EQ(rep_res.size(), 5);
     EXPECT_EQ(rep_res.find("GPU0") != rep_res.end(), true);
     EXPECT_EQ(rep_res.find("VR0") != rep_res.end(), true);
@@ -750,7 +755,8 @@ TEST(selftestTest, immuneToDeviceTestPointCircle)
     // dat_traverse::Device::printTree(datMap);
     selftest::Selftest selftest("selftestObj", datMap);
     selftest::ReportResult rep_res;
-    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res), eventing::RcCode::succ);
+    EXPECT_EQ(selftest.perform(datMap.at("GPU0"), rep_res),
+              eventing::RcCode::succ);
     EXPECT_EQ(rep_res.size(), 2);
     EXPECT_EQ(rep_res.find("GPU0") != rep_res.end(), true);
     EXPECT_EQ(rep_res.find("VR0") != rep_res.end(), true);
@@ -1172,32 +1178,32 @@ TEST(OOCDeterminationTest, test1)
     // Test 2: hardcoded redfish path (with and without device ID brackets)
     event.setOriginOfCondition("/redfish/v1/Chassis/HGX_GPU_SXM_[0|1-8]");
     EXPECT_EQ(mc.getOriginOfCondition<DummyObjectMapper>(event),
-        "/redfish/v1/Chassis/HGX_GPU_SXM_4");
+              "/redfish/v1/Chassis/HGX_GPU_SXM_4");
 
     event.setOriginOfCondition("/redfish/v1/Chassis/HGX_GPU_SXM_4");
     EXPECT_EQ(mc.getOriginOfCondition<DummyObjectMapper>(event),
-        "/redfish/v1/Chassis/HGX_GPU_SXM_4");
+              "/redfish/v1/Chassis/HGX_GPU_SXM_4");
 
     event.setOriginOfCondition("/redfish/v1/Chassis/HGX_GPU_SXM_7");
     EXPECT_EQ(mc.getOriginOfCondition<DummyObjectMapper>(event),
-        "/redfish/v1/Chassis/HGX_GPU_SXM_7");
-
+              "/redfish/v1/Chassis/HGX_GPU_SXM_7");
 
     // Test 3: hardcoded device ID expression (with and without brackets)
     event.setOriginOfCondition("GPU_SXM_[0|1-8]");
     EXPECT_EQ(mc.getOriginOfCondition<DummyObjectMapper>(event),
-        "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_4");
+              "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_4");
 
     event.setOriginOfCondition("GPU_SXM_4");
     EXPECT_EQ(mc.getOriginOfCondition<DummyObjectMapper>(event),
-        "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_4");
+              "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_4");
 
     event.setOriginOfCondition("GPU_SXM_7");
     EXPECT_EQ(mc.getOriginOfCondition<DummyObjectMapper>(event),
-        "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_7");
+              "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SXM_7");
 
     event.setOriginOfCondition("PCIeRetimer_3");
-    EXPECT_EQ(mc.getOriginOfCondition<DummyObjectMapper>(event),
+    EXPECT_EQ(
+        mc.getOriginOfCondition<DummyObjectMapper>(event),
         "/xyz/openbmc_project/inventory/system/chassis/HGX_PCIeRetimer_3");
 }
 #endif

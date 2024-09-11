@@ -9,24 +9,27 @@
  */
 
 #include "jtag.h"
-#include <iostream>
-#include <sstream>
+
 #include <fcntl.h>
-#include <vector>
-#include <bitset>
 #include <sys/ioctl.h>
 #include <unistd.h>
+
+#include <bitset>
 #include <chrono>
+#include <iostream>
+#include <sstream>
 #include <thread>
+#include <vector>
 
 const int max_ir_size = 1024;
-const std::vector<int> trst_tms = {1,1,1,1,1,1,1,1,1,1};
-const std::vector<int> shiftdr_tms = {0,1,0,0};
-const std::vector<int> shiftir_tms = {0,1,1,0,0};
-const std::vector<int> rti_from_exit1_tms = {0,1,1,0};
-const std::vector<int> shiftdr_from_rti_tms = {1,0,0};
+const std::vector<int> trst_tms = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+const std::vector<int> shiftdr_tms = {0, 1, 0, 0};
+const std::vector<int> shiftir_tms = {0, 1, 1, 0, 0};
+const std::vector<int> rti_from_exit1_tms = {0, 1, 1, 0};
+const std::vector<int> shiftdr_from_rti_tms = {1, 0, 0};
 
-typedef struct jtag_device {
+typedef struct jtag_device
+{
     int number_of_devices;
     int ir_length;
     int sleep;
@@ -40,13 +43,17 @@ void printHelp()
     std::cout << "Read idcode from a device over jtag" << std::endl;
     std::cout << "jtag_test -j DEV_PATH -i EXPECTED_IDCODE_IN_HEX" << std::endl;
     std::cout << "Example: jtag_test -j /dev/jtag0 -i 0x0318A0DD" << std::endl;
-    std::cout << "Additional options:" << std::endl<< "-v for verbose" << std::endl << "-s <N> how many miliseconds to sleep in between each jtag clock cycle" << std::endl;
+    std::cout
+        << "Additional options:" << std::endl
+        << "-v for verbose" << std::endl
+        << "-s <N> how many miliseconds to sleep in between each jtag clock cycle"
+        << std::endl;
     std::cout << "-f <N> jtag frequency in Hz. 1MHz default" << std::endl;
 }
 
-int goto_state(const jtag_device device, const std::vector<int> &tms, int fd)
+int goto_state(const jtag_device device, const std::vector<int>& tms, int fd)
 {
-    struct tck_bitbang *data;
+    struct tck_bitbang* data;
     struct bitbang_packet bb_packet;
     int ret = 0;
     int cnt = 0;
@@ -73,9 +80,10 @@ int goto_state(const jtag_device device, const std::vector<int> &tms, int fd)
     return ret;
 }
 
-int shift_data_in_out(const jtag_device &device, std::vector<int> &tdi, std::vector<int> &tdo, int fd)
+int shift_data_in_out(const jtag_device& device, std::vector<int>& tdi,
+                      std::vector<int>& tdo, int fd)
 {
-    struct tck_bitbang *data;
+    struct tck_bitbang* data;
     struct bitbang_packet bb_packet;
     int ret = 0;
 
@@ -89,7 +97,7 @@ int shift_data_in_out(const jtag_device &device, std::vector<int> &tdi, std::vec
         if (tdi[i] == 1)
             data[i].tdi = 1;
         data[i].tms = 0;
-        if (i == (tdi.size() -1))
+        if (i == (tdi.size() - 1))
             data[i].tms = 1;
     }
     bb_packet.length = tdi.size();
@@ -111,14 +119,14 @@ int find_bitset_pattern(std::vector<int> large, std::vector<int> pattern)
         {
             if (large[i + j] != pattern[j])
                 break;
-            if (j == pattern.size() -1)
+            if (j == pattern.size() - 1)
                 return i;
         }
     }
     return -1;
 }
 
-int get_number_of_devices(int fd, jtag_device &device)
+int get_number_of_devices(int fd, jtag_device& device)
 {
     std::vector<int> all_ones;
     std::bitset<32> patt(0xDECAFBAD);
@@ -176,10 +184,12 @@ int get_number_of_devices(int fd, jtag_device &device)
     }
 
     int pos = find_bitset_pattern(tdo, patt_search);
-    if (pos != -1) {
+    if (pos != -1)
+    {
         device.number_of_devices = pos;
         if (device.verbose)
-            std::cout << "Found number of devices:" <<device.number_of_devices << std::endl;
+            std::cout << "Found number of devices:" << device.number_of_devices
+                      << std::endl;
     }
     else
     {
@@ -189,7 +199,7 @@ int get_number_of_devices(int fd, jtag_device &device)
     return 0;
 }
 
-int get_ir_length(int fd, jtag_device &device)
+int get_ir_length(int fd, jtag_device& device)
 {
     std::vector<int> pattern;
     std::vector<int> patt_search;
@@ -224,10 +234,12 @@ int get_ir_length(int fd, jtag_device &device)
     shift_data_in_out(device, pattern, tdo, fd);
 
     int pos = find_bitset_pattern(tdo, patt_search);
-    if (pos != -1) {
+    if (pos != -1)
+    {
         device.ir_length = pos;
         if (device.verbose)
-            std::cout << "Found ir length devices:" <<device.ir_length << std::endl;
+            std::cout << "Found ir length devices:" << device.ir_length
+                      << std::endl;
     }
     else
     {
@@ -235,10 +247,9 @@ int get_ir_length(int fd, jtag_device &device)
         return -2;
     }
     return 0;
-
 }
 
-int read_idcodes(int fd, jtag_device &device)
+int read_idcodes(int fd, jtag_device& device)
 {
     std::vector<int> tdo;
     std::vector<int> tdi;
@@ -293,7 +304,7 @@ int read_idcodes(int fd, jtag_device &device)
 int main(int argc, char** argv)
 {
     int c = 0;
-    char *dev = NULL;
+    char* dev = NULL;
     int fd = -1;
     int ret = 0;
     jtag_device device;
@@ -302,8 +313,10 @@ int main(int argc, char** argv)
     device.sleep = 0;
     device.freq = 1000000;
 
-    while ((c = getopt(argc, argv, "j:i:s:hvf:")) != -1) {
-        switch (c) {
+    while ((c = getopt(argc, argv, "j:i:s:hvf:")) != -1)
+    {
+        switch (c)
+        {
             case 's':
                 device.sleep = atoi(optarg);
                 break;
@@ -327,7 +340,8 @@ int main(int argc, char** argv)
         }
     }
 
-    if (!dev || device.expected_idcode.empty()){
+    if (!dev || device.expected_idcode.empty())
+    {
         std::cout << "Device path and idcode must be provided" << std::endl;
         printHelp();
         ret = 1;
@@ -335,7 +349,8 @@ int main(int argc, char** argv)
     }
 
     fd = open(dev, O_RDWR);
-    if (fd < 0) {
+    if (fd < 0)
+    {
         std::cout << "Could not open device:" << dev << std::endl;
         ret = 2;
         goto err;
@@ -350,7 +365,8 @@ int main(int argc, char** argv)
 
     if (get_number_of_devices(fd, device))
     {
-        std::cout << "Could not read jtag chain to get number of devices" << std::endl;
+        std::cout << "Could not read jtag chain to get number of devices"
+                  << std::endl;
         ret = 4;
         goto err;
     }
@@ -362,12 +378,13 @@ int main(int argc, char** argv)
     }
     if (read_idcodes(fd, device))
     {
-        std::cout << "id code obtained did not match expected value" << std::endl;
+        std::cout << "id code obtained did not match expected value"
+                  << std::endl;
         ret = 6;
         goto err;
     }
     close(fd);
-    std::cout<<"0"<<std::endl;
+    std::cout << "0" << std::endl;
     return 0;
 err:
     close(fd);

@@ -44,8 +44,8 @@ DeviceIdMap expandDeviceRange(const std::string& deviceRegx);
 DeviceIdMap expandDeviceRange(const device_id::DeviceIdPattern& patternObj);
 
 device_id::PatternIndex
-determineDeviceIndex(const device_id::DeviceIdPattern& objPathPattern,
-                     const std::string& objPath);
+    determineDeviceIndex(const device_id::DeviceIdPattern& objPathPattern,
+                         const std::string& objPath);
 
 /**
  * @brief determine device name from DBus object path.
@@ -56,7 +56,6 @@ determineDeviceIndex(const device_id::DeviceIdPattern& objPathPattern,
  */
 std::string determineDeviceName(const std::string& objPath,
                                 const std::string& devType);
-
 
 /**
  * @brief Returns a device_id::PatternIndex that will
@@ -102,15 +101,16 @@ std::string determineDeviceName(const std::string& objPathPattern,
       auto obj = "/xyz/openbmc_project/processors/GPU_SXM_4/more";
       device_id::DeviceIdPattern deviceObjPattern(objPattern);
       device_id::DeviceIdPattern deviceTypePattern("GPU_SXM_[1-8]");
-      auto devName = determineDeviceName(deviceObjPattern, obj, deviceTypePattern);
-      EXPECT_EQ(devName, "GPU_SXM_4");
+      auto devName = determineDeviceName(deviceObjPattern, obj,
+ deviceTypePattern); EXPECT_EQ(devName, "GPU_SXM_4");
    }
    @endcode
  *
  */
-std::string determineDeviceName(const device_id::DeviceIdPattern& objPathPattern,
-                    const std::string& objPath,
-                    const device_id::DeviceIdPattern& deviceTypePattern);
+std::string
+    determineDeviceName(const device_id::DeviceIdPattern& objPathPattern,
+                        const std::string& objPath,
+                        const device_id::DeviceIdPattern& deviceTypePattern);
 
 /**
  * @brief Returns the first device from a device_type pattern that can be
@@ -120,9 +120,9 @@ std::string determineDeviceName(const device_id::DeviceIdPattern& objPathPattern
  * @param index
  * @return the first device name according to the index
  */
-std::string determineDeviceName(
-        const device_id::DeviceIdPattern& deviceTypePattern,
-        const device_id::PatternIndex& index);
+std::string
+    determineDeviceName(const device_id::DeviceIdPattern& deviceTypePattern,
+                        const device_id::PatternIndex& index);
 
 /**
  * @brief Returns the first element from a pattern having separator such as '/'

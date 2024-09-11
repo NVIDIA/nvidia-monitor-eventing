@@ -57,7 +57,8 @@ class ClearEvent : public EventHandler
      * @param event
      * @return eventing::RcCode
      */
-    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode
+        process([[maybe_unused]] event_info::EventNode& event) override
     {
 
         if (event.accessor.isTypeDeviceCoreApi())
@@ -119,7 +120,7 @@ class EventHandlerManager : public object::Object
      * @return eventing::RcCode
      */
     eventing::RcCode RunHandler(event_info::EventNode& event,
-                           const std::string& name)
+                                const std::string& name)
     {
         for (auto& hdlr : _handlers)
         {

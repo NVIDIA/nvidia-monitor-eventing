@@ -58,7 +58,6 @@ bool DataAccessor::contains(const DataAccessor& other) const
     return ret;
 }
 
-
 InterfaceObjectsMap DataAccessor::getDbusInterfaceObjectsMap() const
 {
     InterfaceObjectsMap ret;
@@ -93,11 +92,10 @@ bool DataAccessor::readDbus(const device_id::PatternIndex* devIndex)
         if (util::existsRange(objPath) == true && devIndex != nullptr)
         {
             // apply the device into the "object" to replace the range
-            objPath =
-                util::introduceDeviceInObjectpath(objPath, *devIndex);
+            objPath = util::introduceDeviceInObjectpath(objPath, *devIndex);
         }
-        auto propVariant = dbus::readDbusProperty(
-            objPath, _acc[interfaceKey], _acc[propertyKey]);
+        auto propVariant = dbus::readDbusProperty(objPath, _acc[interfaceKey],
+                                                  _acc[propertyKey]);
         // setDataValueFromVariant returns false in case variant is invalid
         ret = setDataValueFromVariant(propVariant);
     }
@@ -136,12 +134,16 @@ bool DataAccessor::runCommandLine(const device_id::PatternIndex* devIndex)
             log_elapsed("running cmd: %s", cmd.c_str());
             boost::process::ipstream pipe_stream;
             boost::process::group g;
-            boost::process::child process(cmd, g, boost::process::std_out > pipe_stream);
-            int waits_remaining = (SUBPROCESS_RUNNING_TIMEOUT_MS / SUBPROCESS_RUNNING_POLL_MS);
+            boost::process::child process(
+                cmd, g, boost::process::std_out > pipe_stream);
+            int waits_remaining =
+                (SUBPROCESS_RUNNING_TIMEOUT_MS / SUBPROCESS_RUNNING_POLL_MS);
             while (process.running() && waits_remaining > 0)
             {
-                //std::cerr << "process still running, " << waits_remaining << " waits remaining" << std::endl;
-                std::this_thread::sleep_for(std::chrono::milliseconds(SUBPROCESS_RUNNING_POLL_MS));
+                // std::cerr << "process still running, " << waits_remaining <<
+                // " waits remaining" << std::endl;
+                std::this_thread::sleep_for(
+                    std::chrono::milliseconds(SUBPROCESS_RUNNING_POLL_MS));
                 waits_remaining--;
             }
             std::error_code ec;
@@ -150,24 +152,27 @@ bool DataAccessor::runCommandLine(const device_id::PatternIndex* devIndex)
                 log_err("process still running, going to terminate group\n");
                 // terminate process and any subprocesses it launched as well
                 g.terminate(ec);
-                // prevent direct child becoming zombie (grandchildren are reparented
-                // to init which reaps them)
+                // prevent direct child becoming zombie (grandchildren are
+                // reparented to init which reaps them)
                 process.wait();
                 if (ec && ec.value() != ESRCH)
                 {
-                    throw std::runtime_error("error terminating subprocess group: " + ec.message());
+                    throw std::runtime_error(
+                        "error terminating subprocess group: " + ec.message());
                 }
-                throw std::runtime_error("child process timed out and was terminated!");
+                throw std::runtime_error(
+                    "child process timed out and was terminated!");
             }
             // store main process's exit code now, before cleanup
             process.wait();
-            // make sure children (if any) are cleaned up once the main process exits
-            // since these are indirect children, they will be reparented to init
-            // which reaps them.
+            // make sure children (if any) are cleaned up once the main process
+            // exits since these are indirect children, they will be reparented
+            // to init which reaps them.
             g.terminate(ec);
             if (ec && ec.value() != ESRCH)
             {
-                throw std::runtime_error("error terminating subprocess group: " + ec.message());
+                throw std::runtime_error(
+                    "error terminating subprocess group: " + ec.message());
             }
             processExitCode = static_cast<uint64_t>(process.exit_code());
             log_dbg("returnCode=%llu cmd='%s'\n", processExitCode, cmd.c_str());
@@ -275,7 +280,7 @@ std::string DataAccessor::readUsingMainAccessor(const DataAccessor& otherAcc)
     if (otherAcc.hasData() && *this == otherAcc)
     {
         _dataValue = otherAcc._dataValue;
-        ret =  _dataValue.getString();
+        ret = _dataValue.getString();
     }
     // (2) case
     // otherAcc data does not matter, trying to get otherAcc "object" value
@@ -285,11 +290,11 @@ std::string DataAccessor::readUsingMainAccessor(const DataAccessor& otherAcc)
         auto objPath = this->getDbusObjectPath();
         auto otherObjPath = otherAcc.getDbusObjectPath();
         if (util::existsRange(objPath) && !util::existsRange(otherObjPath) &&
-                util::matchRegexString(objPath, otherObjPath))
+            util::matchRegexString(objPath, otherObjPath))
         {
             // build another Accessor using otherAcc object path without range
             auto jsonData = _acc;
-            jsonData[data_accessor::objectKey] =  otherObjPath;
+            jsonData[data_accessor::objectKey] = otherObjPath;
             DataAccessor tmpAcc(jsonData);
             ret = tmpAcc.read();
             _dataValue = tmpAcc._dataValue; // copy tmpAcc data
@@ -297,8 +302,7 @@ std::string DataAccessor::readUsingMainAccessor(const DataAccessor& otherAcc)
     }
     std::stringstream ss;
     ss << "ret: '" << ret << "'"
-       <<  "\n\t_acc: " << _acc
-       << "\n\totherAcc: " << otherAcc;
+       << "\n\t_acc: " << _acc << "\n\totherAcc: " << otherAcc;
     log_dbg("%s\n", ss.str().c_str());
     return ret;
 }
@@ -310,20 +314,20 @@ std::vector<DataAccessor> DataAccessor::expand() const
     auto expansionType = isTypeDbus() ? 1 : 0;
     if (isTypeCmdline())
     {
-        expansionType = 2;        
+        expansionType = 2;
     }
     if (expansionType > 0)
     {
         nlohmann::json json = this->_acc;
-        std::string jKey =  expansionType == 1 ? data_accessor::objectKey :
-                                                 data_accessor::argumentsKey;
-        std::string jValue = expansionType == 1 ? this->getDbusObjectPath() :
-                                                  this->getArguments();
+        std::string jKey = expansionType == 1 ? data_accessor::objectKey
+                                              : data_accessor::argumentsKey;
+        std::string jValue = expansionType == 1 ? this->getDbusObjectPath()
+                                                : this->getArguments();
         device_id::DeviceIdPattern pattern(jValue);
         for (auto& domainItemIndex : pattern.domainVec())
         {
-            json[jKey] = pattern.eval(domainItemIndex);           
-            accessorList.push_back(DataAccessor(json, this->getDataValue()));         
+            json[jKey] = pattern.eval(domainItemIndex);
+            accessorList.push_back(DataAccessor(json, this->getDataValue()));
         }
     }
     return accessorList;
@@ -346,8 +350,8 @@ std::string DataAccessor::read(const event_info::EventNode& event)
         // common DataAccessor::read() if attempts above failed
         return read(event.device, &devIdData.index);
     }
-    else
-    if (isTypeDevice() || isTypeTest() || isTypeConst() || isTypeDeviceName())
+    else if (isTypeDevice() || isTypeTest() || isTypeConst() ||
+             isTypeDeviceName())
     {
         // DataAccessor::read() decides when to use device parameter
         return read(event.device);

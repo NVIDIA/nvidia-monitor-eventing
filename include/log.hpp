@@ -117,35 +117,39 @@ namespace logging
  */
 class LogElapsedTime
 {
-  private:  // static variables
+  private: // static variables
     /** @brief stores the tree messages, it is cleaned after printing */
     static std::vector<std::string> _messages;
     /** @brief stores the the level/deep of current entry point */
     static int _deep;
+
   private:
     /** @brief time stamp when the entry point starts its execution */
     struct timespec _begin;
     /** @brief index in _messages for this entry point */
     size_t _msgIndex;
+
   private:
     /** @brief calculates elapsed time remaking the string in _messages
      *          pointed by by _msgIndex */
     void calcTimeStamp();
     /** @brief prints the entire tree and clears _messages */
     void printElapsedTree() const;
+
   public:
-    explicit LogElapsedTime(const char* file, int line, const char *label,
+    explicit LogElapsedTime(const char* file, int line, const char* label,
                             const char* fmt = nullptr, ...);
     LogElapsedTime(const LogElapsedTime&) = delete;
     LogElapsedTime() = delete;
     virtual ~LogElapsedTime();
 };
 
-#define log_elapsed(fmt, ...) LogElapsedTime __func_performance__(\
-    __FILE__, __LINE__, __func__, fmt " ",  ##__VA_ARGS__)
+#define log_elapsed(fmt, ...)                                                  \
+    LogElapsedTime __func_performance__(__FILE__, __LINE__, __func__, fmt " ", \
+                                        ##__VA_ARGS__)
 #else
-# define log_elapsed(...) /* fmt, ##__VA_ARGS__ */
-#endif // LOG_ELAPSED_TIME
+#define log_elapsed(...) /* fmt, ##__VA_ARGS__ */
+#endif                   // LOG_ELAPSED_TIME
 
 /**
  * Set debug level controller by,
@@ -187,8 +191,8 @@ enum LogLevel
 class Log
 {
     using CtrlType = int;
-#define getLogLevel(logFlag) ((logFlag)&0x00FF)
-#define getLogControl(logFlag) ((logFlag)&0xFF00)
+#define getLogLevel(logFlag) ((logFlag) & 0x00FF)
+#define getLogControl(logFlag) ((logFlag) & 0xFF00)
   public:
     Log(const std::string& file = "", CtrlType level = DEF_DBG_LEVEL) :
         logFile(file), logCtrlName(DBG_LOG_CTRL), initLevel(level), seq(0)
@@ -224,8 +228,7 @@ class Log
 
     void log(int desiredLevel, const char* fmt, ...)
     {
-        if (!isReady
-            || getLogLevel(getLevel()) < getLogLevel(desiredLevel))
+        if (!isReady || getLogLevel(getLevel()) < getLogLevel(desiredLevel))
         {
             // Should not print anything as log is not ready anyways
             return;
@@ -274,8 +277,7 @@ class Log
     void log_raw(int desiredLevel, const char* msg,
                  const std::vector<uint8_t>& array, size_t size)
     {
-        if (!isReady
-            || getLogLevel(getLevel()) < getLogLevel(desiredLevel))
+        if (!isReady || getLogLevel(getLevel()) < getLogLevel(desiredLevel))
         {
             // Should not print anything as log is not ready anyways
             return;
@@ -298,8 +300,8 @@ class Log
         ss << "(" << size << ") ";
         for (size_t i = 0; i < size; i++)
         {
-            ss << std::setfill('0') << std::setw(2) << std::hex
-                << int(array[i]) << " ";
+            ss << std::setfill('0') << std::setw(2) << std::hex << int(array[i])
+               << " ";
         }
         ss << "\n";
 
@@ -309,8 +311,7 @@ class Log
     void log_raw(int desiredLevel, const char* msg,
                  const std::vector<uint32_t>& array, size_t size)
     {
-        if (!isReady
-            || getLogLevel(getLevel()) < getLogLevel(desiredLevel))
+        if (!isReady || getLogLevel(getLevel()) < getLogLevel(desiredLevel))
         {
             // Should not print anything as log is not ready anyways
             return;
@@ -333,8 +334,8 @@ class Log
         ss << "(" << size << ") ";
         for (size_t i = 0; i < size; i++)
         {
-            ss << std::setfill('0') << std::setw(8) << std::hex
-                << int(array[i]) << " ";
+            ss << std::setfill('0') << std::setw(8) << std::hex << int(array[i])
+               << " ";
         }
         ss << "\n";
 

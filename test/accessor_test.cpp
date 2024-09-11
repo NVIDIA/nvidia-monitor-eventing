@@ -422,12 +422,12 @@ TEST(DataAccessor, TestAccessorEqualityAndHash)
         {"arguments", "AP0_BOOTCOMPLETE_TIMEOUT GPU_SXM_1"},
         {"check", {{"equal", "1"}}}};
 
-     const nlohmann::json devCoreApiJson = {
+    const nlohmann::json devCoreApiJson = {
         {"type", "DeviceCoreAPI"},
         {"property", "gpu.thermal.temperature.overTemperatureInfo"},
         {"check", {{"equal", "1"}}}};
 
-     const nlohmann::json devCoreApiJson2 = {
+    const nlohmann::json devCoreApiJson2 = {
         {"type", "DeviceCoreAPI"},
         {"property", "gpu1.thermal.temperature.overTemperatureInfo"},
         {"check", {{"equal", "1"}}}};
@@ -634,7 +634,7 @@ TEST(DataAccessor, CompareDeviceId)
 TEST(DataAccessor, CmdLineAccessorWithDeviceShouldNotPerformLoop)
 {
     auto eventAccJson =
-      R"(
+        R"(
       {
         "type": "CMDLINE",
         "executable": "/bin/sh",
@@ -648,7 +648,7 @@ TEST(DataAccessor, CmdLineAccessorWithDeviceShouldNotPerformLoop)
     data_accessor::DataAccessor eventAccRange(eventJson);
 
     auto selfTestAccJson =
-     R"(
+        R"(
       {
         "type": "CMDLINE",
         "executable": "/bin/sh",
@@ -669,7 +669,7 @@ TEST(DataAccessor, CmdLineAccessorWithDeviceShouldNotPerformLoop)
     EXPECT_NE(accCheckNoEvent.check(eventAccRange, selftestAcc), true);
 
     auto selfTestAccJsonGpu2 =
-      R"(
+        R"(
       {
         "type": "CMDLINE",
         "executable": "/bin/sh",
@@ -680,7 +680,8 @@ TEST(DataAccessor, CmdLineAccessorWithDeviceShouldNotPerformLoop)
       }
     )";
 
-    nlohmann::json selftestJsonGpu2 = nlohmann::json::parse(selfTestAccJsonGpu2);
+    nlohmann::json selftestJsonGpu2 =
+        nlohmann::json::parse(selfTestAccJsonGpu2);
     data_accessor::DataAccessor selftestAccGpu2(selftestJsonGpu2);
     CheckAccessor accCheckEvent("GPU_SXM_[1-8]");
     EXPECT_EQ(accCheckEvent.check(eventAccRange, selftestAccGpu2), true);
@@ -698,7 +699,7 @@ TEST(DataAccessor, ExpandDbusNotRange)
         "check": { "equal": "1"}
       }
     )";
-    
+
     nlohmann::json dbusNotRange = nlohmann::json::parse(jsonDbusNotRange);
     data_accessor::DataAccessor dbusNotRangeAcc(dbusNotRange);
     auto list = dbusNotRangeAcc.expand();
@@ -718,7 +719,7 @@ TEST(DataAccessor, ExpandDbusSingleRange)
         "check": { "equal": "1"}
       }
     )";
-    
+
     auto jsonDbusSingleRange_1 =
         R"(
       {
@@ -728,7 +729,7 @@ TEST(DataAccessor, ExpandDbusSingleRange)
         "property": "DrainAndResetRequired"
       }
     )";
-    
+
     auto jsonDbusSingleRange_8 =
         R"(
       {
@@ -738,17 +739,17 @@ TEST(DataAccessor, ExpandDbusSingleRange)
         "property": "DrainAndResetRequired"
       }
     )";
-    
+
     nlohmann::json dbusSingleRange = nlohmann::json::parse(jsonDbusSingleRange);
     data_accessor::DataAccessor dbusSingleRangeAcc(dbusSingleRange);
-    
+
     auto list = dbusSingleRangeAcc.expand();
     EXPECT_EQ(list.size(), 8);
     if (list.size() == 8)
     {
-        nlohmann::json firstJson =  nlohmann::json::parse(jsonDbusSingleRange_1);
+        nlohmann::json firstJson = nlohmann::json::parse(jsonDbusSingleRange_1);
         EXPECT_EQ(list.front(), data_accessor::DataAccessor(firstJson));
-        
+
         nlohmann::json lastJson = nlohmann::json::parse(jsonDbusSingleRange_8);
         EXPECT_EQ(list.back(), data_accessor::DataAccessor(lastJson));
     }
@@ -766,7 +767,7 @@ TEST(DataAccessor, ExpandDbusDoubleRange)
         "check": { "equal": "1"}
       }
     )";
-    
+
     auto jsonDbusDoubleRange_1_0 =
         R"(
       {
@@ -776,7 +777,7 @@ TEST(DataAccessor, ExpandDbusDoubleRange)
         "property": "DrainAndResetRequired"
       }
     )";
-    
+
     auto jsonDbusDoubleRange_8_4 =
         R"(
       {
@@ -786,18 +787,20 @@ TEST(DataAccessor, ExpandDbusDoubleRange)
         "property": "DrainAndResetRequired"
       }
     )";
-    
+
     nlohmann::json dbusDoubleRange = nlohmann::json::parse(jsonDbusDoubleRange);
     data_accessor::DataAccessor dbusDoubleRangleAcc(dbusDoubleRange);
-    
+
     auto list = dbusDoubleRangleAcc.expand();
     EXPECT_EQ(list.size(), 40);
     if (list.size() == 40)
     {
-        nlohmann::json firstJson =  nlohmann::json::parse(jsonDbusDoubleRange_1_0);
+        nlohmann::json firstJson =
+            nlohmann::json::parse(jsonDbusDoubleRange_1_0);
         EXPECT_EQ(list.front(), data_accessor::DataAccessor(firstJson));
-        
-        nlohmann::json lastJson = nlohmann::json::parse(jsonDbusDoubleRange_8_4);
-        EXPECT_EQ(list.back(), data_accessor::DataAccessor(lastJson));       
+
+        nlohmann::json lastJson =
+            nlohmann::json::parse(jsonDbusDoubleRange_8_4);
+        EXPECT_EQ(list.back(), data_accessor::DataAccessor(lastJson));
     }
 }

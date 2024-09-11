@@ -11,18 +11,15 @@
 #include "util.hpp"
 
 #include "dbus_accessor.hpp"
-
 #include "log.hpp"
-
-#include <nlohmann/json.hpp>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/interprocess/exceptions.hpp>
 #include <boost/exception/diagnostic_information.hpp>
-
+#include <boost/interprocess/exceptions.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
+#include <nlohmann/json.hpp>
 
 #include <iostream>
 #include <thread>
@@ -452,11 +449,12 @@ std::regex createRegexDigitsRange(const std::string& pattern)
     TEST(IntroduceDeviceInObjectpath, DoubleDeviceWithDeviceData)
     TEST(IntroduceDeviceInObjectpath, NoRangeWithDeviceIdData)
  */
-std::string introduceDeviceInObjectpath(
-    const std::string& objPath, const device_id::PatternIndex& deviceIndex)
+std::string
+    introduceDeviceInObjectpath(const std::string& objPath,
+                                const device_id::PatternIndex& deviceIndex)
 {
     std::string ret{objPath};
-    device_id::DeviceIdPattern  objPattern(objPath);
+    device_id::DeviceIdPattern objPattern(objPath);
     std::stringstream ss;
     ss << deviceIndex;
     // objPath should have a range specification, if not just return itself
@@ -495,7 +493,8 @@ std::string getDeviceHealth(const std::string& device)
                 auto propVariant =
                     dbus::readDbusProperty(objPath, healthInterface, "Health");
 
-                // assuming health is the same for all, exit early on first if succeed
+                // assuming health is the same for all, exit early on first if
+                // succeed
                 if (isValidVariant(propVariant))
                 {
                     std::string dbusHealth =
@@ -520,23 +519,23 @@ std::string getDeviceHealth(const std::string& device)
                     else
                     {
                         logs_err("Object %s returned unknown health value\n",
-                                    objPath.c_str());
+                                 objPath.c_str());
                     }
                 }
                 else
                 {
                     logs_err("Unable to read health from object %s\n",
-                        objPath.c_str());
+                             objPath.c_str());
                 }
             }
         }
         else // ! objPaths.empty()
         {
             logs_err("No object paths found in the subtree of "
-                    "'xyz.openbmc_project.ObjectMapper' "
-                    "corresponding to the '%s' device id "
-                    "and implementing the '%s' interface\n",
-                    device.c_str(), healthInterface.c_str());
+                     "'xyz.openbmc_project.ObjectMapper' "
+                     "corresponding to the '%s' device id "
+                     "and implementing the '%s' interface\n",
+                     device.c_str(), healthInterface.c_str());
         }
     }
     catch (const sdbusplus::exception::SdBusError& e)
@@ -556,8 +555,7 @@ namespace file_util
  * @brief Write file content with timed lock protection
  * @return 0 - succ; otherwise - fail
  */
-int writeJson2File(const std::string& filePath,
-    const nlohmann::json& j)
+int writeJson2File(const std::string& filePath, const nlohmann::json& j)
 {
     try
     {
@@ -574,7 +572,9 @@ int writeJson2File(const std::string& filePath,
         {
             auto now = std::chrono::steady_clock::now();
             auto elapsed =
-                std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
+                std::chrono::duration_cast<std::chrono::milliseconds>(now -
+                                                                      start)
+                    .count();
 
             if (elapsed >= FLOCK_TIMEOUT)
             {
@@ -596,19 +596,19 @@ int writeJson2File(const std::string& filePath,
 
         fileLock.unlock();
     }
-    catch(const std::exception& ex)
+    catch (const std::exception& ex)
     {
         logs_err("A std::exception error occurred: %s on %s\n", ex.what(),
                  filePath.c_str());
         return -3;
     }
-    catch(const boost::exception& ex)
+    catch (const boost::exception& ex)
     {
         logs_err("A boost::exception error occurred: %s\n",
-            boost::diagnostic_information(ex));
+                 boost::diagnostic_information(ex));
         return -4;
     }
-    catch(...)
+    catch (...)
     {
         logs_err("Caught an unknown error\n");
         return -5;

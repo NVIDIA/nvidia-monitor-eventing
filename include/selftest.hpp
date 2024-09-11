@@ -15,8 +15,8 @@
 #include "event_handler.hpp"
 
 #include <dbus_utility.hpp>
-#include <util.hpp>
 #include <nlohmann/json.hpp>
+#include <util.hpp>
 
 #include <chrono>
 #include <ostream>
@@ -233,7 +233,8 @@ class Selftest : public event_handler::EventHandler
      * @return eventing::RcCode::succ when all testpoints passed, otherwise
      * eventing::RcCode::error (failed TP or failed test operation)
      */
-    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode
+        process([[maybe_unused]] event_info::EventNode& event) override
     {
         if (_dat.count(event.device) == 0)
         {
@@ -268,12 +269,13 @@ class Selftest : public event_handler::EventHandler
      * <ReportResult>
      * @param[in]  layersToIgnore - for these passed layer names testpoints are
      * skipped and only empty layers are included in the reportRes; default none
-     * @return eventing::RcCode meaning testing operation status, not test results
+     * @return eventing::RcCode meaning testing operation status, not test
+     * results
      */
     eventing::RcCode perform(const dat_traverse::Device& dev,
-                        ReportResult& reportRes,
-                        std::vector<std::string> layersToIgnore = {},
-                        const bool& doEventDetermination = false);
+                             ReportResult& reportRes,
+                             std::vector<std::string> layersToIgnore = {},
+                             const bool& doEventDetermination = false);
 
     /** @brief Performs selftest on entire DAT.
      *
@@ -281,11 +283,13 @@ class Selftest : public event_handler::EventHandler
      * <ReportResult>
      * @param[in]  layersToIgnore - for these passed layer names testpoints are
      * skipped and only empty layers are included in the reportRes; default none
-     * @return eventing::RcCode meaning testing operation status, not test results
+     * @return eventing::RcCode meaning testing operation status, not test
+     * results
      */
-    eventing::RcCode performEntireTree(ReportResult& reportRes,
-                                  std::vector<std::string> layersToIgnore = {},
-                                  const bool& doEventDetermination = false);
+    eventing::RcCode
+        performEntireTree(ReportResult& reportRes,
+                          std::vector<std::string> layersToIgnore = {},
+                          const bool& doEventDetermination = false);
 
     /**
      * @brief Checks selftest result of particular device -> testpoints
@@ -398,7 +402,7 @@ class RootCauseTracer : public EventHandler
 {
   public:
     RootCauseTracer(const std::string& name,
-            std::map<std::string, dat_traverse::Device>& dat) :
+                    std::map<std::string, dat_traverse::Device>& dat) :
         EventHandler(name),
         _dat(dat)
     {}
@@ -414,11 +418,13 @@ class RootCauseTracer : public EventHandler
      * @param[in out] event - shall carry problematic device name; gets written
      * in selftest report of problematic device + its associated devices
      *
-     * @return eventing::RcCode::succ when performed root cause tracing, otherwise
-     * eventing::RcCode::error (wrong device name in event, performing selftest
-     * failed). Warning - does not mean a root cause was found, but op success.
+     * @return eventing::RcCode::succ when performed root cause tracing,
+     * otherwise eventing::RcCode::error (wrong device name in event, performing
+     * selftest failed). Warning - does not mean a root cause was found, but op
+     * success.
      */
-    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override;
+    eventing::RcCode
+        process([[maybe_unused]] event_info::EventNode& event) override;
 
   private:
     /**

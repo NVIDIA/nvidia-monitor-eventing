@@ -8,7 +8,6 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-
 #include "event_info.hpp"
 
 #include "json_proc.hpp"
@@ -116,10 +115,10 @@ std::string MessageArgPattern::substPlaceholders(
 }
 
 void addEventToPropertyFilterSet(const EventNode& eventNode,
-    PropertyFilterSet& propertyFilterSet)
+                                 PropertyFilterSet& propertyFilterSet)
 {
-    for (const auto& accessor : {eventNode.accessor, eventNode.trigger,
-        eventNode.recovery_accessor})
+    for (const auto& accessor :
+         {eventNode.accessor, eventNode.trigger, eventNode.recovery_accessor})
     {
         if (accessor.isEmpty() || !accessor.isTypeDbus())
         {
@@ -136,8 +135,9 @@ void addEventToPropertyFilterSet(const EventNode& eventNode,
 }
 
 void loadFromJson(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
-    EventTriggerView& eventTriggerView, EventAccessorView& eventAccessorView,
-    EventRecoveryView& eventRecoveryView, const nlohmann::json& j)
+                  EventTriggerView& eventTriggerView,
+                  EventAccessorView& eventAccessorView,
+                  EventRecoveryView& eventRecoveryView, const nlohmann::json& j)
 {
     for (const auto& el : j.items())
     {
@@ -155,7 +155,8 @@ void loadFromJson(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
             ss << "\tcreate event (" << event["event"] << ").\n";
             logs_dbg("%s", ss.str().c_str());
 
-            auto eventNode = std::make_shared<event_info::EventNode>(event["event"]);
+            auto eventNode =
+                std::make_shared<event_info::EventNode>(event["event"]);
 
             ss.str(std::string()); // Clearing the stream first
             ss << "\tload event (" << event["event"] << ").\n";
@@ -175,7 +176,8 @@ void loadFromJson(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
             eventAccessorView.insert({eventNode->accessor, eventNode});
             if (!eventNode->recovery_accessor.isEmpty())
             {
-                eventRecoveryView.insert({eventNode->recovery_accessor, eventNode});
+                eventRecoveryView.insert(
+                    {eventNode->recovery_accessor, eventNode});
             }
         }
         eventMap.insert(
@@ -187,8 +189,9 @@ void loadFromJson(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
 }
 
 void loadFromFile(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
-    EventTriggerView& eventTriggerView, EventAccessorView& eventAccessorView,
-    EventRecoveryView& eventRecoveryView, const std::string& file)
+                  EventTriggerView& eventTriggerView,
+                  EventAccessorView& eventAccessorView,
+                  EventRecoveryView& eventRecoveryView, const std::string& file)
 {
     std::stringstream ss;
     ss << "loadFromFile func (" << file << ").";
@@ -198,7 +201,7 @@ void loadFromFile(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
     i >> j;
 
     loadFromJson(eventMap, propertyFilterSet, eventTriggerView,
-        eventAccessorView, eventRecoveryView, j);
+                 eventAccessorView, eventRecoveryView, j);
 }
 
 void printMap(const EventMap& eventMap)
@@ -497,9 +500,8 @@ void EventNode::loadFrom(const json& j)
             : nlohmann::json()};
 
     this->accessor = j.at("accessor");
-    this->trigger = j.at("event_trigger").empty()
-        ? j.at("accessor")
-        : j.at("event_trigger");
+    this->trigger = j.at("event_trigger").empty() ? j.at("accessor")
+                                                  : j.at("event_trigger");
 
     std::stringstream ss;
     ss << "Loaded accessor: " << this->accessor << ", j: " << j;
@@ -517,7 +519,8 @@ void EventNode::loadFrom(const json& j)
     //     std::stringstream ss2;
     //     ss2 << "did not load recovery accessor, the value in the node is "
     //         << this->recovery_accessor << ", j: " << j << std::endl
-    //         << "is the accessor empty? " << this->recovery_accessor.isEmpty();
+    //         << "is the accessor empty? " <<
+    //         this->recovery_accessor.isEmpty();
     //     log_err("%s\n", ss2.str().c_str());
     // }
 
@@ -708,7 +711,7 @@ util::DeviceIdData EventNode::getDataDeviceType() const
     device_id::PatternIndex indexTuple;
     if (deviceIndexTuple.has_value())
     {
-         indexTuple = *deviceIndexTuple;
+        indexTuple = *deviceIndexTuple;
     }
     return util::DeviceIdData(getStringifiedDeviceType(), indexTuple);
 }
@@ -732,19 +735,18 @@ std::string EventNode::getFullDeviceName(device_id::PatternIndex& index) const
         if (devTypePattern.dim() == index.dim() ||
             (devTypePattern.dim() == 0 && index.dim() == 1 && index[0] == 0))
         {
-              fullDevice = devTypePattern.eval(index);
+            fullDevice = devTypePattern.eval(index);
         }
-        else
-        if (devTypePattern.dim() > 0 && devTypePattern.dim() < index.dim())
+        else if (devTypePattern.dim() > 0 && devTypePattern.dim() < index.dim())
         {
-          // device_type such as "PCIeSwitch_0/Down_[0-3]" must work for both
-          // device_id::DeviceIdPattern(x) and device_id::DeviceIdPattern(0,x)
-              device_id::PatternIndex indexAdjusted;
-              for (unsigned dim = 1; dim <= devTypePattern.dim(); ++dim)
-              {
-                indexAdjusted.set(dim -1, index[dim]);
-              }
-              fullDevice = devTypePattern.eval(indexAdjusted);
+            // device_type such as "PCIeSwitch_0/Down_[0-3]" must work for both
+            // device_id::DeviceIdPattern(x) and device_id::DeviceIdPattern(0,x)
+            device_id::PatternIndex indexAdjusted;
+            for (unsigned dim = 1; dim <= devTypePattern.dim(); ++dim)
+            {
+                indexAdjusted.set(dim - 1, index[dim]);
+            }
+            fullDevice = devTypePattern.eval(indexAdjusted);
         }
     }
     return fullDevice;
@@ -761,7 +763,7 @@ std::string EventNode::getFullDeviceName() const
 }
 
 std::vector<std::string>
-EventNode::getFullDeviceNameSeparated(device_id::PatternIndex& index) const
+    EventNode::getFullDeviceNameSeparated(device_id::PatternIndex& index) const
 {
     std::vector<std::string> fullDevices;
     auto fullDeviceNameSlash = getFullDeviceName(index);
@@ -774,7 +776,7 @@ std::vector<std::string>
     std::vector<std::string> fullDevices;
     if (!fullName.empty())
     {
-         boost::split(fullDevices, fullName, boost::is_any_of("/"));
+        boost::split(fullDevices, fullName, boost::is_any_of("/"));
     }
     return fullDevices;
 }
@@ -840,12 +842,13 @@ EventCategory::operator std::string() const
     return category;
 }
 
-bool EventNode::getIsAccessorInterestingToEvent(const EventNode& event,
-    const data_accessor::DataAccessor& otherAccessor)
+bool EventNode::getIsAccessorInterestingToEvent(
+    const EventNode& event, const data_accessor::DataAccessor& otherAccessor)
 {
     return event.accessor == otherAccessor ||
-        (!event.trigger.isEmpty() && event.trigger == otherAccessor) ||
-        (!event.recovery_accessor.isEmpty() && event.recovery_accessor == otherAccessor);
+           (!event.trigger.isEmpty() && event.trigger == otherAccessor) ||
+           (!event.recovery_accessor.isEmpty() &&
+            event.recovery_accessor == otherAccessor);
 }
 
 } // namespace event_info

@@ -8,8 +8,8 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-#include "eventing_main.hpp"
 #include "dat_traverse.hpp"
+#include "eventing_main.hpp"
 
 #include <nlohmann/json.hpp>
 

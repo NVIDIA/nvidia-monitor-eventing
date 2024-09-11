@@ -9,6 +9,7 @@
  */
 
 #include "device_util.hpp"
+
 #include "log.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -53,12 +54,12 @@ DeviceIdMap expandDeviceRange(const device_id::DeviceIdPattern& patternObj)
 DeviceIdMap expandDeviceRange(const std::string& deviceRegx)
 {
     device_id::DeviceIdPattern devicePattern(deviceRegx);
-    return  expandDeviceRange(devicePattern);
+    return expandDeviceRange(devicePattern);
 }
 
 device_id::PatternIndex
-determineDeviceIndex(const device_id::DeviceIdPattern& objPathPattern,
-                     const std::string& objPath)
+    determineDeviceIndex(const device_id::DeviceIdPattern& objPathPattern,
+                         const std::string& objPath)
 {
     auto indexes = objPathPattern.match(objPath);
     if (indexes.size() > 0)
@@ -69,9 +70,9 @@ determineDeviceIndex(const device_id::DeviceIdPattern& objPathPattern,
 }
 
 std::string
-determineDeviceName(const device_id::DeviceIdPattern& objPathPattern,
-                    const std::string& objPath,
-                    const device_id::DeviceIdPattern& deviceTypePattern)
+    determineDeviceName(const device_id::DeviceIdPattern& objPathPattern,
+                        const std::string& objPath,
+                        const device_id::DeviceIdPattern& deviceTypePattern)
 {
     std::string deviceName{""};
     auto index = determineDeviceIndex(objPathPattern, objPath);
@@ -93,7 +94,7 @@ std::string determineDeviceName(const std::string& objPattern,
         device_id::DeviceIdPattern objectPathPattern(objPattern);
         device_id::DeviceIdPattern deviceTypePattern(devType);
         deviceName =
-             determineDeviceName(objectPathPattern, objPath, deviceTypePattern);
+            determineDeviceName(objectPathPattern, objPath, deviceTypePattern);
     }
     logs_dbg("objPattern:'%s' objPath:'%s' devType:'%s' Devname:'%s'\n.",
              objPattern.c_str(), objPath.c_str(), devType.c_str(),
@@ -108,22 +109,21 @@ std::string getFirstDeviceTypePattern(const std::string& devicesPatterns)
     return devices.front();
 }
 
-
-std::string determineDeviceName(
-                    const device_id::DeviceIdPattern& deviceTypePattern,
-                    const device_id::PatternIndex& index)
+std::string
+    determineDeviceName(const device_id::DeviceIdPattern& deviceTypePattern,
+                        const device_id::PatternIndex& index)
 {
-   std::string name{""};
-   if (false == deviceTypePattern.pattern().empty())
-   {
-       logs_dbg("deviceTypePattern.dim()=%u index.dim()=%u\n",
-                deviceTypePattern.dim(), index.dim());
-       if (deviceTypePattern.dim() == index.dim())
-       {
-           name = getFirstDeviceTypePattern(deviceTypePattern.eval(index));
-       }
-   }
-   return name;
+    std::string name{""};
+    if (false == deviceTypePattern.pattern().empty())
+    {
+        logs_dbg("deviceTypePattern.dim()=%u index.dim()=%u\n",
+                 deviceTypePattern.dim(), index.dim());
+        if (deviceTypePattern.dim() == index.dim())
+        {
+            name = getFirstDeviceTypePattern(deviceTypePattern.eval(index));
+        }
+    }
+    return name;
 }
 
 } // namespace util

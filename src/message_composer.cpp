@@ -8,7 +8,6 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-
 #include "message_composer.hpp"
 
 #include "common.hpp"
@@ -72,8 +71,7 @@ bool MessageComposer::createLog(event_info::EventNode& event)
     auto pNamespace = getPhosphorLoggingNamespace(event);
 
     method.append(std::array<std::pair<std::string, std::string>, 11>(
-        {{{"xyz.openbmc_project.Logging.Entry.EventId",
-           event.errorId},
+        {{{"xyz.openbmc_project.Logging.Entry.EventId", event.errorId},
           {"xyz.openbmc_project.Logging.Entry.Resolution",
            event.getResolution()},
           {"REDFISH_MESSAGE_ID", event.getMessageId()},

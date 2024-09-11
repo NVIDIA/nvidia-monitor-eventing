@@ -39,7 +39,6 @@ struct Status
     std::string triState;
 };
 
-
 struct TestPoint
 {
     data_accessor::DataAccessor accessor;
@@ -243,7 +242,8 @@ class DATTraverse : public event_handler::EventHandler
      * @param event
      * @return eventing::RcCode
      */
-    eventing::RcCode process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode
+        process([[maybe_unused]] event_info::EventNode& event) override
     {
         std::string problemDevice = event.device;
         if (problemDevice.length() == 0)

@@ -10,10 +10,10 @@
 
 #include "dbus.hpp"
 
-#include <string>
-
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
+
+#include <string>
 
 // copied from develop, commit d139e40b0cc0c65dd17875aff9167de4ff903d47
 namespace dbus
@@ -38,7 +38,8 @@ bool setDeviceHealth(const std::string& device, const std::string& health)
                     "xyz.openbmc_project.State.Decorator.Health.HealthType." +
                     health;
 
-                lg2::info("Setting Health Property for: {OBJPATH} to: {HEALTHSTATE}",
+                lg2::info(
+                    "Setting Health Property for: {OBJPATH} to: {HEALTHSTATE}",
                     "OBJPATH", objPath, "HEALTHSTATE", healthState);
                 bool ok = dbus::setDbusProperty(
                     objPath, "xyz.openbmc_project.State.Decorator.Health",
@@ -46,12 +47,12 @@ bool setDeviceHealth(const std::string& device, const std::string& health)
                 if (ok == true)
                 {
                     lg2::info("Changed health property for {OBJPATH}",
-                        "OBJPATH", objPath);
+                              "OBJPATH", objPath);
                 }
                 else
                 {
                     lg2::warning("Did not change health property for {OBJPATH}",
-                        "OBJPATH", objPath);
+                                 "OBJPATH", objPath);
                     allSuccess = false;
                 }
             }
@@ -62,13 +63,14 @@ bool setDeviceHealth(const std::string& device, const std::string& health)
             // The object path does not exist (yet). This could be due to
             // the hosting service not started yet (hosting service could also
             // be an eventing service, e.g. pldmd for PLDM T2 events), and
-            // the device Health service must start before all eventing services.
-            // This is not fatal; the code calling this method will implement retries.
-            lg2::warning("No object paths found in the subtree of " \
-                    "'xyz.openbmc_project.ObjectMapper' " \
-                    "corresponding to device ID {DEVICE} " \
-                    "and implementing the {INTERFACE} interface",
-                    "DEVICE", device, "INTERFACE", healthInterface);
+            // the device Health service must start before all eventing
+            // services. This is not fatal; the code calling this method will
+            // implement retries.
+            lg2::warning("No object paths found in the subtree of "
+                         "'xyz.openbmc_project.ObjectMapper' "
+                         "corresponding to device ID {DEVICE} "
+                         "and implementing the {INTERFACE} interface",
+                         "DEVICE", device, "INTERFACE", healthInterface);
             return false;
         }
     }
@@ -91,10 +93,8 @@ std::string getService(const std::string& objectPath,
     auto bus = sdbusplus::bus::new_default_system();
     try
     {
-        auto method = bus.new_method_call(mapperBusBame,
-            mapperObjectPath,
-            mapperInterface,
-            "GetObject");
+        auto method = bus.new_method_call(mapperBusBame, mapperObjectPath,
+                                          mapperInterface, "GetObject");
         method.append(std::string(objectPath));
         method.append(std::vector<std::string>({interface}));
         auto reply = method.call();
@@ -103,19 +103,22 @@ std::string getService(const std::string& objectPath,
         if (response.empty() == false)
         {
             ret = response.begin()->first;
-            lg2::info("object path {OBJPATH}, interface {INTERFACE} is hosted" \
-                " by service {SERVICE}", "OBJPATH", objectPath, "INTERFACE",
-                interface, "SERVICE", ret);
+            lg2::info("object path {OBJPATH}, interface {INTERFACE} is hosted"
+                      " by service {SERVICE}",
+                      "OBJPATH", objectPath, "INTERFACE", interface, "SERVICE",
+                      ret);
         }
         else
         {
-            lg2::warning("getService(): Service not found for {OBJPATH}, {INTERFACE}",
+            lg2::warning(
+                "getService(): Service not found for {OBJPATH}, {INTERFACE}",
                 "OBJPATH", objectPath, "INTERFACE", interface);
         }
     }
     catch (const sdbusplus::exception::exception& e)
     {
-        lg2::error("getService(): DBus error for {OBJPATH}, {INTERFACE}: {WHAT}",
+        lg2::error(
+            "getService(): DBus error for {OBJPATH}, {INTERFACE}: {WHAT}",
             "OBJPATH", objectPath, "INTERFACE", interface, "WHAT", e.what());
     }
     return ret;
@@ -136,10 +139,8 @@ bool setDbusProperty(const std::string& service, const std::string& objPath,
     bool ret = false;
     try
     {
-        auto method = bus.new_method_call(service.c_str(),
-            objPath.c_str(),
-            freeDesktopInterface,
-            setCall);
+        auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
+                                          freeDesktopInterface, setCall);
         method.append(interface);
         method.append(property);
         method.append(val);
@@ -152,9 +153,10 @@ bool setDbusProperty(const std::string& service, const std::string& objPath,
     }
     catch (const sdbusplus::exception::exception& e)
     {
-        lg2::error("setDbusProperty() Failed to set property {OBJPATH}, " \
-            "{INTERFACE}, {PROPERTY}: {WHAT}", "OBJPATH", objPath,
-            "INTERFACE", interface, "PROPERTY", property, "WHAT", e.what());
+        lg2::error("setDbusProperty() Failed to set property {OBJPATH}, "
+                   "{INTERFACE}, {PROPERTY}: {WHAT}",
+                   "OBJPATH", objPath, "INTERFACE", interface, "PROPERTY",
+                   property, "WHAT", e.what());
     }
     return ret;
 }
@@ -166,11 +168,10 @@ DirectObjectMapper::ValueType DirectObjectMapper::getObjectImpl(
     const std::vector<std::string>& interfaces) const
 {
     ValueType result;
-    auto method = bus.new_method_call(
-        "xyz.openbmc_project.ObjectMapper",
-        "/xyz/openbmc_project/object_mapper",
-        "xyz.openbmc_project.ObjectMapper",
-        "GetObject");
+    auto method =
+        bus.new_method_call("xyz.openbmc_project.ObjectMapper",
+                            "/xyz/openbmc_project/object_mapper",
+                            "xyz.openbmc_project.ObjectMapper", "GetObject");
     method.append(objectPath);
     method.append(interfaces);
     auto reply = method.call();
@@ -185,9 +186,9 @@ std::vector<std::string> DirectObjectMapper::getSubTreePathsImpl(
 
     std::vector<std::string> result;
     auto method = bus.new_method_call("xyz.openbmc_project.ObjectMapper",
-        "/xyz/openbmc_project/object_mapper",
-        "xyz.openbmc_project.ObjectMapper",
-        "GetSubTreePaths");
+                                      "/xyz/openbmc_project/object_mapper",
+                                      "xyz.openbmc_project.ObjectMapper",
+                                      "GetSubTreePaths");
     method.append(subtree);
     method.append(depth);
     method.append(interfaces);
@@ -201,11 +202,10 @@ DirectObjectMapper::FullTreeType DirectObjectMapper::getSubtreeImpl(
     const std::vector<std::string>& interfaces) const
 {
     FullTreeType result;
-    auto method = bus.new_method_call(
-        "xyz.openbmc_project.ObjectMapper",
-        "/xyz/openbmc_project/object_mapper",
-        "xyz.openbmc_project.ObjectMapper",
-        "GetSubTree");
+    auto method =
+        bus.new_method_call("xyz.openbmc_project.ObjectMapper",
+                            "/xyz/openbmc_project/object_mapper",
+                            "xyz.openbmc_project.ObjectMapper", "GetSubTree");
     method.append(subtree);
     method.append(depth);
     method.append(interfaces);
@@ -214,4 +214,4 @@ DirectObjectMapper::FullTreeType DirectObjectMapper::getSubtreeImpl(
     return result;
 }
 
-}  // namespace dbus
+} // namespace dbus

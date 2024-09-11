@@ -9,7 +9,6 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-
 #include "message_dispatcher.hpp"
 
 namespace message_dispatcher

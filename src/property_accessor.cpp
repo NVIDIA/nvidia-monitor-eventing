@@ -90,17 +90,17 @@ bool PropertyValue::check(const CheckDefinitionMap& map,
         else if (key == bitsetKey)
         {
             ret = bitset(criteria::getValueFromCriteria(redefCriteria,
-                                                         accessorCheck.second));
+                                                        accessorCheck.second));
         }
         else if (key == notBitmaskKey)
         {
-            ret = notBitmask(criteria::getValueFromCriteria(redefCriteria,
-                                                        accessorCheck.second));
+            ret = notBitmask(criteria::getValueFromCriteria(
+                redefCriteria, accessorCheck.second));
         }
         else if (key == notBitsetKey)
         {
-            ret = notBitset(criteria::getValueFromCriteria(redefCriteria,
-                                                            accessorCheck.second));
+            ret = notBitset(criteria::getValueFromCriteria(
+                redefCriteria, accessorCheck.second));
         }
         else if (key == lookupKey)
         {
@@ -110,12 +110,12 @@ bool PropertyValue::check(const CheckDefinitionMap& map,
         else if (key == equalKey)
         {
             ret = (*this == criteria::getValueFromCriteria(
-                                          redefCriteria, accessorCheck.second));
+                                redefCriteria, accessorCheck.second));
         }
         else if (key == notEqualKey)
         {
             auto equal = (*this == criteria::getValueFromCriteria(
-                                          redefCriteria, accessorCheck.second));
+                                       redefCriteria, accessorCheck.second));
             ret = (equal == false);
         }
         if (ret == false)
@@ -223,7 +223,7 @@ void PropertyValue::getPropertyDataFromVariant(const PropertyVariant& varVar)
             PropertyValueDataHelper<double>::setInteger(varVar, &_data) ||
             PropertyValueDataHelper<bool>::setBoolean(varVar, &_data) ||
             PropertyValueDataHelper<std::vector<std::string>>::setVectorStrings(
-                varVar, &_data) ||            
+                varVar, &_data) ||
             PropertyValueDataHelper<std::vector<uint8_t>>::keepVectorsAsString(
                 varVar, &_data) ||
             PropertyValueDataHelper<std::vector<int16_t>>::keepVectorsAsString(
@@ -239,7 +239,7 @@ void PropertyValue::getPropertyDataFromVariant(const PropertyVariant& varVar)
             PropertyValueDataHelper<std::vector<uint64_t>>::keepVectorsAsString(
                 varVar, &_data) ||
             PropertyValueDataHelper<std::vector<double>>::keepVectorsAsString(
-                varVar, &_data);            
+                varVar, &_data);
     }
     if (done == false) // varVar.index() == 0 or type not handled above
     {
@@ -324,4 +324,3 @@ PropertyValue getValueFromCriteria(const PropertyVariant& redefCriteria,
 } // namespace criteria
 
 } // namespace data_accessor
-

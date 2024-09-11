@@ -20,8 +20,8 @@
 
 #include <map>
 #include <memory>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 using json = nlohmann::json;
@@ -287,7 +287,6 @@ struct redfish
      */
     std::string getStringMessageArgs(const EventNode& event);
 };
-
 
 /**
  * @brief Represent a test layer the given event corresponds to
@@ -570,7 +569,8 @@ class EventNode : public object::Object
      * @brief Return whether the DataAccessor is interesting
      * (matches our D-Bus object/interface/property)
      */
-    static bool getIsAccessorInterestingToEvent(const EventNode& event,
+    static bool getIsAccessorInterestingToEvent(
+        const EventNode& event,
         const data_accessor::DataAccessor& otherAccessor);
 
     /** @returns The full (single/multi) device name for the @a index
@@ -582,8 +582,8 @@ class EventNode : public object::Object
     std::string getFullDeviceName() const;
 
     /** @returns the full device name not joined by a separator such as '/' */
-    std::vector<std::string> getFullDeviceNameSeparated(
-        device_id::PatternIndex& index) const;
+    std::vector<std::string>
+        getFullDeviceNameSeparated(device_id::PatternIndex& index) const;
 
     /** just separates a full device name @sa getFullDeviceName() */
     static std::vector<std::string>
@@ -597,22 +597,28 @@ using EventMap = std::map<std::string, std::vector<event_info::EventNode>>;
 using PropertyFilterTuple = std::tuple<std::string, std::string, std::string>;
 using PropertyFilterSet = std::set<PropertyFilterTuple>;
 
-using EventTriggerView = std::unordered_multimap<data_accessor::DataAccessor,
-    std::shared_ptr<event_info::EventNode>, data_accessor::DataAccessor::Hash>;
+using EventTriggerView =
+    std::unordered_multimap<data_accessor::DataAccessor,
+                            std::shared_ptr<event_info::EventNode>,
+                            data_accessor::DataAccessor::Hash>;
 
-using EventAccessorView = std::unordered_multimap<data_accessor::DataAccessor,
-    std::shared_ptr<event_info::EventNode>, data_accessor::DataAccessor::Hash>;
+using EventAccessorView =
+    std::unordered_multimap<data_accessor::DataAccessor,
+                            std::shared_ptr<event_info::EventNode>,
+                            data_accessor::DataAccessor::Hash>;
 
-using EventRecoveryView = std::unordered_multimap<data_accessor::DataAccessor,
-    std::shared_ptr<event_info::EventNode>, data_accessor::DataAccessor::Hash>;
+using EventRecoveryView =
+    std::unordered_multimap<data_accessor::DataAccessor,
+                            std::shared_ptr<event_info::EventNode>,
+                            data_accessor::DataAccessor::Hash>;
 
 /** @brief Add D-Bus properties from @c eventNode to @c propertyFilterSet
  *
  * @param[in]      eventNode
  * @param[in,out]  propertyFilterSet
-*/
+ */
 void addEventToPropertyFilterSet(const EventNode& eventNode,
-    PropertyFilterSet& propertyFilterSet);
+                                 PropertyFilterSet& propertyFilterSet);
 
 /** @brief Load class contents from JSON profile
  *
@@ -623,8 +629,10 @@ void addEventToPropertyFilterSet(const EventNode& eventNode,
  *
  */
 void loadFromFile(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
-    EventTriggerView& eventTriggerView, EventAccessorView& eventAccessorView,
-    EventRecoveryView& eventRecoveryView, const std::string& file);
+                  EventTriggerView& eventTriggerView,
+                  EventAccessorView& eventAccessorView,
+                  EventRecoveryView& eventRecoveryView,
+                  const std::string& file);
 
 /**
  * @brief Read data from the json object @c j into @c eventMap
@@ -633,8 +641,10 @@ void loadFromFile(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
  * @param[in] j
  */
 void loadFromJson(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
-    EventTriggerView& eventTriggerView, EventAccessorView& eventAccessorView,
-    EventRecoveryView& eventRecoveryView, const nlohmann::json& j);
+                  EventTriggerView& eventTriggerView,
+                  EventAccessorView& eventAccessorView,
+                  EventRecoveryView& eventRecoveryView,
+                  const nlohmann::json& j);
 
 /** @brief Prints out memory map to verify field population
  *

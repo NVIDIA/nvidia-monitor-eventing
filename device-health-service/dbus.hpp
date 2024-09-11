@@ -10,11 +10,10 @@
 
 #pragma once
 
-#include <utility>
-
 #include <boost/algorithm/string.hpp>
 #include <sdbusplus/bus.hpp>
 
+#include <utility>
 
 // copied from develop, commit d139e40b0cc0c65dd17875aff9167de4ff903d47
 namespace dbus
@@ -36,17 +35,15 @@ using Association = std::tuple<std::string, std::string, std::string>;
  *     It is not expected to use a variable of this type
  **/
 using InvalidMonoState =
-         std::map<uint16_t, std::map<uint16_t, std::map<uint16_t, uint16_t>>>;
+    std::map<uint16_t, std::map<uint16_t, std::map<uint16_t, uint16_t>>>;
 
 /**
  *  Variant type used for Dbus properties
  *  (only types needed for /xyz/openbmc_project/logging/entry/<id> interfaces)
  */
 using PropertyVariant =
-    std::variant<InvalidMonoState, bool, uint32_t,
-                 uint64_t, std::string, std::vector<std::string>,
-                 std::vector<Association>>;
-
+    std::variant<InvalidMonoState, bool, uint32_t, uint64_t, std::string,
+                 std::vector<std::string>, std::vector<Association>>;
 
 /**
  * @brief returns the service assigned with objectPath and interface
@@ -469,17 +466,19 @@ class DirectObjectMapper : public ObjectMapper<DirectObjectMapper>
 };
 
 /**
- * @brief Makes D-Bus calls to set the device Health to the specified value ("OK"/"Warning"/"Critical")
+ * @brief Makes D-Bus calls to set the device Health to the specified value
+ * ("OK"/"Warning"/"Critical")
  *
  * Updating the device Health requires 3 steps:
- * 1. Finding the object path(s) corresponding to the device with a Health property
+ * 1. Finding the object path(s) corresponding to the device with a Health
+ * property
  * 2. Finding the D-Bus service that created each path
  * 3. Actually writing to the service and object path found in steps 1 and 2
  * (The Health interface is fixed: xyz.openbmc_project.State.Decorator.Health)
  *
- * @return @c true if the device Health was successfully updated, @c false otherwise
- * (D-Bus exception, object path does not exist, write failed, etc.)
+ * @return @c true if the device Health was successfully updated, @c false
+ * otherwise (D-Bus exception, object path does not exist, write failed, etc.)
  */
 bool setDeviceHealth(const std::string& device, const std::string& health);
 
-}  // namespace dbus
+} // namespace dbus

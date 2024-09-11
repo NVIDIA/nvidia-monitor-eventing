@@ -17,7 +17,7 @@
 
 #include "gmock/gmock.h"
 
-static  void create_event_by_device_type(event_info::EventNode& ev,
+static void create_event_by_device_type(event_info::EventNode& ev,
                                         const std::string& deviceType)
 {
     nlohmann::json j;
@@ -169,10 +169,13 @@ TEST(EventLookupTest, TriggerAccessor)
     data_accessor::DataAccessor accessorNil(j5);
     std::vector<std::shared_ptr<event_info::EventNode>> eventPtrs;
 
-    EXPECT_EQ(eventDetection.EventsDetection(accessor, eventPtrs).empty(), true);
-    EXPECT_EQ(eventDetection.EventsDetection(accessorTrigger, eventPtrs).empty(),
+    EXPECT_EQ(eventDetection.EventsDetection(accessor, eventPtrs).empty(),
               true);
-    EXPECT_EQ(eventDetection.EventsDetection(accessorNil, eventPtrs).empty(), true);
+    EXPECT_EQ(
+        eventDetection.EventsDetection(accessorTrigger, eventPtrs).empty(),
+        true);
+    EXPECT_EQ(eventDetection.EventsDetection(accessorNil, eventPtrs).empty(),
+              true);
 }
 
 TEST(EventDetectionTest, TID_1_triggers_instantly)
@@ -588,10 +591,10 @@ TEST(EventDetectionTest, PcQueueConcurrentStress)
     EXPECT_TRUE(expectedSet.empty());
 }
 
-TEST(EventDetectionTest,  CreateEventFromFailedCmdLineSecureBoot)
+TEST(EventDetectionTest, CreateEventFromFailedCmdLineSecureBoot)
 {
-   auto   secureBootEventInfo =
-   R"(
+    auto secureBootEventInfo =
+        R"(
        {
             "type": "CMDLINE",
             "executable": "mctp-vdm-util-wrapper",
@@ -603,7 +606,7 @@ TEST(EventDetectionTest,  CreateEventFromFailedCmdLineSecureBoot)
    )";
 
     auto secureBootSelfTest =
-    R"(
+        R"(
         {
             "type": "CMDLINE",
             "executable": "mctp-vdm-util-wrapper",
@@ -612,7 +615,8 @@ TEST(EventDetectionTest,  CreateEventFromFailedCmdLineSecureBoot)
     )";
 
     // Event Info Accessor
-    nlohmann::json eventInfoecureBoot = nlohmann::json::parse(secureBootEventInfo);
+    nlohmann::json eventInfoecureBoot =
+        nlohmann::json::parse(secureBootEventInfo);
     data_accessor::DataAccessor eventInfoSecureBoot(eventInfoecureBoot);
 
     // SelfTest Accessor
@@ -629,10 +633,10 @@ TEST(EventDetectionTest,  CreateEventFromFailedCmdLineSecureBoot)
     EXPECT_EQ(assertedData.at(0).deviceIndexTuple, device_id::PatternIndex(5));
 }
 
-TEST(EventDetectionTest,  CreateEventFromFailedCoreApiTestPoint)
+TEST(EventDetectionTest, CreateEventFromFailedCoreApiTestPoint)
 {
     auto eventInfoGpuOverTemp =
-    R"(
+        R"(
       {
         "type": "DeviceCoreAPI",
                  "property": "gpu.thermal.temperature.overTemperatureInfo",
@@ -643,7 +647,7 @@ TEST(EventDetectionTest,  CreateEventFromFailedCoreApiTestPoint)
     )";
 
     auto selftestGpuOverTemp =
-    R"(
+        R"(
        {
           "type": "DeviceCoreAPI",
           "property": "gpu.thermal.temperature.overTemperatureInfo"
@@ -671,7 +675,7 @@ TEST(EventDetectionTest,  CreateEventFromFailedCoreApiTestPoint)
     auto& assertedEvent = assertedData.at(0);
     auto& device = assertedEvent.device;
     EXPECT_EQ(device, inputDevice);
-    auto& index  = assertedEvent.deviceIndexTuple;
+    auto& index = assertedEvent.deviceIndexTuple;
     EXPECT_EQ(index, device_id::PatternIndex(4));
 }
 
@@ -726,8 +730,8 @@ TEST(CheckAccessor, Logic)
     nlohmann::json jsonCmdLine = nlohmann::json::parse(cmdLine);
     data_accessor::DataAccessor cmdLineAcc(jsonCmdLine);
 
-    std::unique_ptr<data_accessor::CheckAccessor>
-        checkObj(new data_accessor::CheckAccessor("GPU_SXM_[1-8]"));
+    std::unique_ptr<data_accessor::CheckAccessor> checkObj(
+        new data_accessor::CheckAccessor("GPU_SXM_[1-8]"));
 
     checkObj->check(eventTriggerAcc, cmdLineAcc, pcTriggerAcc);
     EXPECT_EQ(checkObj->passed(), true);
@@ -791,10 +795,9 @@ TEST(CheckAccessor, LogicDiffEventType)
     auto& assertedEvent = assertedData.at(0);
     auto& device = assertedEvent.device;
     EXPECT_EQ(device, std::string{"ERoT_GPU_SXM_5"});
-    auto& index  = assertedEvent.deviceIndexTuple;
+    auto& index = assertedEvent.deviceIndexTuple;
     EXPECT_EQ(index, device_id::PatternIndex(5));
 }
-
 
 TEST(EventDeviceType, FullDeviceName)
 {
@@ -835,7 +838,6 @@ TEST(EventDeviceType, FullDeviceName)
     EXPECT_EQ(nvlinkSpec.getFullDeviceName(), "NVSwitch_3/NVLink_15");
 }
 
-
 TEST(EventDeviceType, getFullDeviceNameSeparated)
 {
     std::string deviceType{"PCIeSwitch_0"};
@@ -845,7 +847,7 @@ TEST(EventDeviceType, getFullDeviceNameSeparated)
     create_event_by_device_type(event, deviceType);
     // there is no index yet
     EXPECT_EQ(event.getDataDeviceType().index.dim(), 0);
-    device_id::PatternIndex  eventIndex(0);
+    device_id::PatternIndex eventIndex(0);
     deviceNames = event.getFullDeviceNameSeparated(eventIndex);
     EXPECT_EQ(deviceNames.size(), 1);
     if (deviceNames.size() == 1)
@@ -869,7 +871,7 @@ TEST(EventDeviceType, getFullDeviceNameSeparated)
     EXPECT_EQ(devices.at(0), "PCIeSwitch_0");
     EXPECT_EQ(devices.at(1), "Down_3");
 
-    device_id::PatternIndex downIndexComplete(0,2);
+    device_id::PatternIndex downIndexComplete(0, 2);
     devices = down.getFullDeviceNameSeparated(downIndexComplete);
     EXPECT_EQ(devices.size(), 2);
     EXPECT_EQ(devices.at(0), "PCIeSwitch_0");
@@ -906,19 +908,18 @@ TEST(CheckAccessor, BitmapWithoutRangeInCMDLINE)
     const std::string deviceType{"ERoT_GPU_SXM_[1-8]"};
 
     data_accessor::DataAccessor triggerAccessor(triggerJson);
-    data_accessor::DataAccessor dataTriggerAccessor(PropertyVariant(std::string{"true"}));
+    data_accessor::DataAccessor dataTriggerAccessor(
+        PropertyVariant(std::string{"true"}));
 
-    const nlohmann::json jsonAccessor = {
-        {"type", "CMDLINE"},
-        {"executable", "/bin/echo"},
-        {"arguments", "5"},
-        {"check", {{"bitmap", "1"}}}};
+    const nlohmann::json jsonAccessor = {{"type", "CMDLINE"},
+                                         {"executable", "/bin/echo"},
+                                         {"arguments", "5"},
+                                         {"check", {{"bitmap", "1"}}}};
     data_accessor::DataAccessor accessorFromJson(jsonAccessor);
 
     data_accessor::CheckAccessor trippleCheck(deviceType);
-    auto ok =
-            trippleCheck.check(triggerAccessor, accessorFromJson,
-                               dataTriggerAccessor);
+    auto ok = trippleCheck.check(triggerAccessor, accessorFromJson,
+                                 dataTriggerAccessor);
 
     EXPECT_EQ(ok, true);
     auto devicesAsserted = trippleCheck.getAssertedDevices();
@@ -941,19 +942,18 @@ TEST(CheckAccessor, BitmapRangeInCMDLINE)
     const std::string deviceType{"ERoT_GPU_SXM_[1-8]"};
 
     data_accessor::DataAccessor triggerAccessor(triggerJson);
-    data_accessor::DataAccessor dataTriggerAccessor(PropertyVariant(std::string{"true"}));
+    data_accessor::DataAccessor dataTriggerAccessor(
+        PropertyVariant(std::string{"true"}));
 
-    const nlohmann::json jsonAccessor = {
-        {"type", "CMDLINE"},
-        {"executable", "/bin/echo"},
-        {"arguments", "GPU_SXM_[1-8]"},
-        {"check", {{"lookup", "_4"}}}};
+    const nlohmann::json jsonAccessor = {{"type", "CMDLINE"},
+                                         {"executable", "/bin/echo"},
+                                         {"arguments", "GPU_SXM_[1-8]"},
+                                         {"check", {{"lookup", "_4"}}}};
     data_accessor::DataAccessor accessorFromJson(jsonAccessor);
 
     data_accessor::CheckAccessor trippleCheck(deviceType);
-    auto ok =
-            trippleCheck.check(triggerAccessor, accessorFromJson,
-                               dataTriggerAccessor);
+    auto ok = trippleCheck.check(triggerAccessor, accessorFromJson,
+                                 dataTriggerAccessor);
 
     EXPECT_EQ(ok, true);
     auto devicesAsserted = trippleCheck.getAssertedDevices();
@@ -1025,7 +1025,7 @@ TEST(BootupSelfTestDiscovery, IgnoreDbusTriggerIfThereisAccessor)
     }
   ]
  }
-)" ;
+)";
 
     auto triggerJson = R"(
     {
@@ -1040,16 +1040,18 @@ TEST(BootupSelfTestDiscovery, IgnoreDbusTriggerIfThereisAccessor)
     event_info::PropertyFilterSet propertyFilterSet;
 
     event_info::loadFromJson(
-        eventMap, propertyFilterSet,
-        event_detection::eventTriggerView, event_detection::eventAccessorView,
-        event_detection::eventRecoveryView, nlohmann::json::parse(eventInfoRaw));
+        eventMap, propertyFilterSet, event_detection::eventTriggerView,
+        event_detection::eventAccessorView, event_detection::eventRecoveryView,
+        nlohmann::json::parse(eventInfoRaw));
 
-    std::string strValue("xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Unkown");
+    std::string strValue(
+        "xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Unkown");
     data_accessor::DataAccessor trigger(nlohmann::json::parse(triggerJson),
                                         data_accessor::PropertyValue(strValue));
 
     trigger.setDevice(std::string{"NVSwitch_0"});
-    auto eventsSent = event_detection::EventDetection::eventDiscovery(trigger, true);
+    auto eventsSent =
+        event_detection::EventDetection::eventDiscovery(trigger, true);
     EXPECT_EQ(eventsSent, 0);
 }
 
@@ -1115,7 +1117,7 @@ TEST(BootupSelfTestDiscovery, IgnoreCmdLineAccessorWithoutData)
     }
   ]
  }
-)" ;
+)";
 
     auto sfFailedJson = R"(
     {
@@ -1129,16 +1131,15 @@ TEST(BootupSelfTestDiscovery, IgnoreCmdLineAccessorWithoutData)
     event_info::PropertyFilterSet propertyFilterSet;
 
     event_info::loadFromJson(
-        eventMap, propertyFilterSet,
-        event_detection::eventTriggerView, event_detection::eventAccessorView,
-        event_detection::eventRecoveryView, nlohmann::json::parse(eventInfoRaw));
+        eventMap, propertyFilterSet, event_detection::eventTriggerView,
+        event_detection::eventAccessorView, event_detection::eventRecoveryView,
+        nlohmann::json::parse(eventInfoRaw));
 
-    data_accessor::DataAccessor
-        tpFailedAccessor(nlohmann::json::parse(sfFailedJson));
+    data_accessor::DataAccessor tpFailedAccessor(
+        nlohmann::json::parse(sfFailedJson));
 
     tpFailedAccessor.setDevice(std::string{"GPU_SXM_4"});
     auto eventsSent =
         event_detection::EventDetection::eventDiscovery(tpFailedAccessor, true);
     EXPECT_EQ(eventsSent, 0);
 }
-

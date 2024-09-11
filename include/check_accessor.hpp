@@ -59,8 +59,8 @@ class CheckAccessor
 
     /** constructor
      *  The parameter @a deviceType is by default empty to allow */
-    explicit CheckAccessor(const std::string& deviceType)
-        : _lastStatus(NotPerformed), _devIdData(deviceType)
+    explicit CheckAccessor(const std::string& deviceType) :
+        _lastStatus(NotPerformed), _devIdData(deviceType)
     {
         // Empty
     }
@@ -142,6 +142,7 @@ class CheckAccessor
     bool subCheck(const DataAccessor& jsonAcc, DataAccessor& dataAcc,
                   const std::string& dev2Read,
                   const int deviceId = util::InvalidDeviceId);
+
   private:
     /*
      * @sa check() that is the wrapper for privCheck()
@@ -162,7 +163,7 @@ class CheckAccessor
     bool loopDevices(const DeviceIndexesList& deviceIndexes,
                      const DataAccessor& jsonAcc, DataAccessor& dataAcc);
 
-   /**
+    /**
      * @brief fills the _latestAssertedDevices with a single deviceName
      * @param realDevice  the device name
      */

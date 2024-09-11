@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include "common.hpp"
 #include "check_accessor.hpp"
+#include "common.hpp"
 #include "dat_traverse.hpp"
 #include "dbus_accessor.hpp"
 #include "event_handler.hpp"
@@ -21,8 +21,8 @@
 #include "selftest.hpp"
 #include "threadpool_manager.hpp"
 
-#include <boost/container/flat_map.hpp>
 #include <boost/algorithm/string/join.hpp>
+#include <boost/container/flat_map.hpp>
 #include <dbus_log_utils.hpp>
 #include <dbus_utility.hpp>
 #include <sdbusplus/asio/object_server.hpp>
@@ -32,8 +32,8 @@
 #include <memory>
 #include <string>
 #include <thread>
-#include <variant>
 #include <unordered_set>
+#include <variant>
 
 #ifndef PROPERTIESCHANGED_QUEUE_SIZE
 #define PROPERTIESCHANGED_QUEUE_SIZE 100
@@ -126,16 +126,16 @@ class EventDetection : public object::Object
      * messages
      */
     static void workerThreadProcessEvents();
-       
+
     /**
      * @brief bootUpEventsDetection() checks all events on BootUp
-     * 
+     *
      *        calls processEventList()
-     *        
+     *
      *        @sa processEventList()
      */
     static void bootUpEventsDetection();
-    
+
     /**
      * @brief Process the list of asserted events or events to be recovered
      *        Call handlers to process that list
@@ -145,25 +145,25 @@ class EventDetection : public object::Object
     static void processEventList(EventCandidateList& eventsCandidateList,
                                  data_accessor::PropertyValue& propertyValue,
                                  bool isMultiThread = true);
-    
+
     /**
      * @brief Pushes into the queue both @a pcTrigger and @a eventPtrs
-     *   
+     *
      * @param pcTrigger the Accessor created from PropertyChange signal
-     * 
+     *
      * @param eventPtrs The list of Events that match the @a pcTrigger
      */
     static void pushToQueue(const data_accessor::DataAccessor& pcTrigger,
                             EventNodeSharedList eventPtrs);
-    
+
     /**
      * @brief Checks if there is data in the queue data to detect events
-     * 
-     *     If so calls EventsDetection() 
-     *     @sa EventsDetection() 
+     *
+     *     If so calls EventsDetection()
+     *     @sa EventsDetection()
      *     @sa processEventList()
      */
-    static void popFromQueue();   
+    static void popFromQueue();
 
     /**
      * @brief This is the callback which handles DBUS properties changes
@@ -189,7 +189,8 @@ class EventDetection : public object::Object
     static void resetDeviceHealth([[maybe_unused]] const std::string& devId)
     {
 #ifdef EVENTING_SERVICE_NO_DEVICE_HEALTH
-        logs_err("not setting device Health: Device Health service is enabled\n");
+        logs_err(
+            "not setting device Health: Device Health service is enabled\n");
 #else
         dbus::DirectObjectMapper om;
         const std::string healthInterface(
@@ -213,7 +214,7 @@ class EventDetection : public object::Object
                 }
             }
         }
-#endif  // EVENTING_SERVICE_NO_DEVICE_HEALTH
+#endif // EVENTING_SERVICE_NO_DEVICE_HEALTH
     }
 
     /**
@@ -279,8 +280,8 @@ class EventDetection : public object::Object
         auto bus = sdbusplus::bus::new_default_system();
         dbus::utility::ManagedObjectType result;
         std::string devId{""};
-        auto deviceNames = event_info::EventNode::separateFullDeviceName(
-            fullDeviceName);
+        auto deviceNames =
+            event_info::EventNode::separateFullDeviceName(fullDeviceName);
         try
         {
             devId = deviceNames.at(0);
@@ -301,8 +302,8 @@ class EventDetection : public object::Object
         }
 
         PROFILING_SWITCH(selftest::TsLatcher TS(
-            "resolveDeviceLogs-" + fullDeviceName + "-" + eventName + "-logsNumber-" +
-            std::to_string(result.size())));
+            "resolveDeviceLogs-" + fullDeviceName + "-" + eventName +
+            "-logsNumber-" + std::to_string(result.size())));
 
         if (eventName.length() == 0)
         {
@@ -368,7 +369,7 @@ class EventDetection : public object::Object
             {
                 // case where new version performing entries generated
                 //  by an old version which does not save FULL_DEVICE_NAME
-                auto reverseCounter = deviceNames.size() -1;
+                auto reverseCounter = deviceNames.size() - 1;
                 // main device devId was already checked, check only others
                 foundAllDevices = true;
                 for (; reverseCounter > 0; reverseCounter--)
@@ -398,16 +399,15 @@ class EventDetection : public object::Object
      * @param possibleEventsPatternList list of possible event patterns
      * @return an EventCandidateList with the Events to be generated
      */
-    EventCandidateList EventsDetection(
-        const data_accessor::DataAccessor& pcTrigger,
-        const EventNodeSharedList&
-            possibleEventPatternList)
+    EventCandidateList
+        EventsDetection(const data_accessor::DataAccessor& pcTrigger,
+                        const EventNodeSharedList& possibleEventPatternList)
     {
         EventCandidateList eventCandidateList;
         std::stringstream ss;
         pcTrigger.print(ss);
         log_dbg("In Detect Event Method for PC trigger %s\n", ss.str().c_str());
-        EventNodeSharedList  eventsOnlyPattern;
+        EventNodeSharedList eventsOnlyPattern;
 
         std::unordered_set<std::string> recoveredEventDevices;
         std::unordered_set<std::string> rootCauseTracerDevice;
@@ -431,7 +431,8 @@ class EventDetection : public object::Object
                 else
                 {
                     log_dbg("Recovery Case: performing recovery actions for "
-                            "event %s\n", eventPtr->event.c_str());
+                            "event %s\n",
+                            eventPtr->event.c_str());
 
                     PROFILING_SWITCH(selftest::TsLatcher TS(
                         "event-detection-recovery-flow-" + eventPtr->event +
@@ -440,8 +441,8 @@ class EventDetection : public object::Object
                     for (auto& entry : recoveryCheck.getAssertedDevices())
                     {
                         // for multi devices, example:  "PCIeSwitch_0/Down_3"
-                        auto fullDeviceName = eventPtr->getFullDeviceName(
-                            entry.deviceIndexTuple);
+                        auto fullDeviceName =
+                            eventPtr->getFullDeviceName(entry.deviceIndexTuple);
                         if (fullDeviceName.empty())
                         {
                             log_err("Empty Device Name Event: '%s'\n",
@@ -459,37 +460,41 @@ class EventDetection : public object::Object
                             {
                                 rootCauseTracerDevice.insert(mainDeviceKey);
                                 eventCandidateList.push_back(std::make_tuple(
-                                   eventPtr, recoveryCheck.getAssertedDevices(),
-                                   true));
+                                    eventPtr,
+                                    recoveryCheck.getAssertedDevices(), true));
                             }
                             else
                             {
                                 log_dbg("skipping, RootCauseTracer already set "
-                                        "for device %s", mainDeviceKey.c_str());
+                                        "for device %s",
+                                        mainDeviceKey.c_str());
                             }
                             log_err("doing Recovery Device: '%s' Event: '%s'\n",
-                               fullDeviceName.c_str(), eventPtr->event.c_str());
+                                    fullDeviceName.c_str(),
+                                    eventPtr->event.c_str());
                             try
                             {
                                 // devices.at(0) =  Phosphor logging namespace
                                 recoveredCnt++;
-                                resolveDeviceLogs(eventPtr->event, fullDeviceName);
+                                resolveDeviceLogs(eventPtr->event,
+                                                  fullDeviceName);
                             }
                             catch (std::runtime_error& e)
                             {
                                 log_err(
                                     "Failed to recover from fault %s on %s due "
                                     "to %s. Corresponding log may not have been"
-                                    " resolved.\n", eventPtr->event.c_str(),
-                                     fullDeviceName.c_str(),
-                                    e.what());
+                                    " resolved.\n",
+                                    eventPtr->event.c_str(),
+                                    fullDeviceName.c_str(), e.what());
                             }
                         }
                         else
                         {
                             log_dbg("skipping, already done Recovery "
                                     "Device:'%s' Event:'%s'\n",
-                               fullDeviceName.c_str(), eventPtr->event.c_str());
+                                    fullDeviceName.c_str(),
+                                    eventPtr->event.c_str());
                         }
                     }
                 }
@@ -508,8 +513,8 @@ class EventDetection : public object::Object
 
             log_dbg("Standard Event Detection Case for event %s\n",
                     eventPtr->event.c_str());
-            std::unique_ptr<data_accessor::CheckAccessor>
-                checkObj(new data_accessor::CheckAccessor(deviceType));
+            std::unique_ptr<data_accessor::CheckAccessor> checkObj(
+                new data_accessor::CheckAccessor(deviceType));
 
             // eventPtr->trigger doesn't exist or pcTrigger is Boot Selftest
             if (eventPtr->accessor == pcTrigger)
@@ -526,7 +531,7 @@ class EventDetection : public object::Object
                         checkObj->passed(), eventPtr->event.c_str());
             }
             else
-            {   // both event.trigger and event.accessor will be checked
+            { // both event.trigger and event.accessor will be checked
                 checkObj->check(eventPtr->trigger, eventPtr->accessor,
                                 pcTrigger);
                 log_dbg("Check=%d against both event.trigger and "
@@ -539,9 +544,8 @@ class EventDetection : public object::Object
             {
                 log_dbg("asserted Event:'%s' Accessor: %s\n",
                         eventPtr->event.c_str(), ss.str().c_str());
-                eventCandidateList.push_back(
-                    std::make_tuple(
-                        eventPtr, check->getAssertedDevices(),false));
+                eventCandidateList.push_back(std::make_tuple(
+                    eventPtr, check->getAssertedDevices(), false));
             }
             else
             {
@@ -552,7 +556,7 @@ class EventDetection : public object::Object
 
         auto assertedCnt = eventCandidateList.size() - rootCauseTracerCnt;
         log_dbg("[total] recovered=%u asserted=%u rootCauseTracers=%u\n",
-                  recoveredCnt, assertedCnt, rootCauseTracerCnt);
+                recoveredCnt, assertedCnt, rootCauseTracerCnt);
         return eventCandidateList;
     }
 
@@ -563,8 +567,7 @@ class EventDetection : public object::Object
      * @return true
      * @return false
      */
-    bool IsEvent(event_info::EventNode& candidate,
-                 const std::string& device,
+    bool IsEvent(event_info::EventNode& candidate, const std::string& device,
                  int compareCount = invalidIntParam)
     {
         int count = candidate.count[device] + 1;
@@ -596,7 +599,7 @@ class EventDetection : public object::Object
         }
         return false;
     }
-    
+
     /**
      * @brief run a single event handle on the Event (does not start new thread)
      * @param event
@@ -612,7 +615,7 @@ class EventDetection : public object::Object
         auto hdlrMgr = *this->_hdlrMgr;
         hdlrMgr.RunHandler(event, name);
     }
-    
+
     /**
      * @brief Throw out a thread to run a single event handle on the Event.
      *
@@ -632,7 +635,7 @@ class EventDetection : public object::Object
         auto thread =
             std::make_unique<std::thread>([this, event, guard, name]() mutable {
                 log_err("started event thread\n");
-                runSingleEventHandler(event, name);               
+                runSingleEventHandler(event, name);
                 log_err("finished event thread\n");
             });
 
@@ -646,7 +649,7 @@ class EventDetection : public object::Object
         }
         log_err("finished RunEventHandler\n");
     }
-    
+
     /**
      * @brief run all event handlers on the Event (does not start new thread)
      * @param event
@@ -660,7 +663,7 @@ class EventDetection : public object::Object
         auto hdlrMgr = *this->_hdlrMgr;
         hdlrMgr.RunAllHandlers(event);
     }
-    
+
     /**
      * @brief Throw out a thread to run all event handlers on the Event.
      *
@@ -686,7 +689,7 @@ class EventDetection : public object::Object
         auto thread =
             std::make_unique<std::thread>([this, event, guard]() mutable {
                 log_err("started event thread\n");
-                runAllEventHandlers(event);                
+                runAllEventHandlers(event);
                 log_err("finished event thread\n");
             });
 
@@ -722,7 +725,7 @@ class EventDetection : public object::Object
      * @return number of events pushed into the queue
      */
     static int eventDiscovery(const data_accessor::DataAccessor& accessor,
-                               const bool& bootup = false);
+                              const bool& bootup = false);
 
   private:
     /**

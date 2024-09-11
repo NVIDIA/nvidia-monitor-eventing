@@ -704,10 +704,10 @@ class DataAccessor
     {
         _dataValue = value;
     }
-    
-    /** Accessor DBUS or CMDLINE has range is expanded to many no range 
+
+    /** Accessor DBUS or CMDLINE has range is expanded to many no range
      *     accessors
-     */  
+     */
     std::vector<DataAccessor> expand() const;
 
   private:

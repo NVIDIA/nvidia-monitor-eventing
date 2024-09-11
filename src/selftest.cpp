@@ -8,7 +8,6 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-
 #include "selftest.hpp"
 
 #include "dbus_accessor.hpp"
@@ -133,8 +132,9 @@ void Selftest::resolveLogEntry(
     }
 }
 
-void Selftest::updateDeviceHealth([[maybe_unused]] const std::string& device,
-                                  [[maybe_unused]] const std::string& health) const
+void Selftest::updateDeviceHealth(
+    [[maybe_unused]] const std::string& device,
+    [[maybe_unused]] const std::string& health) const
 {
 #ifdef EVENTING_SERVICE_NO_DEVICE_HEALTH
     log_err("not setting device Health: Device Health service is enabled\n");
@@ -184,10 +184,11 @@ void Selftest::updateDeviceHealth([[maybe_unused]] const std::string& device,
                             entry("SDBUSERR=%s", e.what()));
         }
     }
-#endif  // EVENTING_SERVICE_NO_DEVICE_HEALTH
+#endif // EVENTING_SERVICE_NO_DEVICE_HEALTH
 }
 
-void Selftest::updateHealthBasedOnResults([[maybe_unused]] const ReportResult& reportRes)
+void Selftest::updateHealthBasedOnResults(
+    [[maybe_unused]] const ReportResult& reportRes)
 {
 #ifdef EVENTING_SERVICE_NO_DEVICE_HEALTH
     log_err("not setting device Health: Device Health service is enabled\n");
@@ -197,7 +198,7 @@ void Selftest::updateHealthBasedOnResults([[maybe_unused]] const ReportResult& r
         auto severity = getDeviceTestResult(dev.second);
         updateDeviceHealth(dev.first, severity);
     }
-#endif  // EVENTING_SERVICE_NO_DEVICE_HEALTH
+#endif // EVENTING_SERVICE_NO_DEVICE_HEALTH
 }
 
 bool Selftest::evaluateDevice(const DeviceResult& deviceResult)
@@ -225,8 +226,7 @@ bool Selftest::evaluateDevice(const DeviceResult& deviceResult)
 
 std::string Selftest::getDeviceTestResult(const DeviceResult& deviceResult)
 {
-    util::Severity worstSeverityFound(
-        util::Severity::SEVERITY::SEVERITY_OK);
+    util::Severity worstSeverityFound(util::Severity::SEVERITY::SEVERITY_OK);
     for (auto& layer : deviceResult.layer)
     {
         auto testPoints = layer.second;
@@ -271,9 +271,9 @@ bool Selftest::isDeviceCached(const std::string& devName,
 }
 
 eventing::RcCode Selftest::perform(const dat_traverse::Device& dev,
-                              ReportResult& reportRes,
-                              std::vector<std::string> layersToIgnore,
-                              const bool& doEventDetermination)
+                                   ReportResult& reportRes,
+                                   std::vector<std::string> layersToIgnore,
+                                   const bool& doEventDetermination)
 {
     shortlog_dbg(<< "selftest: device visited: '" << dev.name << "'");
 
@@ -291,30 +291,30 @@ eventing::RcCode Selftest::perform(const dat_traverse::Device& dev,
         shortlog_dbg(<< "doing event determination for device: '" << dev.name);
     }
 
-    auto fillTpRes =
-        [](selftest::TestPointResult& tp, const std::string& expVal,
-           const data_accessor::PropertyValue& readVal, const std::string& name,
-           auto& severity, bool isDevice) {
-            tp.targetName = name;
-            tp.valExpected = expVal;
-            tp.severity = severity;
-            tp.isTypeDevice = isDevice;
-            // it will empty when if DataAccessor::read() has failed
-            if (readVal.empty())
-            {
-                tp.valRead = "Error - TP read failed.";
-                tp.result = false;
-            }
-            else
-            {
-                tp.valRead = readVal.getString();
-                // in case of empty expected value default to positive result
-                tp.result =
-                    (expVal.size() == 0)
-                        ? true
-                        : readVal == data_accessor::PropertyValue(expVal);
-            }
-        };
+    auto fillTpRes = [](selftest::TestPointResult& tp,
+                        const std::string& expVal,
+                        const data_accessor::PropertyValue& readVal,
+                        const std::string& name, auto& severity,
+                        bool isDevice) {
+        tp.targetName = name;
+        tp.valExpected = expVal;
+        tp.severity = severity;
+        tp.isTypeDevice = isDevice;
+        // it will empty when if DataAccessor::read() has failed
+        if (readVal.empty())
+        {
+            tp.valRead = "Error - TP read failed.";
+            tp.result = false;
+        }
+        else
+        {
+            tp.valRead = readVal.getString();
+            // in case of empty expected value default to positive result
+            tp.result = (expVal.size() == 0)
+                            ? true
+                            : readVal == data_accessor::PropertyValue(expVal);
+        }
+    };
 
     PROFILING_SWITCH(selftest::TsLatcher TS("selftest-perform-" + dev.name));
     auto& availableLayers = dev.test;
@@ -386,9 +386,10 @@ eventing::RcCode Selftest::perform(const dat_traverse::Device& dev,
     return eventing::RcCode::succ;
 }
 
-eventing::RcCode Selftest::performEntireTree(ReportResult& reportRes,
-                                        std::vector<std::string> layersToIgnore,
-                                        const bool& doEventDetermination)
+eventing::RcCode
+    Selftest::performEntireTree(ReportResult& reportRes,
+                                std::vector<std::string> layersToIgnore,
+                                const bool& doEventDetermination)
 {
     PROFILING_SWITCH(selftest::TsLatcher TS("selftest-perform-entire-tree"));
 
@@ -399,7 +400,7 @@ eventing::RcCode Selftest::performEntireTree(ReportResult& reportRes,
             try
             {
                 event_detection::EventDetection::resolveDeviceLogs(
-                     std::string(""), dev.second.name);
+                    std::string(""), dev.second.name);
             }
             catch (std::runtime_error& e)
             {
@@ -575,7 +576,7 @@ void Report::writeSummaryHeader(void)
 /* ========================= free function todo ========================= */
 
 eventing::RcCode DoSelftest([[maybe_unused]] const dat_traverse::Device& dev,
-                       [[maybe_unused]] const std::string& report)
+                            [[maybe_unused]] const std::string& report)
 {
     return eventing::RcCode::error;
 }
@@ -647,8 +648,8 @@ void RootCauseTracer::updateRootCause(
     DATTraverse::setOriginOfCondition(dev, status);
 }
 
-eventing::RcCode RootCauseTracer::process([
-    [maybe_unused]] event_info::EventNode& event)
+eventing::RcCode
+    RootCauseTracer::process([[maybe_unused]] event_info::EventNode& event)
 {
     std::string problemDevice = event.device;
     if ((problemDevice.length() == 0) || (_dat.count(problemDevice) == 0))
@@ -679,8 +680,8 @@ eventing::RcCode RootCauseTracer::process([
     /* append to already existing event severities a selftest severity then find
     worst */
     PROFILING_SWITCH(TS.addTimepoint("update health"));
-    auto selftestSeverity = selftester.getDeviceTestResult(
-                                            completeReportRes[problemDevice]);
+    auto selftestSeverity =
+        selftester.getDeviceTestResult(completeReportRes[problemDevice]);
     event.severities.push_back(selftestSeverity);
 
     std::string health = util::Severity::findMaxSeverity(event.severities);

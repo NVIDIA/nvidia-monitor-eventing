@@ -8,7 +8,6 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-
 #pragma once
 
 #include "dbus_singleton.hpp"
@@ -125,7 +124,6 @@ inline bool getNthStringFromPath(const std::string& path, int index,
     }
     return count >= index;
 }
-
 
 } // namespace utility
 } // namespace dbus

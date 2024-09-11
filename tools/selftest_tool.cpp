@@ -8,8 +8,8 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-#include "common.hpp"
 #include "cmd_line.hpp"
+#include "common.hpp"
 #include "dat_traverse.hpp"
 #include "dbus_accessor.hpp"
 #include "selftest.hpp"
@@ -172,8 +172,7 @@ void updateDevicesHealthBasedOnResults(
 
     for (auto& dev : reportResult)
     {
-        std::string deviceHealth =
-            selftest.getDeviceTestResult(dev.second);
+        std::string deviceHealth = selftest.getDeviceTestResult(dev.second);
 
         std::cout << "Setting health " << dev.first << " = " << deviceHealth
                   << "\r\n";

@@ -10,13 +10,14 @@
 
 #include "data_structures.hpp"
 
-#include <stdexcept>
-
 #include <phosphor-logging/lg2.hpp>
+
+#include <stdexcept>
 
 // Private
 
-size_t TmpFileManager::getActiveCriticalErrorCountForDeviceUnchecked(const std::string& device_)
+size_t TmpFileManager::getActiveCriticalErrorCountForDeviceUnchecked(
+    const std::string& device_)
 {
     shared_string device(device_.c_str(), file->get_allocator<char>());
     if (assertedEventsMap->contains(device))
@@ -27,7 +28,8 @@ size_t TmpFileManager::getActiveCriticalErrorCountForDeviceUnchecked(const std::
     return 0;
 }
 
-size_t TmpFileManager::getActiveWarningErrorCountForDeviceUnchecked(const std::string& device_)
+size_t TmpFileManager::getActiveWarningErrorCountForDeviceUnchecked(
+    const std::string& device_)
 {
     shared_string device(device_.c_str(), file->get_allocator<char>());
     if (assertedEventsMap->contains(device))
@@ -38,8 +40,8 @@ size_t TmpFileManager::getActiveWarningErrorCountForDeviceUnchecked(const std::s
     return 0;
 }
 
-bool TmpFileManager::addCriticalErrorToDeviceUnchecked(const std::string& errorId_,
-    const std::string& device_)
+bool TmpFileManager::addCriticalErrorToDeviceUnchecked(
+    const std::string& errorId_, const std::string& device_)
 {
     shared_string device(device_.c_str(), file->get_allocator<char>());
     ensureMappingPresent(device);
@@ -54,8 +56,8 @@ bool TmpFileManager::addCriticalErrorToDeviceUnchecked(const std::string& errorI
     return true;
 }
 
-bool TmpFileManager::addWarningErrorToDeviceUnchecked(const std::string& errorId_,
-    const std::string& device_)
+bool TmpFileManager::addWarningErrorToDeviceUnchecked(
+    const std::string& errorId_, const std::string& device_)
 {
     shared_string device(device_.c_str(), file->get_allocator<char>());
     ensureMappingPresent(device);
@@ -71,7 +73,7 @@ bool TmpFileManager::addWarningErrorToDeviceUnchecked(const std::string& errorId
 }
 
 bool TmpFileManager::removeErrorFromDeviceUnchecked(const std::string& errorId_,
-    const std::string& device_)
+                                                    const std::string& device_)
 {
     shared_string device(device_.c_str(), file->get_allocator<char>());
     if (!assertedEventsMap->contains(device))
@@ -100,22 +102,24 @@ bool TmpFileManager::growRegion()
 {
     size_t currentSize = file->get_size();
     size_t newSize = currentSize + INCREMENT_SHMEM_SIZE;
-    lg2::warning("resize requested: current: {CURRENTSIZE}, newSize: {NEWSIZE}" \
-        ", maxSize: {MAXSIZE}", "CURRENTSIZE", currentSize, "NEWSIZE", newSize,
-        "MAXSIZE", MAXIMUM_SHMEM_SIZE);
+    lg2::warning("resize requested: current: {CURRENTSIZE}, newSize: {NEWSIZE}"
+                 ", maxSize: {MAXSIZE}",
+                 "CURRENTSIZE", currentSize, "NEWSIZE", newSize, "MAXSIZE",
+                 MAXIMUM_SHMEM_SIZE);
     if (newSize > MAXIMUM_SHMEM_SIZE)
     {
-        lg2::critical("resizing to {NEWSIZE} would exceed the maximum shared " \
-            "memory size limit of {MAXSIZE}", "NEWSIZE", newSize, "MAXSIZE",
-            MAXIMUM_SHMEM_SIZE);
+        lg2::critical("resizing to {NEWSIZE} would exceed the maximum shared "
+                      "memory size limit of {MAXSIZE}",
+                      "NEWSIZE", newSize, "MAXSIZE", MAXIMUM_SHMEM_SIZE);
         return false;
     }
     // first, region needs to be taken offline.
     // This will invalidate any maps, sets, strings, etc.
     assertedEventsMap = nullptr;
-    file.reset(nullptr);  // deletes the object, closing the mapping
+    file.reset(nullptr); // deletes the object, closing the mapping
     // Now, grow the region
-    bool result = bip::managed_mapped_file::grow(MAPPED_FILE_NAME, INCREMENT_SHMEM_SIZE);
+    bool result =
+        bip::managed_mapped_file::grow(MAPPED_FILE_NAME, INCREMENT_SHMEM_SIZE);
     if (!result)
     {
         lg2::critical("bip::managed_mapped_file::grow failed!");
@@ -126,16 +130,16 @@ bool TmpFileManager::growRegion()
     if (!file)
     {
         lg2::critical("file reopen failed!");
-        throw std::runtime_error("failed to reopen shared memory file after " \
-            "closing it for resizing");
+        throw std::runtime_error("failed to reopen shared memory file after "
+                                 "closing it for resizing");
     }
     lg2::warning("file reopened");
     assertedEventsMap = file->find<shared_map>("DeviceAssertedErrorsMap").first;
     if (!assertedEventsMap)
     {
         lg2::critical("assertedEventsMap no longer in file!");
-        throw std::runtime_error("data structure missing from shared memory " \
-            "after reopening it after resize");
+        throw std::runtime_error("data structure missing from shared memory "
+                                 "after reopening it after resize");
     }
     lg2::warning("assertedEventsMap found in resized file");
 
