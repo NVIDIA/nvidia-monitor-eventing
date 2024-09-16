@@ -8,7 +8,6 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-#include <cstdint>
 #include "cmd_line.hpp"
 #include "common.hpp"
 #include "dat_traverse.hpp"
@@ -21,6 +20,7 @@
 #include <sdbusplus/asio/object_server.hpp>
 #include <sdbusplus/bus.hpp>
 
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <map>
