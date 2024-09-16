@@ -8,8 +8,8 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
-#include "common.hpp"
 #include "cmd_line.hpp"
+#include "common.hpp"
 #include "dat_traverse.hpp"
 #include "dbus_accessor.hpp"
 #include "selftest.hpp"
