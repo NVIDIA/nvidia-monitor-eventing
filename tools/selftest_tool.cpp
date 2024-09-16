@@ -21,6 +21,8 @@
 #include <sdbusplus/bus.hpp>
 
 #include <cstdint>
+ #include <stdint.h>
+
 #include <fstream>
 #include <iostream>
 #include <map>
