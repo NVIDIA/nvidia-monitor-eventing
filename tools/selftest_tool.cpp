@@ -14,6 +14,8 @@
 #include "dbus_accessor.hpp"
 #include "selftest.hpp"
 
+#include <stdint.h>
+
 #include <dbus_log_utils.hpp>
 #include <dbus_utility.hpp>
 #include <phosphor-logging/log.hpp>
@@ -21,8 +23,6 @@
 #include <sdbusplus/bus.hpp>
 
 #include <cstdint>
- #include <stdint.h>
-
 #include <fstream>
 #include <iostream>
 #include <map>
