@@ -8,6 +8,7 @@
  * license agreement from NVIDIA CORPORATION is strictly prohibited.
  */
 
+#include <cstdint>
 #include "cmd_line.hpp"
 #include "common.hpp"
 #include "dat_traverse.hpp"
