@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <cstdint>
+#include <stdint.h>
+
 #include <functional>
 #include <iomanip>
 #include <iostream>
