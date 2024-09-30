@@ -23,7 +23,6 @@ import json
 
 from getpass import getpass
 from shlex import split
-from time import sleep
 import argparse
 from requests import get
 from requests.auth import HTTPBasicAuth

@@ -12,11 +12,8 @@
 A Glacier spec2code tool for boot status parser, ver=0.1.
 """
 
-import sys
 import argparse
-import csv, json
-import re
-import copy
+import csv
 
 
 def to_glacier_boot_status_parser(boot_status_table_csv):

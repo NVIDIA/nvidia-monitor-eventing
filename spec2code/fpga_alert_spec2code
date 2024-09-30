@@ -12,7 +12,6 @@
 A FPGA alert spec2code tool for device monitor & eventing support, ver=0.1
 """
 
-import sys
 import argparse
 import csv
 import os

@@ -8,7 +8,6 @@
 
 import ids
 import argparse
-import pprint
 import json
 import sys
 

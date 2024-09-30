@@ -10,7 +10,6 @@
 # of the full 'dat.json' rooted in a given device.
 
 import argparse
-import pprint
 import json
 import sys
 
