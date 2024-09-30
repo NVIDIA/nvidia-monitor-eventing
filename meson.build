@@ -55,6 +55,10 @@ if get_option('device-status-fs').enabled()
     add_project_arguments('-DEVENTING_SERVICE_DEVICE_STATUS_FS', language : lang)
 endif
 
+if get_option('device-status-shmem').enabled()
+    add_project_arguments('-DEVENTING_SERVICE_DEVICE_STATUS_NVIDIA_SHMEM', language : lang)
+endif
+
 
 # Get the options and enable the respective features
 ## create a MAP of  "options : feature_flag"

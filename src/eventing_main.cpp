@@ -27,6 +27,7 @@
 #include "message_composer.hpp"
 #include "pc_event.hpp"
 #include "selftest.hpp"
+#include "tal_singleton.hpp"
 #include "threadpool_manager.hpp"
 #include "util.hpp"
 
@@ -36,6 +37,7 @@
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/asio/object_server.hpp>
+#include <tal.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -548,6 +550,19 @@ int main(int argc, char* argv[])
             logs_err("NOT Performing Eventing Bootup.\n");
         }
 #endif // EVENTING_FEATURE_ONLY
+
+#ifdef EVENTING_SERVICE_DEVICE_STATUS_NVIDIA_SHMEM
+        // Initializing TAL
+        if (tal::TelemetryAggregator::namespaceInit(tal::ProcessType::Producer,
+                                                    "nvidia-monitor-eventing"))
+        {
+            logs_err(
+                "Initialized shared memory for producer service nvidia-monitor-eventing");
+        }
+        auto& talInstance = event_tal::TalHealthMRD::getInstance();
+        talInstance.initializeSharedMemory(
+            eventing::profile::deviceAssociation);
+#endif
 
         logs_err("NVIDIA Monitor and Eventing daemon is ready.\n");
         io->run();

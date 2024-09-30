@@ -40,3 +40,6 @@ option('device-status-fs', type : 'feature', value : 'enabled',
         description : 'Update Device Health Status over FS')
 option('device-status-fs-path', type : 'string', value : '/tmp/devices',
         description : 'Specify device status filesystem top folder.')
+
+# Shared memory 
+option('device-status-shmem', type: 'feature', description: 'Use NVIDIA Shared-Memory IPC', value: 'enabled')

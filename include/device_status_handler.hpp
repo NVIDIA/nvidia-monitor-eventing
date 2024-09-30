@@ -22,6 +22,7 @@
 #include "dbus_accessor.hpp"
 #include "event_handler.hpp"
 #include "event_info.hpp"
+#include "tal_singleton.hpp"
 #include "util.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -202,6 +203,12 @@ class DeviceStatusHandler : public EventHandler
                     filePath.c_str());
 
             int rc = util::file_util::writeJson2File(filePath, j);
+#ifdef EVENTING_SERVICE_DEVICE_STATUS_NVIDIA_SHMEM
+            auto& mrdInstance = event_tal::TalHealthMRD::getInstance();
+            mrdInstance.updateDeviceHealthAndRollup(
+                dev.name, j["Status"]["Health"], j["Status"]["HealthRollup"]);
+#endif
+
             if (rc != 0)
             {
                 log_err("Save device (%s) status failed, rc = %d!\n",

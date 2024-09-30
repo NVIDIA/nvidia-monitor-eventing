@@ -44,17 +44,25 @@ monitor_eventingd_sources = ['eventing_main.cpp']
 monitor_eventingd_deps = declare_dependency(link_with : [eventinglib, selftestlib],
   include_directories : inc)
 
-monitor_eventingd = executable(
-    'monitor-eventingd',
-    monitor_eventingd_sources,
-    include_directories: inc,
-    dependencies: [
+
+deps = [
         monitor_eventingd_deps,
         sdbusplus_dep,
         sdeventplus_dep,
         phosphor_logging_dep,
         meson.get_compiler('cpp').find_library('pthread'),
         meson.get_compiler('cpp').find_library('rt')
-    ],
+]
+
+if get_option('device-status-shmem').enabled()
+    nvidia_shmem = dependency('nvidia-tal', required: true)
+    deps += nvidia_shmem
+endif
+
+monitor_eventingd = executable(
+    'monitor-eventingd',
+    monitor_eventingd_sources,
+    include_directories: inc,
+    dependencies: deps,
     install: true,
 )
