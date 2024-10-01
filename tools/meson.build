@@ -38,6 +38,7 @@ scripts = [
     'wrapper_i2c_status/i2c_wrapper',
     'wrapper_nvlink_wp_status/nvlink-wp-status-wrapper',
     'device_id_mapping/device-id-norm.sh',
+    'nvidia-xid-event-handler',
 
     'fpga_regtbl',
     'glacier_boot_status_parser',
