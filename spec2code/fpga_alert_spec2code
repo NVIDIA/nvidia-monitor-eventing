@@ -12,6 +12,7 @@
 A FPGA alert spec2code tool for device monitor & eventing support, ver=0.1
 """
 
+import sys
 import argparse
 import csv
 import os
@@ -210,7 +211,7 @@ class FpgaRegtbl:
                 # get intr mask name and def_value
                 rc, mask_name, intr_mask = self.get_intr_mask_info(intr_name)
                 if rc != 0:
-                    print("[E] Can't find mask for intr: ", intr_name)
+                    print("[E] Can't find mask for intr: ", intr_name, file=sys.stderr)
                     continue
 
                 # get byte range
@@ -224,7 +225,7 @@ class FpgaRegtbl:
                 # get bitmask
                 rc, bitmask, bit_range = bitrange_to_bitmask(bits)
                 if rc != 0:
-                    print("[E] Unsupported bits format: ", bits)
+                    print("[E] Unsupported bits format: ", bits, file=sys.stderr)
                     continue
 
                 # mask off the interrupts per regtbl
@@ -306,7 +307,7 @@ class FpgaRegtbl:
                 # get intr mask name and def_value
                 rc, mask_name, intr_mask = self.get_intr_mask_info(intr_name)
                 if rc != 0:
-                    print("[W] Can't find mask for intr: ", intr_name)
+                    print("[W] Can't find mask for intr: ", intr_name, file=sys.stderr)
                     intr_mask = 0
 
                 # format byte range in "min(dec)-max(dec)"
@@ -334,7 +335,7 @@ class FpgaRegtbl:
                 # get bitmask
                 rc, bitmask, bit_range = bitrange_to_bitmask(bits)
                 if rc != 0:
-                    print("[E] Unsupported bits format: ", bits)
+                    print("[E] Unsupported bits format: ", bits, file=sys.stderr)
                     continue
 
                 # mask off the interrupts per regtbl
@@ -390,10 +391,10 @@ class FpgaRegtbl:
             try:
                 with open(conf_file_name, "w+") as output:
                     output.write(output_data)
-                print("[I] The FPGA regtbl platform config is generated at [", conf_file_name, "].")
+                print("[I] The FPGA regtbl platform config is generated at [", conf_file_name, "].", file=sys.stderr)
                 return 0
             except:
-                print("[E] Failed to generate the FPGA regtbl data!")
+                print("[E] Failed to generate the FPGA regtbl data!", file=sys.stderr)
                 return 1
         else:
             print(conf_file_name)
@@ -421,7 +422,7 @@ class FpgaRegtbl:
                 # get intr mask name and def_value
                 rc, mask_name, intr_mask = self.get_intr_mask_info(intr_name)
                 if rc != 0:
-                    print("[E] Can't find mask for intr: ", intr_name)
+                    print("[E] Can't find mask for intr: ", intr_name, file=sys.stderr)
                     continue
 
                 # get byte range
@@ -435,7 +436,7 @@ class FpgaRegtbl:
                 # get bitmask
                 rc, bitmask, bit_range = bitrange_to_bitmask(bits)
                 if rc != 0:
-                    print("[E] Unsupported bits format: ", bits)
+                    print("[E] Unsupported bits format: ", bits, file=sys.stderr)
                     continue
 
                 # mask off the interrupts per regtbl
@@ -446,8 +447,25 @@ class FpgaRegtbl:
 def convert_xlsx_to_csv(xlsx_file, sheet_name):
     import pandas as pd
 
+    def find_header_row(xlsx_file, sheet_name):
+        # Load the sheet into a DataFrame without specifying a header
+        df = pd.read_excel(xlsx_file, sheet_name=sheet_name, header=None)
+
+        # Iterate through the rows to find the first non-empty row
+        for i, row in df.iterrows():
+            if not row.isnull().all():
+                return i
+
+        return None
+
+    # Find the header row
+    header_row = find_header_row(xlsx_file, sheet_name)
+
+    if header_row is None:
+        return None
+
     # Read the specified sheet from the Excel file
-    df = pd.read_excel(xlsx_file, header=4, sheet_name=sheet_name)
+    df = pd.read_excel(xlsx_file, sheet_name=sheet_name, header=header_row)
 
     # Make the csv file path.
     csv_file = "/tmp/" + os.path.splitext(os.path.basename(xlsx_file))[0] + "_" + sheet_name.replace(" ", "_") + ".csv"
@@ -458,11 +476,14 @@ def convert_xlsx_to_csv(xlsx_file, sheet_name):
     return csv_file
 
 help_example="\
-Examples,\n \
-  For GB200 NVL fpga_regtbl_platform.conf,\n \
-  ./fpga_alert_spec2code bianca_regtbl_i2c_info_v1.xlsx \"\" 0x01 0x11 4 to_regtbl_platform_conf\n \
-\n \
-  fpga_regtbl_platform.conf will be generated in current folder.\n \
+Examples,\n\
+  For GB200 NVL fpga_regtbl_platform.conf,\n\
+  ./fpga_alert_spec2code bianca_regtbl_i2c_info_v1.xlsx \"REGTBL\"  \"\" 0x01 0x11 4 to_regtbl_platform_conf\n\
+\n\
+  For Umbriel fpga_regtbl_platform.conf,\n\
+  ./fpga_alert_spec2code Umbriel_I2C_Request_Form.xlsx \"register table (1.08+)\"  \"\" 0x02 0x31 2 to_regtbl_platform_conf\n\
+\n\
+  fpga_regtbl_platform.conf will be generated in current folder.\n\
 "
 
 def main():
@@ -476,6 +497,11 @@ def main():
         "regtbl_file",
         metavar="REGTBL_FILE",
         help="FPGA register table definition file in .xlsx format.")
+
+    parser.add_argument(
+        "regtbl_tab",
+        metavar="REGTBL_TAB",
+        help="The spreadsheet tab name of FPGA register table definition file in .xlsx format.")
 
     parser.add_argument(
         "intr_clr_cmds",
@@ -510,7 +536,13 @@ def main():
     i2c_bus = args.regtbl_i2c_bus
     i2c_addr = args.regtbl_i2c_addr
     regtbl_pages = args.regtbl_pages
-    regtbl_csv = convert_xlsx_to_csv(args.regtbl_file, "REGTBL")
+    regtbl_tab = args.regtbl_tab
+    regtbl_csv = convert_xlsx_to_csv(args.regtbl_file, regtbl_tab)
+
+    if regtbl_csv is None:
+        print("[E] No header row found!", file=sys.stderr)
+        return 1
+
     intr_clr_csv = args.intr_clr_cmds
     
     fpga_regtbl = FpgaRegtbl(i2c_bus, i2c_addr, regtbl_pages, regtbl_csv, intr_clr_csv)
@@ -531,7 +563,7 @@ def main():
         rc = fpga_regtbl.get_reg_list(True)
     else:
         print("Wrong args: ", args.conv_method)
-        rc = 1
+        rc = 2
 
     return rc
 
