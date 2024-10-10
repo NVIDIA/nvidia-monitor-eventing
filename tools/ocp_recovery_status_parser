@@ -50,7 +50,7 @@ RecoveryReason_0x11="Forced Recovery"
 
 show_help()
 {
-    echo "Version: $app_ver"
+    echo "Convert Device OCP Device Status Failures into Human Readable Message, ver=$app_ver"
     echo "Usage:"
     echo " $app_name <device_id>"
     echo
@@ -109,8 +109,8 @@ get_device_status() #(ocp_status[])
 
     local byte2_3=$(( (byte2 << 8) | byte3 ))
 
-    byte0=`printf "0x%X" "$byte0"`
-    byte2_3=`printf "0x%X" "$byte2_3"`
+    byte0=$(printf "0x%X" "$byte0")
+    byte2_3=$(printf "0x%X" "$byte2_3")
 
     local var="DeviceStatus_$byte0"
     local status=${!var}
@@ -124,12 +124,16 @@ get_device_status() #(ocp_status[])
     # else, print status + reason.
     var="RecoveryReason_$byte2_3"
     local reason=${!var}
+    
+    # if reason empty (unknown), show the raw data
+    [ -z "$reason" ] && reason="OtherReasonCodes($byte2_3)"
 
     echo "$status - $reason"
     return 0
 }
 
 ## MAIN ##
+[ "$1" == "--help" ] && show_help && exit 1
 [ "$#" -ne 1 ] && show_help && exit 1
 
 deviceid=$1;shift

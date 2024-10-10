@@ -179,7 +179,7 @@ get_boot_status() #(device)
     # convert array byte into integer in big endian order
     local byte
     for byte in "${value[@]}"; do
-        data=$(( (data < 8) | byte ))
+        data=$(( (data << 8) | byte ))
     done
 
     echo $data # in dec
