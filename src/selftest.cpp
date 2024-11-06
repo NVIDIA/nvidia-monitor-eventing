@@ -142,57 +142,7 @@ void Selftest::resolveLogEntry(
 void Selftest::updateDeviceHealth(
     [[maybe_unused]] const std::string& device,
     [[maybe_unused]] const std::string& health) const
-{
-#ifdef EVENTING_SERVICE_NO_DEVICE_HEALTH
-    log_err("not setting device Health: Device Health service is enabled\n");
-#else
-    if (_dat.at(device).canSetHealthOnDbus())
-    {
-
-        try
-        {
-            const std::string healthInterface(
-                "xyz.openbmc_project.State.Decorator.Health");
-            dbus::DirectObjectMapper om;
-            std::vector<std::string> objPathsToAlter =
-                om.getAllDevIdObjPaths(device, healthInterface);
-            if (!objPathsToAlter.empty())
-            {
-                for (const auto& objPath : objPathsToAlter)
-                {
-                    std::string healthState =
-                        "xyz.openbmc_project.State.Decorator.Health.HealthType." +
-                        health;
-
-                    log_dbg("Setting Health Property for: %s healthState: %s\n",
-                            objPath.c_str(), healthState.c_str());
-                    bool ok = dbus::setDbusProperty(
-                        objPath, "xyz.openbmc_project.State.Decorator.Health",
-                        "Health", PropertyVariant(healthState));
-                    if (ok == true)
-                    {
-                        log_dbg("Changed health property as expected\n");
-                    }
-                }
-            }
-            else // ! objPathsToAlter.empty()
-            {
-                log_err("No object paths found in the subtree of "
-                        "'xyz.openbmc_project.ObjectMapper' "
-                        "corresponding to the '%s' device id "
-                        "and implementing the '%s' interface\n",
-                        device.c_str(), healthInterface.c_str());
-            }
-        }
-        catch (const sdbusplus::exception::SdBusError& e)
-        {
-            std::cerr << "ERROR WITH SDBUSPLUS BUS " << e.what() << "\n";
-            log<level::ERR>("Failed to establish sdbusplus connection",
-                            entry("SDBUSERR=%s", e.what()));
-        }
-    }
-#endif // EVENTING_SERVICE_NO_DEVICE_HEALTH
-}
+{}
 
 void Selftest::updateHealthBasedOnResults(
     [[maybe_unused]] const ReportResult& reportRes)
