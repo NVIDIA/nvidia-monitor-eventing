@@ -399,11 +399,20 @@ int main(int argc, char* argv[])
     logs_err("Trying to load Events from file\n");
 
     // Initialization
-    event_info::loadFromFile(
-        eventing::profile::eventMap, eventing::profile::propertyFilterSet,
-        eventing::profile::eventTriggerView,
-        eventing::profile::eventAccessorView,
-        eventing::profile::eventRecoveryView, eventing::configuration.event);
+    try
+    {
+        event_info::loadFromFile(eventing::profile::eventMap,
+                                 eventing::profile::propertyFilterSet,
+                                 eventing::profile::eventTriggerView,
+                                 eventing::profile::eventAccessorView,
+                                 eventing::profile::eventRecoveryView,
+                                 eventing::configuration.event);
+    }
+    catch (const std::exception& e)
+    {
+        shortlogs_err(<< "Exception caught while load profiles: " << e.what());
+        return 1;
+    }
 
     // event_info::printMap(eventing::profile::eventMap);
 
@@ -411,9 +420,19 @@ int main(int argc, char* argv[])
     message_composer::MessageComposer msgComposer("MsgComp1");
 
     // Create threadpool manager
-    event_detection::threadpoolManager = std::make_unique<ThreadpoolManager>(
-        eventing::configuration.running_thread_limit,
-        eventing::configuration.total_thread_limit);
+    try
+    {
+        event_detection::threadpoolManager =
+            std::make_unique<ThreadpoolManager>(
+                eventing::configuration.running_thread_limit,
+                eventing::configuration.total_thread_limit);
+    }
+    catch (const std::exception& e)
+    {
+        shortlogs_err(<< "Exception caught while creating threadpool: "
+                      << e.what());
+        return 1;
+    }
 
     event_detection::queue =
         std::make_unique<PcQueueType>(PROPERTIESCHANGED_QUEUE_SIZE);
