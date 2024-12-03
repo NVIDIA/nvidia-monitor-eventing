@@ -22,6 +22,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+#include <format>
+
 namespace util
 {
 
@@ -35,6 +37,10 @@ bool existsRange(const std::string& str)
     device_id::DeviceIdPattern devicePattern(str);
     return existsRange(devicePattern);
 }
+
+#ifndef DEVICEID_MAP_MAX_SIZE
+#define DEVICEID_MAP_MAX_SIZE 512
+#endif
 
 DeviceIdMap expandDeviceRange(const device_id::DeviceIdPattern& patternObj)
 {
@@ -51,6 +57,12 @@ DeviceIdMap expandDeviceRange(const device_id::DeviceIdPattern& patternObj)
         {
             if (instance.size() > 0) // empty value not supported.
             {
+                if (initial_key >= DEVICEID_MAP_MAX_SIZE)
+                {
+                    throw std::runtime_error(
+                        std::format("DeviceId map key oversize ({} / {})",
+                                    initial_key, DEVICEID_MAP_MAX_SIZE));
+                }
                 deviceIdMap[initial_key++] = instance;
             }
         }
