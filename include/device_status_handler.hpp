@@ -134,14 +134,14 @@ class DeviceStatusHandler : public EventHandler
         if (event.configEventNode.count("managed") == 0)
         {
             log_dbg("Event (%s) is unmanaged by default, no health rollup.\n",
-                    event.errorId);
+                    event.errorId.c_str());
             return eventing::RcCode::succ;
         }
 
         if (event.configEventNode["managed"] != "yes")
         {
             log_dbg("Event (%s) is unmanaged, no health rollup.\n",
-                    event.errorId);
+                    event.errorId.c_str());
             return eventing::RcCode::succ;
         }
 

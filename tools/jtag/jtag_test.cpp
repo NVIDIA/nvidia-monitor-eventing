@@ -394,6 +394,9 @@ int main(int argc, char** argv)
     std::cout << "0" << std::endl;
     return 0;
 err:
-    close(fd);
+    if (fd >= 0)
+    {
+        close(fd);
+    }
     return ret;
 }

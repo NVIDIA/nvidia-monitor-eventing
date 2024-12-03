@@ -612,7 +612,7 @@ int writeJson2File(const std::string& filePath, const nlohmann::json& j)
     catch (const boost::exception& ex)
     {
         logs_err("A boost::exception error occurred: %s\n",
-                 boost::diagnostic_information(ex));
+                 boost::diagnostic_information(ex).c_str());
         return -4;
     }
     catch (...)

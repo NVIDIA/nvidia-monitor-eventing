@@ -408,7 +408,6 @@ class Log
         // to file
         if (logStream.is_open())
         {
-            log(LogLevel::information, "=========== End ===========\n");
             logStream.flush();
             logStream.close();
         }
