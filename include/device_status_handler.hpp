@@ -86,21 +86,28 @@ DeviceStatus deviceStatus;
 nlohmann::json lookupRollupDeviceId(const nlohmann::json& deviceAssociation,
                                     const std::string& deviceId)
 {
+    logs_dbg("Entry lookupRollupDeviceId for deviceId(%s).\n",
+             deviceId.c_str());
     auto j = deviceAssociation.find(deviceId);
     if (j != deviceAssociation.end())
     {
+        logs_dbg("dev(%s) found in dat.\n", deviceId.c_str());
         return *j;
     }
     else
     {
+        logs_dbg("dev(%s) not found in dat, trying [Other] field.\n", deviceId);
         // If deviceId not found in the list, use "[Other]" field info.
         auto jOther = deviceAssociation.find("[Other]");
         if (jOther != deviceAssociation.end())
         {
+            logs_dbg("[Other] field: (%s).\n",
+                     jOther->get<std::string>().c_str());
             return *jOther;
         }
         else
         {
+            logs_err("No [Other] field either, it's a problem!\n");
             // If no "[Other]" either, return nothing.
             return nlohmann::json::array();
         }
@@ -131,6 +138,9 @@ class DeviceStatusHandler : public EventHandler
     eventing::RcCode
         process([[maybe_unused]] event_info::EventNode& event) override
     {
+        log_dbg("Entry process (%s:%s)\n", event.device.c_str(),
+                event.errorId.c_str());
+
         if (event.configEventNode.count("managed") == 0)
         {
             log_dbg("Event (%s) is unmanaged by default, no health rollup.\n",
@@ -145,25 +155,35 @@ class DeviceStatusHandler : public EventHandler
             return eventing::RcCode::succ;
         }
 
+        log_dbg("(%s) needs DeviceStatus evaluation.\n", event.errorId.c_str());
         auto names = lookupRollupDeviceId(eventing::profile::deviceAssociation,
                                           event.device);
-        for (auto& name : names)
+        for (auto& jName : names)
         {
+            std::string name = jName.get<std::string>();
+            log_dbg("(%s) checking rollup device (%s).\n",
+                    event.errorId.c_str(), name.c_str());
             DeviceStatus::Device& dev = deviceStatus.getDevice(name);
             if (dev.name.empty())
             {
-                log_err("Failed to get DeviceStatus for device='%s'\n",
+                log_err("(%s)Failed to get DeviceStatus for device='%s'\n",
                         event.device.c_str());
                 continue;
             }
 
+            log_dbg("(%s) DeviceStatus is valid (%s).", event.errorId.c_str(),
+                    dev.name.c_str());
+
             if (dev.Health > event.messageRegistry.message.severity)
             {
                 log_dbg(
-                    "Lower severity event, no need to update status of (%s).",
-                    dev.name.c_str());
+                    "Lower severity event (%s), no need to update status of (%s).\n",
+                    event.errorId.c_str(), dev.name.c_str());
                 return eventing::RcCode::succ;
             }
+
+            log_err("Event (%s) severity >= cache, updating the cache.\n",
+                    event.errorId.c_str());
 
             nlohmann::json j;
 
@@ -192,6 +212,9 @@ class DeviceStatusHandler : public EventHandler
 
             j["Status"]["Conditions"].push_back(jCond);
 
+            log_dbg("json(%s): %s.\n", event.errorId.c_str(),
+                    j.get<std::string>().c_str());
+
             // Write back to file & update device status cache
             std::lock_guard<std::mutex> guard(_mutex);
             std::filesystem::create_directories(monevtDeviceStatusFSPath);
@@ -215,6 +238,8 @@ class DeviceStatusHandler : public EventHandler
                         dev.name.c_str(), rc);
                 return eventing::RcCode::error;
             }
+
+            log_dbg("Save device (%s) status done.\n", dev.name.c_str());
 
             // Update Rollup Device Health/Rollup after the devinfofs file
             // updated successfully.
