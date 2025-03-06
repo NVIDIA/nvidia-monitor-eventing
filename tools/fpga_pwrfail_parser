@@ -1,0 +1,402 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Parse GB FPGA PwrFail registers
+
+set -o pipefail
+
+app_name="fpga_pwrfail_parser"
+app_ver="0.1"
+
+app_tmp="/tmp/$app_name"
+
+# Configuration file basename
+CONFIG_FILE="fpga_regtbl_platform.conf"
+
+# Define a list of possible directory paths for the configuration file
+config_dirs=(
+    "."
+    "/usr/share"
+    "/etc"
+)
+
+# Loop through the paths and source the first one found
+for dir in "${config_dirs[@]}"; do
+    config_path="${dir}/${CONFIG_FILE}"
+    [ -f "$config_path" ] || continue
+    source "$config_path" && break
+done
+
+REGTBL_PAGE_SIZE=256
+
+show_help()
+{
+    echo "Version: $app_ver"
+    echo "Usage:"
+    echo " $app_name"
+    echo
+    echo "Output:"
+    echo " pwrfail_reg_names{pwr_value} (separated by ;)"
+    echo
+}
+
+err() #msg
+{
+    echo "$app_name:[E]$*" >&2
+}
+
+dump_regtbl()
+{
+    # For EINJ and UT
+    [ -f "$regtbl_einj" ] && cat $regtbl_einj && return 0
+
+    local rc=0
+    # Read all regtbl pages from FPGA and combine them as one
+    local cur_data
+    local page
+    for page in $(seq 0 $(($REGTBL_PAGES-1))); do
+        local cmd="i2ctransfer -y $REGTBL_BUS w2@$REGTBL_SADDR 0x00 $page r$REGTBL_PAGE_SIZE"
+        local s_data;s_data=$($cmd | sed 's/0x//g');rc=$?
+        [ "$rc" -ne 0 ] && return $rc
+        cur_data="$cur_data $s_data"
+    done
+    cur_data=${cur_data:1} # remove the leading ' '
+
+    echo $cur_data
+    return 0
+}
+
+get_reg_data() #(byte_off, byte_len, bit_mask, regtbl_data)
+{
+    local byte_off=$1;shift
+    local byte_len=$1;shift
+    local bit_mask=$1;shift
+    local regtbl_data="$*"
+
+    # Get reg data from regblt per its position info
+    local reg_bytes=${regtbl_data:$byte_off:$byte_len}
+
+    local b
+    local reg_value
+    # reg may cross multiple bytes, combine them as one
+    for b in ${reg_bytes}; do
+        reg_value=${b}${reg_value}
+    done
+
+    # Get the reg value per its bit_mask
+    local reg_value=$((0x$reg_value & $bit_mask))
+
+    # Account for any bit offsets in the masked reg data
+    while [ $(($bit_mask & 1)) -eq  0 ];do
+        bit_mask=$(($bit_mask>>1))
+        reg_value=$(($reg_value>>1))
+    done
+
+    echo $reg_value
+
+    return 0
+}
+
+get_all_pwrfail()
+{
+    local rc=0
+
+    # Dump regtbl
+    local regtbl_data;regtbl_data=$(dump_regtbl);rc=$?
+    [ "$rc" -ne 0 ] && return $rc
+
+    local output
+    # Loop through all pwrfail regs to check if asserted
+    local line
+    for line in "${pf_reg[@]}"; do
+        [ -z "$line" ] && continue
+
+        local field=(${line//,/ })
+        local value;value=$(get_reg_data "${field[1]}" "${field[2]}" "${field[3]}" "$regtbl_data");rc=$?
+        [ "$rc" -ne 0 ] && return $rc
+
+        # if reg not assert, skip
+        [ "$value" == "0" ] && continue
+
+        # otherwise, prepare the output string
+        output="${output};${field[0]}{$(printf "0x%x" $value)}"
+    done
+
+    echo ${output:1} # remove the leading ";" and return out
+    return 0
+}
+
+# EINJ capability
+regtbl_dev="FPGA_0"
+regtbl_einj="$app_tmp/$regtbl_dev/regtbl.einj"
+regtbl_size=$((REGTBL_PAGES * REGTBL_PAGE_SIZE))
+
+einj_cap()
+{
+    echo "list_errors"
+    echo "list_devices"
+    grep -E "^einj_*()" $(which $0) | cut -d'(' -f1 2>/dev/null
+
+    return 0
+}
+
+list_errors()
+{
+    local reg
+    for reg in ${pf_reg[@]}; do
+        echo ${reg%%,*}
+    done
+
+    return 0
+}
+
+list_devices()
+{
+    echo "$regtbl_dev"
+}
+
+show_regtbl() #(regtbl_dummy)
+{
+    xxd -r -p "$1" | xxd -g 1 -c 16
+}
+
+einj_start()
+{
+    # Create all deassert dummy FPGA regtbl
+    mkdir -p ${regtbl_einj%/*}
+    printf "00 %.0s" {1..1024} > "$regtbl_einj"
+    return 0
+}
+
+einj_stop()
+{
+    rm -rf "$regtbl_einj" &>/dev/null
+    return 0
+}
+
+einj_is_running()
+{
+    [ -f "$regtbl_einj" ]
+}
+
+einj_error() #(dev_id, errors[])
+{
+    local dev_id=$1;shift
+    local pf_reg_name=$*
+
+    local rc=0
+
+    # Backup regtbl.einj
+    #[ -f "${regtbl_einj}.bkp" ] || cp -f $regtbl_einj ${regtbl_einj}.bkp 2>/dev/null
+
+    # Dump regtbl
+    local regtbl_data;regtbl_data=$(cat "$regtbl_einj" 2>/dev/null);rc=$?
+    if [ "$rc" -ne 0 ] || [ -z "$regtbl_data" ]; then
+        regtbl_data=$(printf "00 %.0s" {1..1024})
+    fi
+    local regtbl=($regtbl_data)
+
+    # Inject target reg
+    local line
+    for line in ${pf_reg[@]}; do
+        [ -z "$line" ] && continue
+
+        local field=(${line//,/ })
+        local name=${field[0]}
+        local byte_range=${field[4]}
+        local byte="0x${regtbl[$byte_range]}"
+        local mask="${field[3]}"
+
+        # Caller wants to inject all errors
+        if [ "$pf_reg_name" == "all" ] || [ -z "$pf_reg_name" ]; then
+            echo "Injecting: $name"
+            regtbl[$byte_range]=$(printf "%02x" $((byte | mask)))
+            continue
+        fi
+
+        # Caller wants to inject specific errors
+        local reg_name
+        for reg_name in $pf_reg_name; do
+            if [ "$name" == "$reg_name" ]; then
+                echo "Injecting: $name"
+                regtbl[$byte_range]=$(printf "%02x" $((byte | mask)))
+                break
+            fi
+        done
+    done
+    echo ${regtbl[*]} > $regtbl_einj
+    return 0
+}
+
+einj_error_all() #(dev_id)
+{
+    einj_error "$1" "all"
+    return $?
+}
+
+einj_clear() #(dev_id, errors[])
+{
+    local dev_id=$1;shift
+    local pf_reg_name=$*
+
+    local rc=0
+
+    # Backup regtbl.einj
+    #[ -f "${regtbl_einj}.bkp" ] || cp -f $regtbl_einj ${regtbl_einj}.bkp 2>/dev/null
+
+    # Dump regtbl
+    local regtbl_data;regtbl_data=$(cat "$regtbl_einj" 2>/dev/null);rc=$?
+    if [ "$rc" -ne 0 ] || [ -z "$regtbl_data" ]; then
+        regtbl_data=$(printf "ff %.0s" {1..1024})
+    fi
+    local regtbl=($regtbl_data)
+
+    # Clear the target reg
+    local line
+    for line in ${pf_reg[@]}; do
+        [ -z "$line" ] && continue
+
+        local field=(${line//,/ })
+        local name=${field[0]}
+        local byte_range=${field[4]}
+        local byte="0x${regtbl[$byte_range]}"
+        local mask="${field[3]}"
+
+        # Caller wants to inject all errors
+        if [ "$pf_reg_name" == "all" ] || [ -z "$pf_reg_name" ]; then
+            echo "Injecting: $name"
+            regtbl[$byte_range]=$(printf "%02x" $((byte & ~mask)))
+            continue
+        fi
+
+        # Caller wants to inject specific errors
+        local reg_name
+        for reg_name in $pf_reg_name; do
+            if [ "$name" == "$reg_name" ]; then
+                echo "Injecting: $name"
+                regtbl[$byte_range]=$(printf "%02x" $((byte & ~mask)))
+                break
+            fi
+        done
+    done
+    echo ${regtbl[*]} > $regtbl_einj
+    return 0
+}
+
+einj_clear_all() #(dev_id)
+{
+    einj_start
+    return 0
+}
+
+# UT
+start_ut()
+{
+    einj_start
+
+    local pass=0
+    local fail=0
+    ## Single EINJ Test
+    echo "## Single Injection Test ##"
+    echo "----------------------------"
+
+    local line
+    for line in ${pf_reg[@]};do
+        local field=(${line//,/ })
+        local reg=${field[0]}
+        local mask=${field[3]}
+        while [ $((mask & 1)) -eq 0 ]; do mask=$((mask>>1)); done # Move any position bitmask to bit0
+        local exp="${reg}{$(printf "0x%x" $mask)}"
+
+        # Clear all previous injections first
+        einj_clear_all "$regtbl_dev" >/dev/null
+
+        # Do injection
+        einj_error "$regtbl_dev" $reg >/dev/null
+
+        # Get pwrfail messages (the test target)
+        local rc=0
+        local rslt;rslt=$(get_all_pwrfail);rc=$?
+
+        # Test result evaluation
+        if [ "$rc" -ne "0" ]; then
+            echo -e "Test [$exp] rc=$rc: \e[1;31mFAIL\e[0m"
+            fail=$((fail+1))
+            continue
+        fi
+
+        if [ "${exp}" != "${rslt}" ]; then
+            echo -e "Test [$exp] mismatch with [$rslt]: \e[1;31mFAIL\e[0m"
+            fail=$((fail+1))
+            continue
+        fi
+
+        echo -e "Test [$exp] match with [$rslt]: \e[1;92mPASS\e[0m"
+        pass=$((pass+1))
+    done
+    echo
+
+    ## Multi-EINJ Test
+    echo "## Multi-Injection Test ##"
+    echo "----------------------------"
+
+    local i
+    for i in 1; do
+        # Clear all previous injections first
+        einj_clear_all "$regtbl_dev" >/dev/null
+
+        # Do Injection
+        einj_error "$regtbl_dev" PWR_FAIL_CPU_THERM_OVERT_3 GPU2_FW_RIR_FAIL_CNT >/dev/null
+        local exp="PWR_FAIL_CPU_THERM_OVERT_3{0x1};GPU2_FW_RIR_FAIL_CNT{0xf}"
+
+        # Get pwrfail messages (the test target)
+        local rc=0
+        local rslt;rslt=$(get_all_pwrfail);rc=$?
+
+        # Test result evaluation
+        if [ "$rc" -ne "0" ]; then
+            echo -e "Test [$exp] rc=$rc: \e[1;31mFAIL\e[0m"
+            fail=$((fail+1))
+            continue
+        fi
+
+        if [ "${exp}" != "${rslt}" ]; then
+            echo -e "Test [$exp] mismatch with [$rslt]: \e[1;31mFAIL\e[0m"
+            fail=$((fail+1))
+            continue
+        fi
+
+        echo -e "Test [$exp] match with [$rslt]: \e[1;92mPASS\e[0m"
+        pass=$((pass+1))
+    done
+
+    einj_stop
+
+    # Test summary
+    echo "==================================="
+    echo "Pass: $pass, Fail: $fail, Pass Rate: $((pass * 100 / (fail + pass)))%"
+    echo "==================================="
+
+    return $fail
+}
+
+## MAIN ##
+[ $# -ne 0 ] && if grep "^$1()" $(which $0) &> /dev/null; then func=$1;shift;$func "$@";exit $?; else exit 255; fi
+
+[ "$*" == "--help" ] && show_help && exit 1
+
+rc=0
+pf_msg=$(get_all_pwrfail);rc=$?
+[ "$rc" -ne 0 ] && err "Check PwrFail regs failed, rc=$rc!" && exit $rc
+
+echo $pf_msg
+
+exit 0
+

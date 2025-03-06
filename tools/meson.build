@@ -43,7 +43,8 @@ scripts = [
     'fpga_regtbl',
     'glacier_boot_status_parser',
     'ocp_recovery_status_parser',
-    'gb200_pwrfail_parser'
+    'gb200_pwrfail_parser',
+    'fpga_pwrfail_parser'
 ]
 
 install_data(scripts, install_dir: bindir)
