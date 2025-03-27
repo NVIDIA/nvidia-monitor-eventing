@@ -17,6 +17,12 @@ import csv, json
 import re
 import copy
 import os
+import pandas as pd
+import sys
+from typing import Dict
+
+# Add at the top of the file with other global variables
+platform_column_prefix = "Applicable for "
 
 event_info_json = {
     "Device": []
@@ -109,8 +115,6 @@ platform_nvbmc2errcat = {
 "GH200 NVL" : ["OberonGH", "Applicable for GH200 NVL"],
 "GB200 NVL" : ["OberonGB", "Applicable for GB200 NVL"],
 }
-
-platform_column_prefix = "Applicable for "
 
 class ErrorCatalog:
     def __init__(self, errorlist, devicelist):
@@ -303,7 +307,7 @@ class ErrorCatalog:
                     if key not in device_pattern:
                         continue
                     text = text.replace(key, device_pattern[key])
-                
+
                 return text
 
             id = 0
@@ -358,6 +362,232 @@ class ErrorCatalog:
             print(json.dumps(ei_json, indent = 2))
             return 0
 
+    def get_layer(self, alert_name: str) -> str:
+        """Determine Layer value based on alert name"""
+        alert_lower = alert_name.lower()
+        if any(term in alert_lower for term in ['pwr', 'power', 'vdd', 'vcc']):
+            return "power_rail"
+        elif any(term in alert_lower for term in ['temp', 'therm', 'overt']):
+            return "thermal_control"
+        elif any(term in alert_lower for term in ['i2c', 'pcie', 'bus']):
+            return "interface_status"
+        elif any(term in alert_lower for term in ['prsnt', 'gpio']):
+            return "pin_status"
+        elif any(term in alert_lower for term in ['erot', 'irot']):
+            return "erot-control"
+        return ""
+
+def get_hardware_signal(int_for_hmc: str) -> str:
+    """Convert Int for HMC value to hardware signal name"""
+    if int_for_hmc == "T":
+        return "THERM_OVERT"
+    elif int_for_hmc == "PF":
+        return "PS_RUN_PWR_FAULT"
+    elif int_for_hmc.isdigit():
+        return f"I2C{int_for_hmc}_ALERT"
+    return int_for_hmc
+
+def is_thermal_warning_alert(alert_name: str) -> bool:
+    """Check if alert name indicates a thermal warning/alert"""
+    alert_lower = alert_name.lower()
+    return any(term in alert_lower for term in ['temp', 'therm'])
+
+def get_device_name(alert_name: str) -> str:
+    """Get device name from alert name following the policies:
+    1. Take portion before first "_"
+    2. If device_name is "I2C"+number, remove the number part
+    """
+    device_name = alert_name.split('_')[0]
+    # Special handling for I2C+number case
+    if device_name.startswith('I2C') and device_name[3:].isdigit():
+        device_name = 'I2C'  # Remove the number part
+    elif device_name in ["NVSwitch", "NVSW", "QM3"]:
+        device_name = "NVSwitch"
+    elif device_name in ["PEX", "PEXSW"]:
+        device_name = "NVLinkManagementNIC"
+    elif device_name in ["ConnectX", "CX8"]:
+        device_name = "ConnectX"
+
+    return device_name
+
+def get_device_pattern(device_name: str) -> str:
+    """Get device pattern from device_name"""
+    if device_name == "":
+        return ""
+    elif device_name in ["GPU", "CPU", "NVSwitch", "HMC", "HSCC", "HSC"]:
+        return "{" + device_name + "DeviceID}"
+    else:
+        return "{" + device_name + "ID}"
+
+def get_rollup_device(device_name: str, is_managed: bool) -> str:
+    """Get RF Rollup to Device value based on device name and managed status"""
+    if not is_managed:
+        return ""
+
+    if device_name in ["GPU", "CPU", "NVSwitch", "NVLinkManagementNIC", "ConnectX"]:
+        return device_name
+    else:
+        return "Baseboard"
+
+def get_ooc_device(device_name: str) -> str:
+    """Get OOC device name from device name"""
+    if device_name in ["GPU", "CPU"]:
+        return device_name
+    else:
+        return "Baseboard"
+
+def convert_bit_range(bits: str) -> str:
+    """Convert bit range from [n:m] format to [m-n] format"""
+    if ':' not in bits:
+        return bits
+    start, end = bits.split(':')
+    return f"[{end}-{start}]"
+
+def fpga_alert_rascat(rascat_file: str, fpga_regtbl_file: str, sheet_name: str = "register table") -> int:
+    """Convert FPGA register table alerts to RAS catalog entries"""
+    # Initialize statistics counters
+    stats = {
+        'total_entries': 0,
+        'interrupt_capable': 0,
+        'fully_masked': 0,
+        'partial_masked': 0,
+        'not_masked': 0,
+        'valid_interrupts': 0
+    }
+
+    try:
+        # Convert Excel to CSVs and get the columns from RAS catalog
+        csv_errorlist = convert_xlsx_to_csv(rascat_file, "Error List")
+        csv_devicelist = convert_xlsx_to_csv(rascat_file, "Devices")
+
+        ras_catalog = ErrorCatalog(csv_errorlist, csv_devicelist)
+        srascat_columns = ras_catalog.get_columns()
+
+        # Load FPGA register table
+        print(f"Loading FPGA register table from {fpga_regtbl_file}, sheet: {sheet_name}", file=sys.stderr)
+        regtbl_df = load_fpga_register_table(fpga_regtbl_file, sheet_name)
+        stats['total_entries'] = len(regtbl_df)
+
+        # Filter for interrupt registers
+        int_registers = regtbl_df[
+            (regtbl_df['Int for HMC'].notna()) &
+            (regtbl_df['Bits'].notna()) &
+            (regtbl_df['Address Start'].notna())
+        ]
+        stats['interrupt_capable'] = len(int_registers)
+
+        # Set up CSV writer for stdout
+        csv_writer = csv.DictWriter(sys.stdout, fieldnames=srascat_columns)
+        csv_writer.writeheader()
+
+        # Process each interrupt register
+        for _, int_reg in int_registers.iterrows():
+            reg_name = int_reg['Reg Name']
+            print(f"Processing register: {reg_name}", file=sys.stderr)
+
+            # Check for corresponding mask register
+            mask_reg_name = reg_name.replace('_INT', '_MASK')
+            mask_reg = regtbl_df[regtbl_df['Reg Name'] == mask_reg_name]
+
+            if not mask_reg.empty:
+                mask_default = str(mask_reg.iloc[0]['Default'])
+                if mask_default.strip():  # If mask default exists
+                    if all(c == '1' for c in mask_default if c.isdigit()):
+                        stats['fully_masked'] += 1
+                        continue
+                    elif any(c == '1' for c in mask_default if c.isdigit()):
+                        stats['partial_masked'] += 1
+                    else:
+                        stats['not_masked'] += 1
+
+            # Handle Address End - if empty, use Address Start
+            addr_end = int_reg['Address End']
+            if pd.isna(addr_end) or addr_end == "":
+                int_reg['Address End'] = int_reg['Address Start']
+
+            # Create alert name from register name
+            alert_name = reg_name.split('[')[0]  # Remove array indices if present
+
+            # Get device_name following the policies
+            device_name = get_device_name(alert_name)
+            is_thermal = is_thermal_warning_alert(alert_name)
+
+            # Create entry dictionary with all columns initialized to empty string
+            entry = {col: "" for col in srascat_columns}
+
+            # Get device range from register bits or name
+            device_range = ""
+            if '[' in reg_name:
+                device_range = reg_name[reg_name.find('['):reg_name.find(']')+1]
+                if ':' in device_range:
+                    device_range = convert_bit_range(device_range[1:-1])  # Remove [] before converting
+            elif int_reg['Bits']:
+                bits = str(int_reg['Bits'])
+                if ':' in bits:
+                    device_range = convert_bit_range(bits)
+                else:
+                    device_range = "0"
+            else:
+                device_range = "0"
+
+            # Get device type from device name
+            device_type = get_rollup_device(device_name, not is_thermal)
+            if device_type == "":
+                device_type = "Baseboard"
+
+            # Fill in the values we know based on the processing rules
+            entry.update({
+                'Error ID': f"{alert_name}-ERROR",
+                'Error Name': f"{alert_name} Abnormal State Change",
+                'Impacted Component': device_name,
+                'Description': f"FPGA interrupt {alert_name} happens.",
+                'To HMC Code?': "yes",
+                'Hardware/GPIO Signal': get_hardware_signal(str(int_reg['Int for HMC'])),
+                'Error Telemetry': "BASEBOARD-REDFISH-EVENT-LOG",
+                'RF Managed Error': "no" if is_thermal else "yes",
+                'RF Rollup to Device': get_device_pattern(get_rollup_device(device_name, not is_thermal)),
+                'RF Log Producer': "EventingService",
+                'RF Log URI': "/redfish/v1/Systems/{SystemID}/LogServices/EventLog",
+                'RF Log Message ID': "ResourceEvent.1.0.ResourceErrorsDetected",
+                'RF Log Message Args': f"['" + get_device_pattern(device_type) + f" {alert_name}', 'Abnormal State Change']",
+                'RF Log Health': "Warning" if is_thermal else "Critical",
+                'RF Log Resolution': "AC cycle the system. If problem persists, collect all dumps per troubleshooting guide, isolate the system and evaluate for RMA.",
+                'Resolution ID': "COLLECT_LOGS",
+                'Event Name': f"{alert_name} Abnormal State Change",
+                'Device Type': get_device_pattern(device_type),
+                'Error Type': "FPGA-ALERT",
+                'Trigger data config': f"[ type | DBUS ]; [ object | /xyz/openbmc_project/GpioStatusHandler ]; [ interface | xyz.openbmc_project.GpioStatus ]; [ property | {get_hardware_signal(str(int_reg['Int for HMC']))} ]",
+                'Trigger check': "[ equal | false ]",
+                'Accessor data config': f"[ type | CMDLINE ]; [ executable | fpga_regtbl ]; [ arguments | {alert_name} {device_range} ]",
+                'Accessor check': "[ equal | 1 ]",
+                'Leaky bucket trigger count': "0",
+                'Data value is event count': "FALSE",
+                'RF Log Namespace': get_device_pattern(device_type),
+                'RF Log Origin Of Condition': get_device_pattern(get_ooc_device(device_name)),
+                'Layer': ras_catalog.get_layer(alert_name)
+            })
+
+            # Write entry using CSV writer to properly handle commas
+            csv_writer.writerow(entry)
+
+            stats['valid_interrupts'] += 1
+
+        # Print statistics to stderr
+        print("\nProcessing Statistics:", file=sys.stderr)
+        print(f"Total entries in FRTL: {stats['total_entries']}", file=sys.stderr)
+        print(f"Interrupt-capable entries: {stats['interrupt_capable']}", file=sys.stderr)
+        print(f"Mask register statistics:", file=sys.stderr)
+        print(f"  Fully masked: {stats['fully_masked']}", file=sys.stderr)
+        print(f"  Partially masked: {stats['partial_masked']}", file=sys.stderr)
+        print(f"  Not masked: {stats['not_masked']}", file=sys.stderr)
+        print(f"Valid interrupts processed: {stats['valid_interrupts']}", file=sys.stderr)
+
+        return 0
+    finally:
+        # Clean up temporary CSV files
+        os.remove(csv_errorlist)
+        os.remove(csv_devicelist)
+
 def convert_xlsx_to_csv(xlsx_file, sheet_name):
     import pandas as pd
 
@@ -372,10 +602,23 @@ def convert_xlsx_to_csv(xlsx_file, sheet_name):
 
     return csv_file
 
+def load_fpga_register_table(fpga_regtbl_file: str, sheet_name: str) -> pd.DataFrame:
+    """Load FPGA register table from Excel file"""
+    try:
+        df = pd.read_excel(fpga_regtbl_file, sheet_name=sheet_name)
+        required_columns = ['Reg Name', 'Address Start', 'Address End', 'Bits', 'Int for HMC', 'Default']
+        if not all(col in df.columns for col in required_columns):
+            raise ValueError(f"Missing required columns. Expected: {required_columns}")
+        return df
+    except Exception as e:
+        print(f"Error loading FPGA register table: {e}", file=sys.stderr)
+        sys.exit(1)
+
 help_example="\
 Examples,\n \
   ./rascat_spec2code Server-RAS-Catalog.xlsx to_event_info_json Blackwell-HGX-8-GPU > event_info.json\n \
   ./rascat_spec2code Server-RAS-Catalog.xlsx to_event_info_json \"GB200 NVL\" > event_info.json\n \
+  ./rascat_spec2code Server-RAS-Catalog.xlsx fpga_alert_rascat fpga_register_table.xlsx --sheet \"register table\"\n \
 "
 
 def main():
@@ -392,20 +635,42 @@ def main():
     )
 
     conv_method_help_msg = [method for method in dir(ErrorCatalog) if method.startswith("to_")]
+    conv_method_help_msg.append("fpga_alert_rascat")  # Add the new method
 
     parser.add_argument(
-        "conv_method", default="",
+        "conv_method",
         metavar="conv_method",
         help="Specify how to convert the spec to code. Options:\n  " + "\n  ".join(conv_method_help_msg) + "\n"
     )
 
+    # Make these mutually exclusive groups
+    group = parser.add_mutually_exclusive_group()
+
+    group.add_argument(
+        "platform",
+        nargs="?",
+        help="Specify the platform code name for to_event_info_json. Options:\n  " + "\n  ".join(platform_nvbmc2errcat.keys()) + "\n"
+    )
+
+    group.add_argument(
+        "fpga_regtbl_file",
+        nargs="?",
+        help="FPGA register table Excel file (required for fpga_alert_rascat)"
+    )
+
     parser.add_argument(
-        "platform", default="",
-        metavar="platform",
-        help="Specify the platform code name for to_event_info_json to work on. Options:\n  " + "\n  ".join(platform_nvbmc2errcat.keys()) + "\n"
+        "--sheet",
+        default="register table",
+        help="Sheet name in FPGA register table Excel file (default: 'register table')"
     )
 
     args = parser.parse_args()
+
+    # Validate arguments based on conv_method
+    if args.conv_method == "to_event_info_json" and not args.platform:
+        parser.error("Missing platform argument for to_event_info_json")
+    elif args.conv_method == "fpga_alert_rascat" and not args.fpga_regtbl_file:
+        parser.error("Missing FPGA register table file argument")
 
     ras_catalog = args.ras_catalog
 
@@ -426,11 +691,18 @@ def main():
         rc = print("\n".join(ras_catalog.get_platforms()))
     elif args.conv_method == "get_device_list":
         rc = print(ras_catalog.get_device_list('Blackwell-HGX-8-GPU'))
+    elif args.conv_method == "fpga_alert_rascat":
+        if not args.fpga_regtbl_file:
+            print("Error: Missing FPGA register table file argument")
+            return 1
+        rc = fpga_alert_rascat(args.ras_catalog, args.fpga_regtbl_file, args.sheet)
+        # Skip cleanup since fpga_alert_rascat handles it
+        return rc
     else:
         print("Wrong args: ", args.conv_method)
         rc = 1
 
-    # Clean up
+    # Clean up (only for non-fpga_alert_rascat commands)
     os.remove(csv_errorlist)
     os.remove(csv_devicelist)
 
