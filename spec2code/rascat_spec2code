@@ -643,19 +643,10 @@ def main():
         help="Specify how to convert the spec to code. Options:\n  " + "\n  ".join(conv_method_help_msg) + "\n"
     )
 
-    # Make these mutually exclusive groups
-    group = parser.add_mutually_exclusive_group()
-
-    group.add_argument(
-        "platform",
+    parser.add_argument(
+        "arg3",
         nargs="?",
-        help="Specify the platform code name for to_event_info_json. Options:\n  " + "\n  ".join(platform_nvbmc2errcat.keys()) + "\n"
-    )
-
-    group.add_argument(
-        "fpga_regtbl_file",
-        nargs="?",
-        help="FPGA register table Excel file (required for fpga_alert_rascat)"
+        help="Platform name for to_event_info_json or FPGA register table file for fpga_alert_rascat"
     )
 
     parser.add_argument(
@@ -666,11 +657,19 @@ def main():
 
     args = parser.parse_args()
 
-    # Validate arguments based on conv_method
-    if args.conv_method == "to_event_info_json" and not args.platform:
-        parser.error("Missing platform argument for to_event_info_json")
-    elif args.conv_method == "fpga_alert_rascat" and not args.fpga_regtbl_file:
-        parser.error("Missing FPGA register table file argument")
+    # Validate and assign arguments based on conv_method
+    if args.conv_method == "to_event_info_json":
+        args.platform = args.arg3
+        args.fpga_regtbl_file = None
+        if not args.platform:
+            parser.error("Missing platform argument for to_event_info_json")
+        if args.platform not in platform_nvbmc2errcat:
+            parser.error(f"Invalid platform. Choose from: {', '.join(platform_nvbmc2errcat.keys())}")
+    elif args.conv_method == "fpga_alert_rascat":
+        args.fpga_regtbl_file = args.arg3
+        args.platform = None
+        if not args.fpga_regtbl_file:
+            parser.error("Missing FPGA register table file argument")
 
     ras_catalog = args.ras_catalog
 
