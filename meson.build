@@ -180,6 +180,7 @@ srcfiles_unittest = [
     'test/dbus_accessor_test.cpp',
     'test/device_id_test.cpp',
     'test/event_detection_test.cpp',
+    'test/event_instantiator_test.cpp',
     'test/event_test.cpp',
     'test/tests_common_defs.cpp',
     'test/json_proc_test.cpp',
@@ -206,6 +207,7 @@ eventinglib_sources = [
     'src/log.cpp',
     'src/message_composer.cpp',
     'src/message_dispatcher.cpp',
+    'src/event_instantiator.cpp',
     'src/property_accessor.cpp',
     'src/util.cpp']
 

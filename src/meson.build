@@ -16,6 +16,7 @@ eventinglib_sources = [
     'log.cpp',
     'message_composer.cpp',
     'message_dispatcher.cpp',
+    'event_instantiator.cpp',
     'property_accessor.cpp',
     'util.cpp']
 

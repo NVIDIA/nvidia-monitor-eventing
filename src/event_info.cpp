@@ -211,6 +211,50 @@ void loadFromFile(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
                  eventAccessorView, eventRecoveryView, j);
 }
 
+void loadRawEventsFromFile(EventMap& eventMap, const std::string& file)
+{
+    logs_dbg("Loading event definitions from %s\n", file.c_str());
+    std::ifstream i(file);
+    if (!i.is_open())
+    {
+        throw std::runtime_error("Failed to open event definition file: " +
+                                 file);
+    }
+
+    try
+    {
+        nlohmann::json j;
+        i >> j;
+
+        // Process event groups
+        if (j.contains("events") && j["events"].is_array())
+        {
+            for (const auto& eventGroup : j["events"])
+            {
+                EventNode eventNode;
+                eventNode.loadFrom(eventGroup);
+
+                // Add event to map using event name as key
+                std::string eventName = eventNode.event;
+                if (eventMap.find(eventName) == eventMap.end())
+                {
+                    eventMap[eventName] = std::vector<EventNode>();
+                }
+                eventMap[eventName].push_back(eventNode);
+
+                logs_dbg("Loaded event '%s'\n", eventNode.event.c_str());
+            }
+        }
+    }
+    catch (const nlohmann::json::exception& e)
+    {
+        logs_err("JSON parsing error: %s\n", e.what());
+        throw;
+    }
+
+    logs_dbg("Loaded %zu event groups\n", eventMap.size());
+}
+
 void printMap(const EventMap& eventMap)
 {
     for (const auto& dev : eventMap)
@@ -538,6 +582,9 @@ void EventNode::loadFrom(const json& j)
     this->originOfCondition = json_proc::getOptionalAttribute<std::string>(
         j.at("redfish"), "origin_of_condition");
 
+    this->logNamespace =
+        json_proc::getOptionalAttribute<std::string>(j, "log_namespace");
+
     // this->originOfCondition = j.contains("origin_of_condition")
     //                               ?
     //                               j["origin_of_condition"].get<std::string>()
@@ -651,9 +698,35 @@ std::string EventNode::getStringMessageArgs()
     }
     else
     {
-        shortlog_err(
-            << "Called 'getStringMessageArgs' on an unevaluated event node. "
-            << "Returning empty message args string");
+        // For unevaluated nodes, use any available message args directly
+        if (!messageRegistry.messageArgs.empty())
+        {
+            // Format message args as a comma-separated list of patterns
+            std::stringstream ss;
+            for (size_t i = 0; i < messageRegistry.messageArgs.size(); i++)
+            {
+                if (i > 0)
+                {
+                    ss << ", ";
+                }
+                ss << messageRegistry.messageArgs[i].pattern.pattern;
+            }
+            logs_dbg(
+                "Using raw message args patterns for unevaluated node: %s\n",
+                ss.str().c_str());
+            return ss.str();
+        }
+
+        // If no message args available, use device and event name as fallback
+        if (!device.empty())
+        {
+            logs_dbg(
+                "Using device and event name as fallback for message args\n");
+            return device + ", " + event;
+        }
+
+        logs_dbg(
+            "No fallback available for message args on unevaluated node\n");
         return "";
     }
 }
@@ -856,6 +929,110 @@ bool EventNode::getIsAccessorInterestingToEvent(
            (!event.trigger.isEmpty() && event.trigger == otherAccessor) ||
            (!event.recovery_accessor.isEmpty() &&
             event.recovery_accessor == otherAccessor);
+}
+
+bool EventNode::isDeviceTypeMatch(const std::string& deviceId) const
+{
+    std::string deviceTypePattern = getStringifiedDeviceType();
+    if (deviceTypePattern.empty())
+    {
+        return false;
+    }
+
+    device_id::DeviceIdPattern pattern(deviceTypePattern);
+    return !pattern.match(deviceId).empty();
+}
+
+std::unique_ptr<EventNode>
+    EventNode::loadEventByErrorId(const std::string& errorId,
+                                  const std::string& file)
+{
+    logs_dbg("Looking for event with error_id: %s in file: %s\n",
+             errorId.c_str(), file.c_str());
+
+    std::ifstream i(file);
+    if (!i.is_open())
+    {
+        logs_err("Failed to open event definition file: %s\n", file.c_str());
+        return nullptr;
+    }
+
+    try
+    {
+        nlohmann::json j;
+        i >> j;
+
+        // Iterate through each device type section
+        for (const auto& deviceSection : j.items())
+        {
+            // For each event in the device type section
+            for (const auto& event : deviceSection.value())
+            {
+                // Check if this event has the error_id we're looking for
+                if (event.contains("error_id") && event["error_id"] == errorId)
+                {
+                    logs_dbg("Found event with error_id %s\n", errorId.c_str());
+
+                    // Create and populate the event node
+                    auto eventNode =
+                        std::make_unique<EventNode>(event["event"]);
+                    eventNode->loadFrom(event);
+
+                    return eventNode;
+                }
+            }
+        }
+
+        logs_err("No event found with error_id: %s\n", errorId.c_str());
+        return nullptr;
+    }
+    catch (const nlohmann::json::exception& e)
+    {
+        logs_err("JSON parsing error when looking for error_id %s: %s\n",
+                 errorId.c_str(), e.what());
+        return nullptr;
+    }
+    catch (const std::exception& e)
+    {
+        logs_err("Error loading event with error_id %s: %s\n", errorId.c_str(),
+                 e.what());
+        return nullptr;
+    }
+}
+
+/**
+ * @brief Get the number of message arguments in this event
+ *
+ * @return size_t Number of message arguments, 0 if none
+ */
+size_t EventNode::getMessageArgsSize() const
+{
+    return messageRegistry.messageArgs.size();
+}
+
+/**
+ * @brief Set the second message argument to a custom string
+ *
+ * @param arg2 Custom string for the second message argument
+ * @return true if successful, false if not enough message arguments or other
+ * error
+ */
+bool EventNode::setMessageArg2(const std::string& arg2)
+{
+    // Check if we have at least two message args
+    if (messageRegistry.messageArgs.size() < 2)
+    {
+        // Return error if not enough message args
+        logs_err(
+            "Cannot set message_arg2: Event has fewer than 2 message arguments\n");
+        return false;
+    }
+
+    // We have at least 2 message args, replace the second one
+    MessageArg& arg = messageRegistry.messageArgs[1];
+    arg.pattern.pattern = arg2;
+    arg.parameters.clear(); // No parameters needed for static text
+    return true;
 }
 
 } // namespace event_info

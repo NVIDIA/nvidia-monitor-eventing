@@ -423,6 +423,9 @@ class EventNode : public object::Object
      * **/
     bool valueAsCount;
 
+    /** @brief Log namespace for the event, optional **/
+    std::optional<std::string> logNamespace;
+
     /** @brief Report of selftest **/
     nlohmann::ordered_json selftestReport;
 
@@ -513,9 +516,36 @@ class EventNode : public object::Object
         }
         else
         {
-            // This shouldn't happen. Force quit to bring attention.
-            throw std::runtime_error(
-                "Trying to get OOC on an unevaluated event node. Quit...");
+            // If not evaluated but we have an OOC pattern, try to use it
+            // directly
+            if (originOfCondition.has_value())
+            {
+                // If the pattern contains no placeholders, return it as-is
+                if ((*originOfCondition).find("{") == std::string::npos)
+                {
+                    return originOfCondition;
+                }
+                else if (!device.empty())
+                {
+                    // Try to process a simple pattern with the device ID if we
+                    // have it but don't try complex patterns without device
+                    // indices
+                    logs_dbg(
+                        "Using device as fallback for unevaluated OOC: %s\n",
+                        device.c_str());
+                    return device;
+                }
+            }
+            // If we have no OOC, return the device ID if available
+            else if (!device.empty())
+            {
+                return device;
+            }
+
+            // Return null if no alternatives available
+            logs_dbg(
+                "No fallback available for Origin of Condition on unevaluated node\n");
+            return std::nullopt;
         }
     }
 
@@ -595,6 +625,41 @@ class EventNode : public object::Object
     /** just separates a full device name @sa getFullDeviceName() */
     static std::vector<std::string>
         separateFullDeviceName(const std::string& fullName);
+
+    /**
+     * @brief Check if a device ID matches this event's device type pattern
+     *
+     * @param deviceId Device ID to check
+     * @return true if the device matches the pattern, false otherwise
+     */
+    bool isDeviceTypeMatch(const std::string& deviceId) const;
+
+    /**
+     * @brief Get the number of message arguments in this event
+     *
+     * @return size_t Number of message arguments, 0 if none
+     */
+    size_t getMessageArgsSize() const;
+
+    /**
+     * @brief Set the second message argument to a custom string
+     *
+     * @param arg2 Custom string for the second message argument
+     * @return true if successful, false if not enough message arguments or
+     * other error
+     */
+    bool setMessageArg2(const std::string& arg2);
+
+    /**
+     * @brief Load an event from a file by its error ID
+     *
+     * @param errorId The error ID to search for
+     * @param file Path to the event definitions file
+     * @return std::unique_ptr<EventNode> Pointer to loaded event or nullptr if
+     * not found
+     */
+    static std::unique_ptr<EventNode>
+        loadEventByErrorId(const std::string& errorId, const std::string& file);
 };
 
 using EventMap = std::map<std::string, std::vector<event_info::EventNode>>;
@@ -640,6 +705,18 @@ void loadFromFile(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
                   EventAccessorView& eventAccessorView,
                   EventRecoveryView& eventRecoveryView,
                   const std::string& file);
+
+/**
+ * @brief Load event definitions from file without any translation
+ *
+ * This variant only loads the event data without filling property filter sets,
+ * event trigger views, etc. Useful for standalone mode where full translation
+ * is not needed.
+ *
+ * @param eventMap Map to store the loaded event definitions
+ * @param file Path to the event definition file
+ */
+void loadRawEventsFromFile(EventMap& eventMap, const std::string& file);
 
 /**
  * @brief Read data from the json object @c j into @c eventMap

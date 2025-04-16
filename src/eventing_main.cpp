@@ -24,6 +24,7 @@
 #include "diagnostics.hpp"
 #include "event_detection.hpp"
 #include "event_info.hpp"
+#include "event_instantiator.hpp"
 #include "message_composer.hpp"
 #include "pc_event.hpp"
 #include "selftest.hpp"
@@ -96,6 +97,10 @@ struct Configuration
     std::string event;
     int running_thread_limit = DEFAULT_RUNNING_THREAD_LIMIT;
     int total_thread_limit = DEFAULT_TOTAL_THREAD_LIMIT;
+    bool standaloneMode = false;
+    std::string errorId;
+    std::string deviceId;
+    std::string msgArg2;
 };
 
 Configuration configuration;
@@ -250,6 +255,31 @@ static cmd_line::CmdLineArgs cmdLineArgs = {
      []([[maybe_unused]] cmd_line::ArgFuncParamType params) -> int {
          configuration.diagnosticsModeOptSet = true;
          return 0;
+     }},
+    {"-S", "--standalone", cmd_line::OptFlag::none, "",
+     cmd_line::ActFlag::normal, "Run in standalone mode",
+     []([[maybe_unused]] cmd_line::ArgFuncParamType params) -> int {
+         configuration.standaloneMode = true;
+         return 0;
+     }},
+    {"--error-id", "", cmd_line::OptFlag::overwrite, "<error_id>",
+     cmd_line::ActFlag::normal, "Error ID to process in standalone mode",
+     [](cmd_line::ArgFuncParamType params) -> int {
+         configuration.errorId = params[0];
+         return 0;
+     }},
+    {"--device-id", "", cmd_line::OptFlag::overwrite, "<device_id>",
+     cmd_line::ActFlag::normal, "Device ID to process in standalone mode",
+     [](cmd_line::ArgFuncParamType params) -> int {
+         configuration.deviceId = params[0];
+         return 0;
+     }},
+    {"--msg-arg2", "", cmd_line::OptFlag::overwrite, "<message>",
+     cmd_line::ActFlag::normal,
+     "Override message_arg2 for Redfish event in standalone mode",
+     [](cmd_line::ArgFuncParamType params) -> int {
+         configuration.msgArg2 = params[0];
+         return 0;
      }}};
 
 int showHelp()
@@ -392,6 +422,113 @@ int main(int argc, char* argv[])
         {
             shortlogs_err(<< "Exception caught while running in "
                           << "diagnostics mode: '" << e.what() << "'");
+            return 1;
+        }
+    }
+
+    // Check standalone mode arguments
+    if (eventing::configuration.standaloneMode)
+    {
+        try
+        {
+            logs_dbg(
+                "Running in standalone mode with error_id=%s, device_id=%s\n",
+                eventing::configuration.errorId.c_str(),
+                eventing::configuration.deviceId.c_str());
+
+            // Load just the specific event by errorId instead of the full file
+            auto eventNode = event_info::EventNode::loadEventByErrorId(
+                eventing::configuration.errorId, eventing::configuration.event);
+
+            if (!eventNode)
+            {
+                logs_err("Error ID %s not found in event definitions!\n",
+                         eventing::configuration.errorId.c_str());
+                return 1;
+            }
+
+            // Check if device matches the device type pattern
+            if (!eventNode->isDeviceTypeMatch(eventing::configuration.deviceId))
+            {
+                logs_err(
+                    "Device %s doesn't match the device type pattern for error ID %s!\n",
+                    eventing::configuration.deviceId.c_str(),
+                    eventing::configuration.errorId.c_str());
+                return 1;
+            }
+
+            // Set device ID for the event
+            eventNode->device = eventing::configuration.deviceId;
+
+            // Handle "--msg-arg2" parameter
+            if (!eventing::configuration.msgArg2.empty())
+            {
+                if (!eventNode->getMessageArgsSize() ||
+                    eventNode->getMessageArgsSize() < 2)
+                {
+                    logs_err(
+                        "Error: Event has fewer than 2 message arguments, "
+                        "but --msg-arg2 was specified. Cannot continue.\n");
+                    return 1;
+                }
+
+                if (!eventNode->setMessageArg2(eventing::configuration.msgArg2))
+                {
+                    logs_err("Error: Failed to set custom message argument. "
+                             "Cannot continue.\n");
+                    return 1;
+                }
+            }
+
+            // Create EventInstantiator and process the event
+            try
+            {
+                // Let EventInstantiator handle all the pattern evaluation
+                event_handler::EventInstantiator instantiator(
+                    "EventInstantiator");
+                eventing::RcCode result = instantiator.process(*eventNode);
+
+                if (result != eventing::RcCode::succ)
+                {
+                    logs_err("Failed to instantiate event %s for device %s\n",
+                             eventNode->event.c_str(),
+                             eventing::configuration.deviceId.c_str());
+                    return 1;
+                }
+
+                // Get the instantiated event and process with other handlers
+                event_info::EventNode& instantiatedEvent =
+                    instantiator.getInstantiatedEvent();
+                logs_dbg("Successfully instantiated event: %s\n",
+                         instantiatedEvent.event.c_str());
+
+                // Create EventHandlerManager for other handlers
+                event_handler::EventHandlerManager eventHdlrMgr;
+
+#ifdef EVENTING_SERVICE_DEVICE_STATUS_FS
+                event_handler::DeviceStatusHandler deviceStatus("DeviceStatus");
+                eventHdlrMgr.RegisterHandler(&deviceStatus);
+#endif
+
+                message_composer::MessageComposer msgComposer("MsgComp1");
+                eventHdlrMgr.RegisterHandler(&msgComposer);
+
+                // Process the instantiated event with the remaining handlers
+                eventHdlrMgr.RunAllHandlers(instantiatedEvent);
+                logs_dbg("Successfully processed event in standalone mode\n");
+            }
+            catch (const std::exception& e)
+            {
+                shortlogs_err(<< "Failed to process event: " << e.what());
+                return 1;
+            }
+
+            return 0;
+        }
+        catch (const std::exception& e)
+        {
+            logs_err("Exception caught while running in standalone mode: %s\n",
+                     e.what());
             return 1;
         }
     }
