@@ -32,6 +32,7 @@ event_entry_json = {
     "event": "",
     "device_type": "",
     "error_id": "",
+    "error_type": "",
     "managed": "",
     "rollup_device": "",
     "category": [],
@@ -65,6 +66,7 @@ spec2code_dict = {
 "Error Name" : "event",
 "Impacted Component" : "$json_dev_name(device_type)",
 "Description" : "description",
+"Error Type": "error_type",
 "To Customer Doc?" : "",
 "To HMC Code?" : "$direct_value(yes)",
 "Blast Radius" : "",
@@ -332,6 +334,7 @@ class ErrorCatalog:
                 ee["event"] = row["Impacted Component"] + " " + row["Event Name"]
                 ee["device_type"] = row["Device Type"]
                 ee["error_id"] = row["Error ID"]
+                ee["error_type"] = row["Error Type"]
                 ee["managed"] = row["RF Managed Error"].strip().lower()
                 ee["rollup_device"] = row["RF Rollup to Device"]
                 ee["category"] = self.fc_expr_to_json_list(row["Layer"])
@@ -356,6 +359,12 @@ class ErrorCatalog:
                 ee["action"] = ""
                 ee["value_as_count"] = row["Data value is event count"].strip().lower() == "true"
                 ee["description"] = row["Description"]
+
+                # Add error type if present
+                if 'Error Type' in row and row['Error Type']:
+                    ee['error_type'] = row['Error Type']
+                else:
+                    ee['error_type'] = ""  # Default empty string if not specified
 
                 ei_json["Device"].append(ee)
 
@@ -663,8 +672,6 @@ def main():
         args.fpga_regtbl_file = None
         if not args.platform:
             parser.error("Missing platform argument for to_event_info_json")
-        if args.platform not in platform_nvbmc2errcat:
-            parser.error(f"Invalid platform. Choose from: {', '.join(platform_nvbmc2errcat.keys())}")
     elif args.conv_method == "fpga_alert_rascat":
         args.fpga_regtbl_file = args.arg3
         args.platform = None
