@@ -62,60 +62,56 @@ event_entry_json = {
 }
 
 spec2code_dict = {
-"Error ID" : "error_id",
-"Error Name" : "event",
-"Impacted Component" : "$json_dev_name(device_type)",
-"Description" : "description",
-"Error Type": "error_type",
-"To Customer Doc?" : "",
-"To HMC Code?" : "$direct_value(yes)",
-"Blast Radius" : "",
-"System Behavior Description" : "",
-"Error Injection Methods" : "",
-"Error XID/SXIDs" : "",
-"Hardware/GPIO Signal" : "$fc_get_hw_signal(event_trigger)",
-"Error Telemetry" : "",
-"Error Condition" : "",
-"Recovery Telemetry" : "",
-"Recovery Condition" : "",
-"Recovery System State Needs" : "",
-"Self-Test (?)" : "",
-"RF Managed Error": "managed",
-"RF Rollup to Device": "$json_dev_name(rollup_device)",
-"RF Log Producer" : "",
-"RF Log Message ID" : "redfish.message_id",
-"RF Log Message Args" : "redfish.message_args.patterns",
-"MessageArgs Parameters" : "$json_acc_list_to_fc_expr(redfish.message_args.parameters)",
-"RF Log Health" : "severity",
-"RF Log Resolution" : "resolution",
-"RF Log Origin Of Condition" : "redfish.origin_of_condition",
-"CPER GUID" : "",
-"CPER Vendor Section" : "",
-"CPER Vendor Type Value" : "",
-"Supporting Service" : "",
-"Event Name" : "event",
-"Device Type" : "device_type",
-"Layer" : "$json_arr_to_fc(category)",
-"Trigger data config" : "$json_acc_to_fc_expr(event_trigger)",
-"Trigger check" : "$json_acc_to_fc_expr(event_trigger.check)",
-"Accessor data config" : "$json_acc_to_fc_expr(accessor)",
-"Accessor check" : "$json_acc_to_fc_expr(accessor.check)",
-"Recovery data config" : "$json_acc_to_fc_expr(recovery)",
-"Recovery check" : "$json_acc_to_fc_expr(recovery.check)",
-"Leaky bucket trigger count" : "trigger_count",
-"Data value is event count" : "value_as_count",
-"Leaky bucket reset type" : "$json_acc_to_fc_expr(event_counter_reset)",
-"AdditionalData data config (possibly multiple)" : "$json_acc_list_to_fc_expr(telemetries)",
-"In-band Host OS loaded mask type" : "",
-"In-band device driver loaded mask type" : "",
-"Debounce type" : "debounce.type",
-"Debounce duration" : "debounce.duration",
-}
-
-platform_nvbmc2errcat = {
-"Blackwell-HGX-8-GPU" : ["Umbriel", "Applicable for Blackwell-HGX-8-GPU"],
-"GH200 NVL" : ["OberonGH", "Applicable for GH200 NVL"],
-"GB200 NVL" : ["OberonGB", "Applicable for GB200 NVL"],
+    "Error ID": "error_id",
+    "Error Name": "event",
+    "Impacted Component": "$json_dev_name(device_type)",
+    "Description": "description",
+    "Error Type": "error_type",
+    "To Customer Doc?": "",
+    "To HMC Code?": "$direct_value(yes)",
+    "Blast Radius": "",
+    "System Behavior Description": "",
+    "Error Injection Methods": "",
+    "Error XID/SXIDs": "",
+    "Hardware/GPIO Signal": "$fc_get_hw_signal(event_trigger)",
+    "Error Telemetry": "",
+    "Error Condition": "",
+    "Recovery Telemetry": "",
+    "Recovery Condition": "",
+    "Recovery System State Needs": "",
+    "Self-Test (?)": "",
+    "RF Managed Error": "managed",
+    "RF Rollup to Device": "$json_dev_name(rollup_device)",
+    "RF Log Producer": "",
+    "RF Log Message ID": "redfish.message_id",
+    "RF Log Message Args": "redfish.message_args.patterns",
+    "MessageArgs Parameters":
+        "$json_acc_list_to_fc_expr(redfish.message_args.parameters)",
+    "RF Log Health": "severity",
+    "RF Log Resolution": "resolution",
+    "RF Log Origin Of Condition": "redfish.origin_of_condition",
+    "CPER GUID": "",
+    "CPER Vendor Section": "",
+    "CPER Vendor Type Value": "",
+    "Supporting Service": "",
+    "Event Name": "event",
+    "Device Type": "device_type",
+    "Layer": "$json_arr_to_fc(category)",
+    "Trigger data config": "$json_acc_to_fc_expr(event_trigger)",
+    "Trigger check": "$json_acc_to_fc_expr(event_trigger.check)",
+    "Accessor data config": "$json_acc_to_fc_expr(accessor)",
+    "Accessor check": "$json_acc_to_fc_expr(accessor.check)",
+    "Recovery data config": "$json_acc_to_fc_expr(recovery)",
+    "Recovery check": "$json_acc_to_fc_expr(recovery.check)",
+    "Leaky bucket trigger count": "trigger_count",
+    "Data value is event count": "value_as_count",
+    "Leaky bucket reset type": "$json_acc_to_fc_expr(event_counter_reset)",
+    "AdditionalData data config (possibly multiple)":
+        "$json_acc_list_to_fc_expr(telemetries)",
+    "In-band Host OS loaded mask type": "",
+    "In-band device driver loaded mask type": "",
+    "Debounce type": "debounce.type",
+    "Debounce duration": "debounce.duration",
 }
 
 class ErrorCatalog:
@@ -129,7 +125,6 @@ class ErrorCatalog:
     def get_columns(self):
         with open(self._errorlist, 'r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
-
             return reader.fieldnames
 
     def get_platforms(self):
@@ -150,14 +145,14 @@ class ErrorCatalog:
             if key == "check":  # TODO: this is WAR, need a common way
                 continue
             output = output + "[ {0} | {1} ]; ".format(key, accessor[key])
-        output = output[:-2] # remove the tailing ';'
+        output = output[:-2]  # remove the tailing ';'
         return output
 
     def json_acc_list_to_fc_expr(self, accessors):
         output = ""
         for acc in accessors:
             output = output + self.json_acc_to_fc_expr(acc) + " : "
-        output = output[:-3] # remove the tailing " : "
+        output = output[:-3]  # remove the tailing " : "
         return output
 
     def fc_get_hw_signal(self, accessor):
@@ -170,7 +165,7 @@ class ErrorCatalog:
     def json_arr_to_fc(self, json):
         return ';'.join(json)
 
-    def fc_expr_to_json_acc(self, acc, chk = ""):
+    def fc_expr_to_json_acc(self, acc, chk=""):
         output = dict()
         if len(str(acc).strip()) == 0:
             return {}
@@ -206,7 +201,6 @@ class ErrorCatalog:
         return device_type.split('/')[0]
 
     def dot_query_json(self, json, dot_notation):
-        #print(json, dot_notation)
         if type(json) is str:
             return json
         keys = dot_notation.split('.')
@@ -219,8 +213,6 @@ class ErrorCatalog:
         with open(evt_inf_json, "r") as f:
             evt_inf = json.load(f)
             print(','.join(self._csvfields))
-            #print("=======================")
-            #print(evt_inf["Device"][0]['event'])
 
             for dev_grp in evt_inf:
                 for evt in evt_inf[dev_grp]:
@@ -240,15 +232,20 @@ class ErrorCatalog:
                                 params = re.split('\$|\(|\)|,', val)[2:]
 
                                 if func_name == "json_acc_to_fc_expr":
-                                    cell = self.json_acc_to_fc_expr(self.dot_query_json(evt, params[0]))
+                                    cell = self.json_acc_to_fc_expr(
+                                        self.dot_query_json(evt, params[0]))
                                 elif func_name == "json_acc_list_to_fc_expr":
-                                    cell = self.json_acc_list_to_fc_expr(self.dot_query_json(evt, params[0]))
+                                    cell = self.json_acc_list_to_fc_expr(
+                                        self.dot_query_json(evt, params[0]))
                                 elif func_name == "fc_get_hw_signal":
-                                    cell = self.fc_get_hw_signal(self.dot_query_json(evt, params[0]))
+                                    cell = self.fc_get_hw_signal(
+                                        self.dot_query_json(evt, params[0]))
                                 elif func_name == "json_arr_to_fc":
-                                    cell = self.json_arr_to_fc(self.dot_query_json(evt, params[0]))
+                                    cell = self.json_arr_to_fc(
+                                        self.dot_query_json(evt, params[0]))
                                 elif func_name == "json_dev_name":
-                                    cell = self.json_dev_name(self.dot_query_json(evt, params[0]))
+                                    cell = self.json_dev_name(
+                                        self.dot_query_json(evt, params[0]))
                                 elif func_name == "direct_value":
                                     cell = str(params[0]).title()
                                 else:
@@ -263,7 +260,7 @@ class ErrorCatalog:
                         row = row + cell + ','
                     print(row)
 
-    def get_device_list(self, platform, in_rf_prefix = False):
+    def get_device_list(self, platform):
         output = dict()
         with open(self._devicelist, 'r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -277,15 +274,33 @@ class ErrorCatalog:
                 if not row['Platform'] == platform:
                     continue
 
-                if in_rf_prefix:
-                    output[row['Device In RF Content']] = row['RF URI Prefix'] + row['RF Chassis URI Device Prefix'] + "_"
-                else:
-                    output[row['DevicePattern']] = row['Device In RF Content']
+                output[row['DevicePattern']] = {key: value for key, value in row.items() if key != 'DevicePattern' and key != 'Platform'}
+
+        return output
+
+    def get_device_list_sim(self, platform):
+        output = dict()
+        with open(self._devicelist, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+
+            id = 0
+            for row in reader:
+                id = id + 1
+                if id == 1:
+                    continue
+
+                if not row['Platform'] == platform:
+                    continue
+
+                output[row['Device In RF Content']] = (
+                    row['RF URI Prefix'] +
+                    row['RF Chassis URI Device Prefix'] + "_"
+                )
 
         return output
 
     def to_event_info_json(self, platform):
-        with open(self._errorlist, "r", encoding = 'utf-8') as f:
+        with open(self._errorlist, "r", encoding='utf-8') as f:
             fc = csv.DictReader(f)
 
             ei_json = copy.deepcopy(event_info_json)
@@ -297,7 +312,7 @@ class ErrorCatalog:
                 return 1
 
             device_pattern = self.get_device_list(platform)
-            device_rf_pattern = self.get_device_list(platform, True)
+            device_rf_pattern = self.get_device_list_sim(platform)
 
             def pattern2device(text):
                 import re
@@ -306,11 +321,43 @@ class ErrorCatalog:
                 matches = re.findall(pattern, text)
                 for i, match in enumerate(matches):
                     key = "{" + match + "}"
+
                     if key not in device_pattern:
                         continue
-                    text = text.replace(key, device_pattern[key])
+                    text = text.replace(key,
+                        device_pattern[key]['Device In RF Content'])
 
                 return text
+
+            def adjust_mapping_device_pattern(row):
+                for field in row.keys():
+                    if field == "Device Type":
+                        continue
+                    if row[field] == row['Device Type']:
+                        continue
+                    if "SXM" not in row[field]: # Only SXM device need to be adjusted
+                        continue
+                    if row['Device Type'] not in device_pattern:
+                        continue
+                    mapping_device_range = device_pattern[row['Device Type']]['Mapping Device Range']
+                    if mapping_device_range is None or mapping_device_range == "":
+                        continue
+                    mapping_device = row[field]
+                    if mapping_device not in device_pattern:
+                        continue
+
+                    #sys.stderr.write("device_pattern[%s] = %s\n" % (mapping_device, device_pattern[mapping_device]))
+                    row[field] = (
+                        device_pattern[mapping_device]['Device'] +
+                        "_" + mapping_device_range
+                    )
+                return row
+
+            def make_ooc_uri(device):
+                if device in device_rf_pattern:
+                    return device_rf_pattern[device] + device
+                else:
+                    return "/redfish/v1/Chassis/HGX_" + device
 
             id = 0
             for row in fc:
@@ -327,6 +374,7 @@ class ErrorCatalog:
                 if row["To HMC Code?"].lower() != "yes":
                     continue
 
+                row = adjust_mapping_device_pattern(row)
                 row = {key: pattern2device(value) for key, value in row.items()}
 
                 ee = copy.deepcopy(event_entry_json)
@@ -338,24 +386,41 @@ class ErrorCatalog:
                 ee["managed"] = row["RF Managed Error"].strip().lower()
                 ee["rollup_device"] = row["RF Rollup to Device"]
                 ee["category"] = self.fc_expr_to_json_list(row["Layer"])
-                ee["event_trigger"] = self.fc_expr_to_json_acc(row["Trigger data config"], row["Trigger check"])
-                ee["accessor"] = self.fc_expr_to_json_acc(row["Accessor data config"], row["Accessor check"])
+                ee["event_trigger"] = self.fc_expr_to_json_acc(
+                    row["Trigger data config"], row["Trigger check"])
+                ee["accessor"] = self.fc_expr_to_json_acc(
+                    row["Accessor data config"], row["Accessor check"])
+
                 if len(str(row["Recovery data config"]).strip()) == 0:
                     ee.pop("recovery")
                 else:
-                    ee["recovery"] = self.fc_expr_to_json_acc(row["Recovery data config"], row["Recovery check"])
+                    ee["recovery"] = self.fc_expr_to_json_acc(
+                        row["Recovery data config"], row["Recovery check"])
+
                 ee["severity"] = row["RF Log Health"]
                 ee["resolution"] = row["RF Log Resolution"]
                 ee["debounce"]["type"] = row["Debounce type"]
                 ee["debounce"]["duration"] = row["Debounce duration"]
-                ee["trigger_count"] = int(row["Leaky bucket trigger count"], 10) if len(row["Leaky bucket trigger count"]) > 0 else 0
-                ee["event_counter_reset"] = self.fc_expr_to_json_acc(row["Leaky bucket reset type"])
+
+                ee["trigger_count"] = (
+                    int(row["Leaky bucket trigger count"], 10)
+                    if len(row["Leaky bucket trigger count"]) > 0 else 0
+                )
+
+                ee["event_counter_reset"] = self.fc_expr_to_json_acc(
+                    row["Leaky bucket reset type"])
                 ee["redfish"]["message_id"] = row["RF Log Message ID"]
-                ee["redfish"]["origin_of_condition"] = device_rf_pattern[row["RF Log Origin Of Condition"]] + row["RF Log Origin Of Condition"]
-                ee["redfish"]["message_args"]["patterns"] = self.fc_expr_to_json_list(row["RF Log Message Args"])
-                ee["redfish"]["message_args"]["parameters"] = self.fc_expr_to_json_acc_list(row["MessageArgs Parameters"])
+                ee["redfish"]["origin_of_condition"] = make_ooc_uri(
+                    row["RF Log Origin Of Condition"])
+
+                ee["redfish"]["message_args"]["patterns"] = self.fc_expr_to_json_list(
+                    row["RF Log Message Args"])
+                ee["redfish"]["message_args"]["parameters"] = self.fc_expr_to_json_acc_list(
+                    row["MessageArgs Parameters"])
+
                 ee["log_namespace"] = row["RF Log Namespace"]
-                ee["telemetries"] = self.fc_expr_to_json_acc_list(row["AdditionalData data config (possibly multiple)"])
+                ee["telemetries"] = self.fc_expr_to_json_acc_list(
+                    row["AdditionalData data config (possibly multiple)"])
                 ee["action"] = ""
                 ee["value_as_count"] = row["Data value is event count"].strip().lower() == "true"
                 ee["description"] = row["Description"]
@@ -368,7 +433,7 @@ class ErrorCatalog:
 
                 ei_json["Device"].append(ee)
 
-            print(json.dumps(ei_json, indent = 2))
+            print(json.dumps(ei_json, indent=2))
             return 0
 
     def get_layer(self, alert_name: str) -> str:
@@ -452,7 +517,11 @@ def convert_bit_range(bits: str) -> str:
     start, end = bits.split(':')
     return f"[{end}-{start}]"
 
-def fpga_alert_rascat(rascat_file: str, fpga_regtbl_file: str, sheet_name: str = "register table") -> int:
+def fpga_alert_rascat(
+    rascat_file: str,
+    fpga_regtbl_file: str,
+    sheet_name: str = "register table"
+) -> int:
     """Convert FPGA register table alerts to RAS catalog entries"""
     # Initialize statistics counters
     stats = {
@@ -473,7 +542,11 @@ def fpga_alert_rascat(rascat_file: str, fpga_regtbl_file: str, sheet_name: str =
         srascat_columns = ras_catalog.get_columns()
 
         # Load FPGA register table
-        print(f"Loading FPGA register table from {fpga_regtbl_file}, sheet: {sheet_name}", file=sys.stderr)
+        print(
+            f"Loading FPGA register table from {fpga_regtbl_file}, "
+            f"sheet: {sheet_name}",
+            file=sys.stderr
+        )
         regtbl_df = load_fpga_register_table(fpga_regtbl_file, sheet_name)
         stats['total_entries'] = len(regtbl_df)
 
@@ -515,7 +588,8 @@ def fpga_alert_rascat(rascat_file: str, fpga_regtbl_file: str, sheet_name: str =
                 int_reg['Address End'] = int_reg['Address Start']
 
             # Create alert name from register name
-            alert_name = reg_name.split('[')[0]  # Remove array indices if present
+            # Remove array indices if present
+            alert_name = reg_name.split('[')[0]
 
             # Get device_name following the policies
             device_name = get_device_name(alert_name)
@@ -529,7 +603,8 @@ def fpga_alert_rascat(rascat_file: str, fpga_regtbl_file: str, sheet_name: str =
             if '[' in reg_name:
                 device_range = reg_name[reg_name.find('['):reg_name.find(']')+1]
                 if ':' in device_range:
-                    device_range = convert_bit_range(device_range[1:-1])  # Remove [] before converting
+                    # Remove [] before converting
+                    device_range = convert_bit_range(device_range[1:-1])
             elif int_reg['Bits']:
                 bits = str(int_reg['Bits'])
                 if ':' in bits:
@@ -551,28 +626,48 @@ def fpga_alert_rascat(rascat_file: str, fpga_regtbl_file: str, sheet_name: str =
                 'Impacted Component': device_name,
                 'Description': f"FPGA interrupt {alert_name} happens.",
                 'To HMC Code?': "yes",
-                'Hardware/GPIO Signal': get_hardware_signal(str(int_reg['Int for HMC'])),
+                'Hardware/GPIO Signal': get_hardware_signal(
+                    str(int_reg['Int for HMC'])
+                ),
                 'Error Telemetry': "BASEBOARD-REDFISH-EVENT-LOG",
                 'RF Managed Error': "no" if is_thermal else "yes",
-                'RF Rollup to Device': get_device_pattern(get_rollup_device(device_name, not is_thermal)),
+                'RF Rollup to Device': get_device_pattern(
+                    get_rollup_device(device_name, not is_thermal)
+                ),
                 'RF Log Producer': "EventingService",
                 'RF Log URI': "/redfish/v1/Systems/{SystemID}/LogServices/EventLog",
                 'RF Log Message ID': "ResourceEvent.1.0.ResourceErrorsDetected",
-                'RF Log Message Args': f"['" + get_device_pattern(device_type) + f" {alert_name}', 'Abnormal State Change']",
+                'RF Log Message Args': (
+                    f"['" + get_device_pattern(device_type) +
+                    f" {alert_name}', 'Abnormal State Change']"
+                ),
                 'RF Log Health': "Warning" if is_thermal else "Critical",
-                'RF Log Resolution': "AC cycle the system. If problem persists, collect all dumps per troubleshooting guide, isolate the system and evaluate for RMA.",
+                'RF Log Resolution': (
+                    "AC cycle the system. If problem persists, collect all dumps "
+                    "per troubleshooting guide, isolate the system and evaluate "
+                    "for RMA."
+                ),
                 'Resolution ID': "COLLECT_LOGS",
                 'Event Name': f"{alert_name} Abnormal State Change",
                 'Device Type': get_device_pattern(device_type),
                 'Error Type': "FPGA-ALERT",
-                'Trigger data config': f"[ type | DBUS ]; [ object | /xyz/openbmc_project/GpioStatusHandler ]; [ interface | xyz.openbmc_project.GpioStatus ]; [ property | {get_hardware_signal(str(int_reg['Int for HMC']))} ]",
+                'Trigger data config': (
+                    f"[ type | DBUS ]; [ object | /xyz/openbmc_project/"
+                    f"GpioStatusHandler ]; [ interface | xyz.openbmc_project."
+                    f"GpioStatus ]; [ property | {get_hardware_signal(str(int_reg['Int for HMC']))} ]"
+                ),
                 'Trigger check': "[ equal | false ]",
-                'Accessor data config': f"[ type | CMDLINE ]; [ executable | fpga_regtbl ]; [ arguments | {alert_name} {device_range} ]",
+                'Accessor data config': (
+                    f"[ type | CMDLINE ]; [ executable | fpga_regtbl ]; "
+                    f"[ arguments | {alert_name} {device_range} ]"
+                ),
                 'Accessor check': "[ equal | 1 ]",
                 'Leaky bucket trigger count': "0",
                 'Data value is event count': "FALSE",
                 'RF Log Namespace': get_device_pattern(device_type),
-                'RF Log Origin Of Condition': get_device_pattern(get_ooc_device(device_name)),
+                'RF Log Origin Of Condition': get_device_pattern(
+                    get_ooc_device(device_name)
+                ),
                 'Layer': ras_catalog.get_layer(alert_name)
             })
 
@@ -584,12 +679,18 @@ def fpga_alert_rascat(rascat_file: str, fpga_regtbl_file: str, sheet_name: str =
         # Print statistics to stderr
         print("\nProcessing Statistics:", file=sys.stderr)
         print(f"Total entries in FRTL: {stats['total_entries']}", file=sys.stderr)
-        print(f"Interrupt-capable entries: {stats['interrupt_capable']}", file=sys.stderr)
+        print(
+            f"Interrupt-capable entries: {stats['interrupt_capable']}",
+            file=sys.stderr
+        )
         print(f"Mask register statistics:", file=sys.stderr)
         print(f"  Fully masked: {stats['fully_masked']}", file=sys.stderr)
         print(f"  Partially masked: {stats['partial_masked']}", file=sys.stderr)
         print(f"  Not masked: {stats['not_masked']}", file=sys.stderr)
-        print(f"Valid interrupts processed: {stats['valid_interrupts']}", file=sys.stderr)
+        print(
+            f"Valid interrupts processed: {stats['valid_interrupts']}",
+            file=sys.stderr
+        )
 
         return 0
     finally:
@@ -601,13 +702,13 @@ def convert_xlsx_to_csv(xlsx_file, sheet_name):
     import pandas as pd
 
     # Read the specified sheet from the Excel file
-    df = pd.read_excel(xlsx_file, sheet_name = sheet_name)
+    df = pd.read_excel(xlsx_file, sheet_name=sheet_name)
 
     # Make the csv file path.
     csv_file = "/tmp/" + sheet_name.replace(" ", "_") + ".csv"
 
     # Convert the DataFrame to a CSV file
-    df.to_csv(csv_file, index = False, encoding = 'utf-8')
+    df.to_csv(csv_file, index=False, encoding='utf-8')
 
     return csv_file
 
@@ -615,20 +716,28 @@ def load_fpga_register_table(fpga_regtbl_file: str, sheet_name: str) -> pd.DataF
     """Load FPGA register table from Excel file"""
     try:
         df = pd.read_excel(fpga_regtbl_file, sheet_name=sheet_name)
-        required_columns = ['Reg Name', 'Address Start', 'Address End', 'Bits', 'Int for HMC', 'Default']
+        required_columns = [
+            'Reg Name', 'Address Start', 'Address End',
+            'Bits', 'Int for HMC', 'Default'
+        ]
         if not all(col in df.columns for col in required_columns):
-            raise ValueError(f"Missing required columns. Expected: {required_columns}")
+            raise ValueError(
+                f"Missing required columns. Expected: {required_columns}"
+            )
         return df
     except Exception as e:
         print(f"Error loading FPGA register table: {e}", file=sys.stderr)
         sys.exit(1)
 
-help_example="\
-Examples,\n \
-  ./rascat_spec2code Server-RAS-Catalog.xlsx to_event_info_json Blackwell-HGX-8-GPU > event_info.json\n \
-  ./rascat_spec2code Server-RAS-Catalog.xlsx to_event_info_json \"GB200 NVL\" > event_info.json\n \
-  ./rascat_spec2code Server-RAS-Catalog.xlsx fpga_alert_rascat fpga_register_table.xlsx --sheet \"register table\"\n \
-"
+help_example = """\
+Examples,
+  ./rascat_spec2code Server-RAS-Catalog.xlsx to_event_info_json \
+Blackwell-HGX-8-GPU > event_info.json
+  ./rascat_spec2code Server-RAS-Catalog.xlsx to_event_info_json \
+"GB200 NVL" > event_info.json
+  ./rascat_spec2code Server-RAS-Catalog.xlsx fpga_alert_rascat \
+fpga_register_table.xlsx --sheet "register table"
+"""
 
 def main():
     parser = argparse.ArgumentParser(
@@ -640,28 +749,35 @@ def main():
     parser.add_argument(
         "ras_catalog",
         metavar="ras_catalog",
-        help="Server-RAS-Catalog.xlsx downloaded from \n'https://docs.google.com/spreadsheets/d/1X1eSW7A6ai5VwzTiytt5PouGiz7KvxmR4VFfsZ9bP_Q'."
+        help="Server-RAS-Catalog.xlsx downloaded from \n"
+             "'https://docs.google.com/spreadsheets/d/"
+             "1X1eSW7A6ai5VwzTiytt5PouGiz7KvxmR4VFfsZ9bP_Q'."
     )
 
-    conv_method_help_msg = [method for method in dir(ErrorCatalog) if method.startswith("to_")]
+    conv_method_help_msg = [
+        method for method in dir(ErrorCatalog) if method.startswith("to_")
+    ]
     conv_method_help_msg.append("fpga_alert_rascat")  # Add the new method
 
     parser.add_argument(
         "conv_method",
         metavar="conv_method",
-        help="Specify how to convert the spec to code. Options:\n  " + "\n  ".join(conv_method_help_msg) + "\n"
+        help="Specify how to convert the spec to code. Options:\n  " +
+             "\n  ".join(conv_method_help_msg) + "\n"
     )
 
     parser.add_argument(
         "arg3",
         nargs="?",
-        help="Platform name for to_event_info_json or FPGA register table file for fpga_alert_rascat"
+        help="Platform name for to_event_info_json or "
+             "FPGA register table file for fpga_alert_rascat"
     )
 
     parser.add_argument(
         "--sheet",
         default="register table",
-        help="Sheet name in FPGA register table Excel file (default: 'register table')"
+        help="Sheet name in FPGA register table Excel file "
+             "(default: 'register table')"
     )
 
     args = parser.parse_args()
@@ -701,7 +817,11 @@ def main():
         if not args.fpga_regtbl_file:
             print("Error: Missing FPGA register table file argument")
             return 1
-        rc = fpga_alert_rascat(args.ras_catalog, args.fpga_regtbl_file, args.sheet)
+        rc = fpga_alert_rascat(
+            args.ras_catalog,
+            args.fpga_regtbl_file,
+            args.sheet
+        )
         # Skip cleanup since fpga_alert_rascat handles it
         return rc
     else:
