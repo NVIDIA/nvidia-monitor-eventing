@@ -1,9 +1,9 @@
 project('c++ nvidia-monitor-eventing', 'cpp',
   version : '0.1',
   license : 'MIT',
-  meson_version: '>=0.58.0',
+  meson_version: '>=1.1.1',
   default_options: [
-            'cpp_std=c++20'])
+            'cpp_std=c++23'])
 
 # Project related links
 
@@ -20,7 +20,7 @@ cxx = meson.get_compiler(lang)
 add_global_arguments('-DSOME_TOKEN=value', language : lang)
 
 # Validate the c++ Standard
-if get_option('cpp_std') != 'c++20'
+if get_option('cpp_std') != 'c++23'
     error('This project requires c++20 support '+ get_option('cpp_std'))
 endif
 
