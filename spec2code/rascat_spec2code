@@ -228,8 +228,8 @@ class ErrorCatalog:
                             if len(val) == 0:
                                 cell = ""
                             elif val[0] == '$':  # built-in function
-                                func_name = re.split('\$|\(|\)|,', val)[1]
-                                params = re.split('\$|\(|\)|,', val)[2:]
+                                func_name = re.split(r'\$|\(|\)|,', val)[1]
+                                params = re.split(r'\$|\(|\)|,', val)[2:]
 
                                 if func_name == "json_acc_to_fc_expr":
                                     cell = self.json_acc_to_fc_expr(
@@ -322,11 +322,13 @@ class ErrorCatalog:
                 for i, match in enumerate(matches):
                     key = "{" + match + "}"
 
+                    print(f"pattern2device: key = {key}", file=sys.stderr)
                     if key not in device_pattern:
+                        print(f"pattern2device: key = {key} not in device_pattern", file=sys.stderr)
                         continue
                     text = text.replace(key,
                         device_pattern[key]['Device In RF Content'])
-
+                    print(f"pattern2device: text = {text}", file=sys.stderr)
                 return text
 
             def adjust_mapping_device_pattern(row):
@@ -346,7 +348,6 @@ class ErrorCatalog:
                     if mapping_device not in device_pattern:
                         continue
 
-                    #sys.stderr.write("device_pattern[%s] = %s\n" % (mapping_device, device_pattern[mapping_device]))
                     row[field] = (
                         device_pattern[mapping_device]['Device'] +
                         "_" + mapping_device_range
@@ -358,6 +359,19 @@ class ErrorCatalog:
                     return device_rf_pattern[device] + device
                 else:
                     return "/redfish/v1/Chassis/HGX_" + device
+
+            def accessor_pattern_converter(accessor):
+                for key in accessor.keys():
+                    print(f"accessor_pattern_converter: key = {key}", file=sys.stderr)
+                    if key == "check":
+                        continue
+                    value = pattern2device(accessor[key])
+                    print(f"accessor_pattern_converter: value[{key}] = {value}", file=sys.stderr)
+                    if value == "":
+                        continue
+                    accessor[key] = value
+                    print(f"accessor_pattern_converter: accessor[{key}] = {accessor[key]}", file=sys.stderr)
+                return accessor
 
             id = 0
             for row in fc:
@@ -386,17 +400,21 @@ class ErrorCatalog:
                 ee["managed"] = row["RF Managed Error"].strip().lower()
                 ee["rollup_device"] = row["RF Rollup to Device"]
                 ee["category"] = self.fc_expr_to_json_list(row["Layer"])
+
                 ee["event_trigger"] = self.fc_expr_to_json_acc(
                     row["Trigger data config"], row["Trigger check"])
+                ee["event_trigger"] = accessor_pattern_converter(ee["event_trigger"])
+
                 ee["accessor"] = self.fc_expr_to_json_acc(
                     row["Accessor data config"], row["Accessor check"])
+                ee["accessor"] = accessor_pattern_converter(ee["accessor"])
 
                 if len(str(row["Recovery data config"]).strip()) == 0:
                     ee.pop("recovery")
                 else:
                     ee["recovery"] = self.fc_expr_to_json_acc(
                         row["Recovery data config"], row["Recovery check"])
-
+                    ee["recovery"] = accessor_pattern_converter(ee["recovery"])
                 ee["severity"] = row["RF Log Health"]
                 ee["resolution"] = row["RF Log Resolution"]
                 ee["debounce"]["type"] = row["Debounce type"]
@@ -812,7 +830,9 @@ def main():
     elif args.conv_method == "get_platforms":
         rc = print("\n".join(ras_catalog.get_platforms()))
     elif args.conv_method == "get_device_list":
-        rc = print(ras_catalog.get_device_list('Blackwell-HGX-8-GPU'))
+        #rc = print(ras_catalog.get_device_list('Blackwell-HGX-8-GPU'))
+        from pprint import pprint
+        rc = pprint(ras_catalog.get_device_list('B300'))
     elif args.conv_method == "fpga_alert_rascat":
         if not args.fpga_regtbl_file:
             print("Error: Missing FPGA register table file argument")
