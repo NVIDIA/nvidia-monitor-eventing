@@ -278,7 +278,7 @@ void startWorkerThread(std::shared_ptr<boost::asio::io_context> io)
         // queue a task to the main thread to restart the worker thread
         logs_err(
             "worker thread event loop exited unexpectedly, restarting it\n");
-        io->post([io]() { startWorkerThread(io); });
+        boost::asio::post(*io, [io]() { startWorkerThread(io); });
     });
     thread->detach();
 }
