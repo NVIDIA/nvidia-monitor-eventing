@@ -198,8 +198,7 @@ std::string Test::Status::toString() const
 
 Test::Result::Result(Status status, nlohmann::ordered_json details,
                      std::vector<std::shared_ptr<Test>> newTests) :
-    status(status),
-    details(details), newTests(newTests)
+    status(status), details(details), newTests(newTests)
 {}
 
 // ArtifactTest ///////////////////////////////////////////////////////////////
@@ -244,8 +243,8 @@ const ArtifactType& ArtifactTest<ArtifactType>::getArtifact() const
 
 Test::Test(const std::string& type, const std::string& instance,
            const std::vector<std::shared_ptr<Test>>& dependencies) :
-    type(type),
-    instance(instance), dependencies(dependencies), result(std::nullopt)
+    type(type), instance(instance), dependencies(dependencies),
+    result(std::nullopt)
 {}
 
 std::string Test::getTestType() const

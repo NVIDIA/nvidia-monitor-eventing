@@ -112,9 +112,8 @@ class EventDetection : public object::Object
     EventDetection(const std::string& name, event_info::EventMap* eventMap,
                    event_info::PropertyFilterSet* propertyFilterSet,
                    event_handler::EventHandlerManager* hdlrMgr) :
-        object::Object(name),
-        _eventMap(eventMap), _propertyFilterSet(propertyFilterSet),
-        _hdlrMgr(hdlrMgr)
+        object::Object(name), _eventMap(eventMap),
+        _propertyFilterSet(propertyFilterSet), _hdlrMgr(hdlrMgr)
     {}
     ~EventDetection() = default;
 

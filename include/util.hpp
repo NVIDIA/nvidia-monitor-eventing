@@ -96,16 +96,14 @@ struct DeviceIdData
 
     explicit DeviceIdData(const std::string& deviceType,
                           const device_id::PatternIndex& idx) :
-        pattern{device_id::DeviceIdPattern(deviceType)},
-        index(idx)
+        pattern{device_id::DeviceIdPattern(deviceType)}, index(idx)
     {
         // Empty
     }
 
     explicit DeviceIdData(const device_id::DeviceIdPattern& ptrn,
                           const device_id::PatternIndex& idx) :
-        pattern(ptrn),
-        index(idx)
+        pattern(ptrn), index(idx)
     {
         // Empty
     }

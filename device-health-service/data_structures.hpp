@@ -60,8 +60,7 @@ struct AssertedErrorsForDevice
 {
     AssertedErrorsForDevice(
         const bip::allocator<shared_string, segment_manager_t>& allocator) :
-        criticalErrors(allocator),
-        warningErrors(allocator)
+        criticalErrors(allocator), warningErrors(allocator)
     {}
     shared_set criticalErrors;
     shared_set warningErrors;

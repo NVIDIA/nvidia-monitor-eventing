@@ -337,8 +337,7 @@ class TsLatcher
   public:
     TsLatcher(std::string name, std::string startingLabel = "start",
               std::string exitingLabel = "exit") :
-        instanceName(name),
-        startLabel(startingLabel), exitLabel(exitingLabel)
+        instanceName(name), startLabel(startingLabel), exitLabel(exitingLabel)
     {
         addTimepoint(startLabel);
     }
@@ -410,8 +409,7 @@ class RootCauseTracer : public EventHandler
   public:
     RootCauseTracer(const std::string& name,
                     std::map<std::string, dat_traverse::Device>& dat) :
-        EventHandler(name),
-        _dat(dat)
+        EventHandler(name), _dat(dat)
     {}
 
     ~RootCauseTracer() = default;

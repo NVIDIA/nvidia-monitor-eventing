@@ -127,7 +127,7 @@ class DeviceStatusHandler : public EventHandler
         EventHandler(name)
     {}
 
-    ~DeviceStatusHandler(){};
+    ~DeviceStatusHandler() {};
 
   public:
     /**

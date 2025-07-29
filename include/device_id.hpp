@@ -243,8 +243,7 @@ class CartesianProductRange
 {
   public:
     explicit CartesianProductRange(
-        const std::vector<PatternInputDomain>& ranges) :
-        ranges(ranges)
+        const std::vector<PatternInputDomain>& ranges) : ranges(ranges)
     {}
 
     class iterator_t
@@ -258,8 +257,7 @@ class CartesianProductRange
 
         iterator_t(unsigned masterIndex,
                    const std::vector<PatternInputDomain>& ranges) :
-            masterIndex(masterIndex),
-            ranges(ranges)
+            masterIndex(masterIndex), ranges(ranges)
         {}
 
         iterator_t& operator++();

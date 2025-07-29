@@ -88,8 +88,7 @@ class DataAccessor
 
     explicit DataAccessor(const nlohmann::json& acc,
                           const PropertyValue& value = PropertyValue()) :
-        _acc(acc),
-        _dataValue(value)
+        _acc(acc), _dataValue(value)
     {
         std::stringstream ss;
         ss << "Const.: _acc: " << _acc;

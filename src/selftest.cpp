@@ -379,8 +379,7 @@ eventing::RcCode
 
 Selftest::Selftest(const std::string& name,
                    const std::map<std::string, dat_traverse::Device>& dat) :
-    event_handler::EventHandler(name),
-    _dat(dat){};
+    event_handler::EventHandler(name), _dat(dat) {};
 
 /* ========================= report ========================= */
 

@@ -64,9 +64,8 @@ class CmdLineArg
                OptFlag optFlag, const std::string& optFmt, ActFlag actFlag,
                const std::string& helpMsg,
                std::function<int(ArgFuncParamType)> argFunc) :
-        shortArg(shortArg),
-        longArg(longArg), optFlag(optFlag), optFmt(optFmt), actFlag(actFlag),
-        helpMsg(helpMsg), argFunc(argFunc)
+        shortArg(shortArg), longArg(longArg), optFlag(optFlag), optFmt(optFmt),
+        actFlag(actFlag), helpMsg(helpMsg), argFunc(argFunc)
     {
         optCount = calcOptCount(optFlag, optFmt);
     }

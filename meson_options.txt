@@ -1,45 +1,129 @@
-option('debug_log', type: 'integer', min : 0, max : 4, value : 0,
-        description : 'Default debug log Level')
-option('sandbox_mode', type : 'feature', value : 'auto',
-        description : 'Sandbox mode enablement')
-option ('tests', type : 'feature', value : 'enabled',
-        description : 'Enable Unit tests for monitor-eventing')
-option ('log_elapsed_time', type : 'feature', value : 'disabled',
-        description : 'Enable generation of the Elpased time logs')
-option('profile_selftest_and_recovery', type : 'feature', value : 'disabled',
-        description : 'Enable to see time profiling logs of selftest/recovery')
-option('eventing_feature_only', type : 'feature', value : 'disabled',
-        description : 'Turn off self-test, origin of condition, and health rollup')
+option(
+    'debug_log',
+    type: 'integer',
+    min: 0,
+    max: 4,
+    value: 0,
+    description: 'Default debug log Level',
+)
+option(
+    'sandbox_mode',
+    type: 'feature',
+    value: 'auto',
+    description: 'Sandbox mode enablement',
+)
+option(
+    'tests',
+    type: 'feature',
+    value: 'enabled',
+    description: 'Enable Unit tests for monitor-eventing',
+)
+option(
+    'log_elapsed_time',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Enable generation of the Elpased time logs',
+)
+option(
+    'profile_selftest_and_recovery',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Enable to see time profiling logs of selftest/recovery',
+)
+option(
+    'eventing_feature_only',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Turn off self-test, origin of condition, and health rollup',
+)
 
 # device Health service options
-option('device_health_service', type : 'feature', value : 'disabled',
-        description : 'Build Device Health Service and disable eventing service Health update')
-option('deassertion_path_enabled', type : 'feature', value : 'disabled',
-        description : 'Whether Device Health Service supports error deassertion reducing device Health')
-option('deassertion_mode_deassert_log', type : 'feature', value : 'disabled',
-        description : 'Device Health Service supports error deassertion on new log with Resolved=true')
-option('deassertion_mode_log_resolved', type : 'feature', value : 'disabled',
-        description : 'Device Health Service supports error deassertion setting Resolved=true for existing log')
-option('mapped_file_name', type : 'string', value : '/tmp/device-health-service-shmem',
-        description : 'Filename of the memory-mapped file used by the device Health service')
-option('initial_shmem_size', type : 'integer', value : 65536,
-        description : 'Initial size of the memory-mapped file used by the device Health service')
-option('increment_shmem_size', type : 'integer', value : 65536,
-        description : 'How much to extend the memory-mapped file when an allocation failure occurs')
-option('maximum_shmem_size', type : 'integer', value : 1048576,
-        description : 'Maximum size of the memory-mapped file used by the device Health service')
-option('deferred_update_interval', type : 'integer', value : 10,
-        description : 'Wait between retries to set device Health when the property is not yet created')
-option('max_error_id_length', type : 'integer', value : 100,
-        description : 'Maximum length of error_id/EventId field to support in error assertions')
-option('max_asserted_error_ids_per_dev_sev', type : 'integer', value : 50,
-        description : 'Maximum number of asserted error IDs per device per severity')
+option(
+    'device_health_service',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Build Device Health Service and disable eventing service Health update',
+)
+option(
+    'deassertion_path_enabled',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Whether Device Health Service supports error deassertion reducing device Health',
+)
+option(
+    'deassertion_mode_deassert_log',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Device Health Service supports error deassertion on new log with Resolved=true',
+)
+option(
+    'deassertion_mode_log_resolved',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Device Health Service supports error deassertion setting Resolved=true for existing log',
+)
+option(
+    'mapped_file_name',
+    type: 'string',
+    value: '/tmp/device-health-service-shmem',
+    description: 'Filename of the memory-mapped file used by the device Health service',
+)
+option(
+    'initial_shmem_size',
+    type: 'integer',
+    value: 65536,
+    description: 'Initial size of the memory-mapped file used by the device Health service',
+)
+option(
+    'increment_shmem_size',
+    type: 'integer',
+    value: 65536,
+    description: 'How much to extend the memory-mapped file when an allocation failure occurs',
+)
+option(
+    'maximum_shmem_size',
+    type: 'integer',
+    value: 1048576,
+    description: 'Maximum size of the memory-mapped file used by the device Health service',
+)
+option(
+    'deferred_update_interval',
+    type: 'integer',
+    value: 10,
+    description: 'Wait between retries to set device Health when the property is not yet created',
+)
+option(
+    'max_error_id_length',
+    type: 'integer',
+    value: 100,
+    description: 'Maximum length of error_id/EventId field to support in error assertions',
+)
+option(
+    'max_asserted_error_ids_per_dev_sev',
+    type: 'integer',
+    value: 50,
+    description: 'Maximum number of asserted error IDs per device per severity',
+)
 
 # Device Health Status over FS
-option('device-status-fs', type : 'feature', value : 'enabled',
-        description : 'Update Device Health Status over FS')
-option('device-status-fs-path', type : 'string', value : '/tmp/devices',
-        description : 'Specify device status filesystem top folder.')
+option(
+    'device-status-fs',
+    type: 'feature',
+    value: 'enabled',
+    description: 'Update Device Health Status over FS',
+)
+option(
+    'device-status-fs-path',
+    type: 'string',
+    value: '/tmp/devices',
+    description: 'Specify device status filesystem top folder.',
+)
 
-# Shared memory 
-option('device-status-shmem', type: 'feature', description: 'Use NVIDIA Shared-Memory IPC', value: 'enabled')
+# Shared memory
+option(
+    'device-status-shmem',
+    type: 'feature',
+    description: 'Use NVIDIA Shared-Memory IPC',
+    value: 'enabled',
+)
+

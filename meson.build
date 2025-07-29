@@ -1,9 +1,11 @@
-project('c++ nvidia-monitor-eventing', 'cpp',
-  version : '0.1',
-  license : 'MIT',
-  meson_version: '>=1.1.1',
-  default_options: [
-            'cpp_std=c++23'])
+project(
+    'c++ nvidia-monitor-eventing',
+    'cpp',
+    version: '0.1',
+    license: 'MIT',
+    meson_version: '>=1.1.1',
+    default_options: ['cpp_std=c++23'],
+)
 
 # Project related links
 
@@ -17,63 +19,71 @@ lang = 'cpp'
 cxx = meson.get_compiler(lang)
 
 ## Set global arguments
-add_global_arguments('-DSOME_TOKEN=value', language : lang)
+add_global_arguments('-DSOME_TOKEN=value', language: lang)
 
 # Validate the c++ Standard
 if get_option('cpp_std') != 'c++23'
-    error('This project requires c++20 support '+ get_option('cpp_std'))
+    error('This project requires c++20 support ' + get_option('cpp_std'))
 endif
 
 ## Fetch all the project options and set the project arguments
 debug_log_level = get_option('debug_log')
 if debug_log_level != 0
-    add_project_arguments('-DDEF_DBG_LEVEL=' + debug_log_level.to_string(), language : lang)
+    add_project_arguments(
+        '-DDEF_DBG_LEVEL=' + debug_log_level.to_string(),
+        language: lang,
+    )
 endif
 if get_option('sandbox_mode').enabled()
-    add_project_arguments('-DSANDBOX_MODE', language : lang)
+    add_project_arguments('-DSANDBOX_MODE', language: lang)
 endif
 
 if get_option('log_elapsed_time').enabled()
-    add_project_arguments('-DLOG_ELAPSED_TIME', language : lang)
+    add_project_arguments('-DLOG_ELAPSED_TIME', language: lang)
 endif
 
 if get_option('profile_selftest_and_recovery').enabled()
-    add_project_arguments('-DPROFILING_SELFTEST_AND_RECOVERY_FLOW', language : lang)
+    add_project_arguments(
+        '-DPROFILING_SELFTEST_AND_RECOVERY_FLOW',
+        language: lang,
+    )
 endif
 
 if get_option('eventing_feature_only').enabled()
-    add_project_arguments('-DEVENTING_FEATURE_ONLY', language : lang)
+    add_project_arguments('-DEVENTING_FEATURE_ONLY', language: lang)
 endif
 
 # Device Health Service options
-if(get_option('device_health_service').enabled())
-    add_project_arguments('-DEVENTING_SERVICE_NO_DEVICE_HEALTH', language : lang)
+if (get_option('device_health_service').enabled())
+    add_project_arguments('-DEVENTING_SERVICE_NO_DEVICE_HEALTH', language: lang)
 endif
 
 
 if get_option('device-status-fs').enabled()
-    add_project_arguments('-DEVENTING_SERVICE_DEVICE_STATUS_FS', language : lang)
+    add_project_arguments('-DEVENTING_SERVICE_DEVICE_STATUS_FS', language: lang)
 endif
 
 if get_option('device-status-shmem').enabled()
-    add_project_arguments('-DEVENTING_SERVICE_DEVICE_STATUS_NVIDIA_SHMEM', language : lang)
+    add_project_arguments(
+        '-DEVENTING_SERVICE_DEVICE_STATUS_NVIDIA_SHMEM',
+        language: lang,
+    )
 endif
 
 
 # Get the options and enable the respective features
 ## create a MAP of  "options : feature_flag"
 
-feature_map = {
-}
+feature_map = {}
 
 # Get the options status and build a project summary to show which flags are
 # being enabled during the configuration time.
 
-foreach option_key,option_value : feature_map
-  if(get_option(option_key).enabled())
-      summary(option_key,option_value, section : 'Enabled Features')
-      add_global_arguments(option_value,language : lang)
-  endif
+foreach option_key, option_value : feature_map
+    if (get_option(option_key).enabled())
+        summary(option_key, option_value, section: 'Enabled Features')
+        add_global_arguments(option_value, language: lang)
+    endif
 endforeach
 
 systemd_dep = dependency('systemd')
@@ -90,7 +100,8 @@ endif
 if sdbusplus_proj.found()
     sdbusplusplus_prog = sdbusplus_proj.get_variable('sdbusplusplus_prog')
     sdbuspp_gen_meson_prog = sdbusplus_proj.get_variable(
-        'sdbuspp_gen_meson_prog')
+        'sdbuspp_gen_meson_prog',
+    )
 else
     sdbusplusplus_prog = find_program('sdbus++', native: true)
     sdbuspp_gen_meson_prog = find_program('sdbus++-gen-meson', native: true)
@@ -98,7 +109,7 @@ endif
 
 sdeventplus_dep = dependency(
     'sdeventplus',
-    fallback: ['sdeventplus', 'sdeventplus_dep' ],
+    fallback: ['sdeventplus', 'sdeventplus_dep'],
 )
 
 phosphor_logging_dep = dependency(
@@ -121,10 +132,7 @@ if cxx.has_header('nlohmann/json.hpp')
 endif
 
 # Add Include Directory
-inc = include_directories(
-    'include',
-    'config'
-    )
+inc = include_directories('include', 'config')
 
 # subdir for meson project
 subdir('include')
@@ -137,39 +145,43 @@ mon_evt_dependencies += conf_h_dep
 
 # Pkg-config
 pkg_mod = import('pkgconfig')
-pkg_mod.generate(libraries : eventinglib,
-                 version : '0.1',
-                 name : 'monitor-eventing',
-                 filebase : 'monitor-eventing',
-                 description : 'nvidia-monitor-eventing')
+pkg_mod.generate(
+    libraries: eventinglib,
+    version: '0.1',
+    name: 'monitor-eventing',
+    filebase: 'monitor-eventing',
+    description: 'nvidia-monitor-eventing',
+)
 
-pkg_mod.generate(libraries : selftestlib,
-                 version : '0.1',
-                 name : 'selftest',
-                 filebase : 'selftest',
-                 description : 'nvidia-monitor-eventing-selftest')
+pkg_mod.generate(
+    libraries: selftestlib,
+    version: '0.1',
+    name: 'selftest',
+    filebase: 'selftest',
+    description: 'nvidia-monitor-eventing-selftest',
+)
 
 if get_option('tests').enabled()
-  gtest_dep = dependency('gtest', main: true, disabler: true, required: false)
-  gmock_dep = dependency('gmock', disabler: true, required: false)
-  if not gtest_dep.found() or not gmock_dep.found()
-      gtest_proj = import('cmake').subproject('googletest', required: false)
-      if gtest_proj.found()
-          gtest_dep = declare_dependency(
-              dependencies: [
-                  dependency('threads'),
-                  gtest_proj.dependency('gtest'),
-                  gtest_proj.dependency('gtest_main'),
-              ]
-          )
-          gmock_dep = gtest_proj.dependency('gmock')
-      else
-          assert(
-              not get_option('tests').enabled(),
-              'Googletest is required if tests are enabled'
-          )
-      endif
-  endif
+    gtest_dep = dependency('gtest', main: true, disabler: true, required: false)
+    gmock_dep = dependency('gmock', disabler: true, required: false)
+    if not gtest_dep.found() or not gmock_dep.found()
+        gtest_proj = import('cmake').subproject('googletest', required: false)
+        if gtest_proj.found()
+            gtest_dep = declare_dependency(
+                dependencies: [
+                    dependency('threads'),
+                    gtest_proj.dependency('gtest'),
+                    gtest_proj.dependency('gtest_main'),
+                ],
+            )
+            gmock_dep = gtest_proj.dependency('gmock')
+        else
+            assert(
+                not get_option('tests').enabled(),
+                'Googletest is required if tests are enabled',
+            )
+        endif
+    endif
 endif
 
 srcfiles_unittest = [
@@ -187,7 +199,8 @@ srcfiles_unittest = [
     'test/propertyvalue_string_test.cpp',
     'test/propertyvalue_variant_test.cpp',
     'test/selftest_test.cpp',
-    'test/util_test.cpp']
+    'test/util_test.cpp',
+]
 
 eventinglib_sources = [
     'src/config_schemas.cpp',
@@ -209,31 +222,31 @@ eventinglib_sources = [
     'src/message_dispatcher.cpp',
     'src/event_instantiator.cpp',
     'src/property_accessor.cpp',
-    'src/util.cpp']
+    'src/util.cpp',
+]
 
 selftestlib_sources = ['src/selftest.cpp']
 
 bindir = get_option('prefix') + '/' + get_option('bindir')
 
 ## install memory watcher service
-install_data('monitor-eventing-memory-watcher/monitor-eventing-memory-watcher',
-             install_dir : bindir)
+install_data(
+    'monitor-eventing-memory-watcher/monitor-eventing-memory-watcher',
+    install_dir: bindir,
+)
 
-if(get_option('tests').enabled())
-    # generate the test executable
+# generate the test executable
+if (get_option('tests').enabled())
     ut_bin = executable(
-      'eventing_unit_test',
-      srcfiles_unittest + eventinglib_sources + selftestlib_sources,
-      include_directories : inc,
-      install_dir: bindir,
-      dependencies: mon_evt_dependencies + [
-        gtest_dep,
-        gmock_dep,
-      ]
+        'eventing_unit_test',
+        srcfiles_unittest + eventinglib_sources + selftestlib_sources,
+        include_directories: inc,
+        install_dir: bindir,
+        dependencies: mon_evt_dependencies + [gtest_dep, gmock_dep],
     )
     test('eventing_unit_test', ut_bin)
 endif
 
-if(get_option('device_health_service').enabled())
+if (get_option('device_health_service').enabled())
     subdir('device-health-service')
 endif
