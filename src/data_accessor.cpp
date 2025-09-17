@@ -20,10 +20,14 @@
 #include "event_info.hpp"
 #include "log.hpp"
 
-#include <boost/process.hpp>
+#include <signal.h>
+#include <sys/wait.h>
 
+#include <chrono>
+#include <cstdio>
 #include <regex>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace data_accessor
@@ -137,51 +141,55 @@ bool DataAccessor::runCommandLine(const device_id::PatternIndex* devIndex)
         uint64_t processExitCode = 0;
         try
         {
-            std::string line{""};
             log_elapsed("running cmd: %s", cmd.c_str());
-            boost::process::ipstream pipe_stream;
-            boost::process::group g;
-            boost::process::child process(
-                cmd, g, boost::process::std_out > pipe_stream);
-            int waits_remaining =
-                (SUBPROCESS_RUNNING_TIMEOUT_MS / SUBPROCESS_RUNNING_POLL_MS);
-            while (process.running() && waits_remaining > 0)
+
+            // Using popen for simplicity and compatibility
+            // Add timeout wrapper to the command
+            std::string timeoutCmd =
+                "timeout " +
+                std::to_string(SUBPROCESS_RUNNING_TIMEOUT_MS / 1000) + " " +
+                cmd;
+
+            FILE* pipe = popen(timeoutCmd.c_str(), "r");
+            if (!pipe)
             {
-                // std::cerr << "process still running, " << waits_remaining <<
-                // " waits remaining" << std::endl;
-                std::this_thread::sleep_for(
-                    std::chrono::milliseconds(SUBPROCESS_RUNNING_POLL_MS));
-                waits_remaining--;
+                throw std::runtime_error("Failed to run command");
             }
-            std::error_code ec;
-            if (process.running())
+
+            // Read output
+            char buffer[128];
+            std::string line;
+            while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
             {
-                log_err("process still running, going to terminate group\n");
-                // terminate process and any subprocesses it launched as well
-                g.terminate(ec);
-                // prevent direct child becoming zombie (grandchildren are
-                // reparented to init which reaps them)
-                process.wait();
-                if (ec && ec.value() != ESRCH)
+                line = buffer;
+                // Remove trailing newline if present
+                if (!line.empty() && line.back() == '\n')
+                {
+                    line.pop_back();
+                }
+                if (!line.empty())
+                {
+                    result += line;
+                }
+            }
+
+            // Get exit status
+            int pclose_result = pclose(pipe);
+            if (WIFEXITED(pclose_result))
+            {
+                processExitCode = WEXITSTATUS(pclose_result);
+                // Exit code 124 means timeout occurred
+                if (processExitCode == 124)
                 {
                     throw std::runtime_error(
-                        "error terminating subprocess group: " + ec.message());
+                        "child process timed out and was terminated!");
                 }
-                throw std::runtime_error(
-                    "child process timed out and was terminated!");
             }
-            // store main process's exit code now, before cleanup
-            process.wait();
-            // make sure children (if any) are cleaned up once the main process
-            // exits since these are indirect children, they will be reparented
-            // to init which reaps them.
-            g.terminate(ec);
-            if (ec && ec.value() != ESRCH)
+            else
             {
-                throw std::runtime_error(
-                    "error terminating subprocess group: " + ec.message());
+                processExitCode = 1; // Default error code
             }
-            processExitCode = static_cast<uint64_t>(process.exit_code());
+
             log_dbg("returnCode=%llu cmd='%s'\n", processExitCode, cmd.c_str());
             if (processExitCode != 0)
             {
@@ -192,11 +200,6 @@ bool DataAccessor::runCommandLine(const device_id::PatternIndex* devIndex)
                 ss << "Error running the command \'" << cmd << "\' " << error;
                 log_err("%s\n", ss.str().c_str());
                 return ret;
-            }
-            while (pipe_stream && std::getline(pipe_stream, line) &&
-                   line.empty() == false)
-            {
-                result += line;
             }
         }
         catch (const std::exception& error)
