@@ -292,10 +292,11 @@ class ErrorCatalog:
                 if not row['Platform'] == platform:
                     continue
 
-                output[row['Device In RF Content']] = (
-                    row['RF URI Prefix'] +
-                    row['RF Chassis URI Device Prefix'] + "_"
-                )
+                prefix = row['RF Chassis URI Device Prefix']
+                print(f"device_prefix = {prefix}", file=sys.stderr)
+
+                output[row['Device In RF Content']] = row['RF URI Prefix'] + \
+                    (prefix + "_" if prefix != "" else "")
 
         return output
 
