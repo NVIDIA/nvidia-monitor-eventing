@@ -1,0 +1,337 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2025, NVIDIA CORPORATION.  All rights reserved.
+#
+#  NVIDIA CORPORATION and its licensors retain all intellectual property
+#  and proprietary rights in and to this software, related documentation
+#  and any modifications thereto.  Any use, reproduction, disclosure or
+#  distribution of this software and related documentation without an express
+#  license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Parser for MCU NSM Event based GPIO alerts
+
+set -o pipefail
+
+app_name="mcu_event_parser"
+app_ver="0.1"
+
+app_tmp="/tmp/$app_name"
+
+show_help()
+{
+    echo "Version: $app_ver"
+    echo "Usage:"
+    echo " $app_name <error_id> <device_id>"
+    echo
+    echo "Output:"
+    echo " 0 - signal_low"
+    echo " 1 - signal_high"
+    echo
+}
+
+err() #(msg)
+{
+    echo "$app_name:$*" >&2
+}
+
+prompt() #(msg)
+{
+    echo "$*" >&2
+}
+
+run() #(cmd)
+{
+    local cmd=$*
+    err "$cmd"
+    [ -n "$DEBUG" ] && return 0
+    $cmd
+    return $?
+}
+
+# Load platform specific information pertaining to the MCU
+for conf_dir in "." "/tmp" "/usr/share"; do
+    mcu_cfg="${conf_dir}/mcu_alert.conf"
+    source $mcu_cfg &>/dev/null;rc=$?
+    [ "$rc" -ne 0 ] && err "[E] Failed to load MCU alert config!" && exit $rc
+    break
+done
+# Platform conf content
+# mcu_alert=()
+# Format,
+#   "error_id device_id:mcu_id gpio_id signal_name"
+# Example of mcu_alert:
+# "HPM_SMA-CPU_IROT-ERROR-FATAL CPU_0:ProcessorModule_SMA_0 1 CPU0_IROT_FATAL_ERR_L"
+# "HPM_SMA-CPU_IROT-ERROR-FATAL CPU_1:ProcessorModule_SMA_1 1 CPU0_IROT_FATAL_ERR_L"
+# "HPM_SMA-CPU-THERMAL-OVERT CPU_0:ProcessorModule_SMA_0 2 CPU0_THERM_OVERT_L"
+# "HPM_SMA-CPU-THERMAL-OVERT CPU_1:ProcessorModule_SMA_1 2 CPU0_THERM_OVERT_L"
+# "HPM_SMA-CPU-THERMAL-WARN CPU_0:ProcessorModule_SMA_0 3 CPU0_THERM_WARN_L"
+# "HPM_SMA-CPU-THERMAL-WARN CPU_1:ProcessorModule_SMA_1 3 CPU0_THERM_WARN_L"
+# "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_0_Memory_0:ProcessorModule_SMA_0 6 CPU0_SOCAMM0_PRSNT_L"
+# "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_0_Memory_1:ProcessorModule_SMA_0 7 CPU0_SOCAMM1_PRSNT_L"
+# "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_0_Memory_2:ProcessorModule_SMA_0 8 CPU0_SOCAMM2_PRSNT_L"
+# "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_0_Memory_3:ProcessorModule_SMA_0 9 CPU0_SOCAMM3_PRSNT_L"
+
+
+mcu_gpio_service="xyz.openbmc_project.NSM"
+mcu_gpio_path_prefix="/xyz/openbmc_project/gpio/"
+mcu_gpio_interface="xyz.openbmc_project.GPIO.State"
+mcu_gpio_property="States"
+mcu_device_prefix="HGX_"
+
+mcu_read_gpio() #(mcu_id, gpio_id)
+{
+    local mcu_id=$1;shift
+    local gpio_id=$1;shift
+    [ -z "${mcu_id}" -o -z "${gpio_id}" ] && return 1
+
+    local value
+    # EINJ Mode
+    local einj_file="${mcu_einj_folder}/${mcu_id}${mcu_einj_ext}"
+    if [ -f "$einj_file" ]; then
+        prompt "EINJ Mode: $einj_file"
+        value=$(cat $einj_file);rc=$?
+        [ $rc -ne 0 ] && return 3
+    else
+        # Normal Mode
+        # Example:
+        # /xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_0
+        local mcu_gpio_objpath=${mcu_gpio_path_prefix}${mcu_device_prefix}${mcu_id}
+
+        prompt "Normal Mode: $mcu_gpio_objpath"
+        local rc=0
+        local dbus_value
+        dbus_value=$(run busctl get-property \
+            ${mcu_gpio_service} \
+            ${mcu_gpio_objpath} \
+            ${mcu_gpio_interface} \
+            ${mcu_gpio_property});rc=$?
+        [ $rc -ne 0 ] && return 2
+
+
+        # Output example 1:
+        # {
+        #   "States": {
+        #     "23": true,
+        #     "4": false,
+        #     "54": true,
+        #     "76": true,
+        #     "0": false,
+        #     "14": true
+        #   }
+        # }
+        #value=$(grep -o "\"$gpio_id\"[[:space:]]*:[[:space:]]*[a-zA-Z0-9]*" \
+        #    <<< "${dbus_value}" | \
+        #    sed -E "s/\"$gpio_id\"[[:space:]]*:[[:space:]]*//");rc=$?
+
+        # Output example 2:
+        # a{ub} 6 3 true 12 false 19 true 27 false 34 true 41 false
+        value=$(grep -oE "$gpio_id (true|false)" <<< "$dbus_value");rc=$?
+        [ $rc -ne 0 ] && return 3
+    fi
+
+    # value example: 34 true
+    value=${value##* }
+
+    # value: true, false
+    [ "${value}" == "true" ] && echo 1 || echo 0
+    return 0
+}
+
+
+main() #(error_id, device_id)
+{
+    local error_id=$1;shift
+    local device_id=$1;shift
+
+    # Mapping Format,
+    #   "error_id device_id:mcu_id signal_name"
+    local line
+    for line in "${mcu_alert[@]}"; do
+        [ -z "$line" ] && continue
+
+        # Check if line matches the error_id and device_id
+        # Example of key:
+        #   HPM_SMA-CPU_IROT-ERROR-FATAL CPU_0
+        local key=${line%%:*}
+        [ "$key" == "${error_id} ${device_id}" ] || continue
+
+        # Example of mcu_signal:
+        #   ProcessorModule_SMA_0 1 CPU0_IROT_FATAL_ERR_L_3V3
+        local mcu_signal=${line##*:}
+
+        local rc=0
+        # Read the MCU GPIO signal
+        # No quotes around $mcu_signal is on purpose as mcu_read_gpio expects
+        #  2 arguments.
+        local value;value=$(mcu_read_gpio $mcu_signal);rc=$?
+        [ "$rc" -ne 0 ] && err "[E] Read GPIO for [$mcu_signal] failed, rc=$rc!" && return $rc
+
+        err "[$key]:[$mcu_signal] value=$value"
+        echo "$value" # 0 or 1
+        return 0
+    done
+}
+
+################################################################################
+## EINJ capability
+mcu_einj_folder="/tmp/$app_name/einj"
+mcu_einj_ext=".einj"
+
+einj_cap()
+{
+    echo "list_errors"
+    echo "list_devices"
+    grep -E "^einj_*()" $(which $0) | cut -d'(' -f1 2>/dev/null
+
+    return 0
+}
+
+list_errors()
+{
+    local value
+    for value in "${mcu_alert[@]}"; do
+        [ -z "$value" ] && continue
+        value=${value%%:*}
+        value=${value%% *}
+        echo $value
+    done
+    return 0
+}
+
+list_devices()
+{
+    local value
+    for value in "${mcu_alert[@]}"; do
+        [ -z "$value" ] && continue
+        value=${value%%:*}
+        value=${value##* }
+        echo $value
+    done
+    return 0
+}
+
+einj_start()
+{
+    mkdir -p $mcu_einj_folder
+    return 0
+}
+
+einj_stop()
+{
+    rm -rf $mcu_einj_folder
+    return 0
+}
+
+dev_to_mcu() #(target_dev_id)
+{
+    local target_dev_id=$1;shift
+    local line
+    for line in "${mcu_alert[@]}"; do
+        [ -z "$line" ] && continue
+        local dev_map=($line);dev_map=(${dev_map[1]//:/ })
+        local dev_id=${dev_map[0]}
+        local mcu_id=${dev_map[1]}
+        [ "$target_dev_id" == "${dev_id}" ] || continue
+        echo $mcu_id
+        return 0
+    done
+    return 1
+}
+
+einj_error() #(dev_id, errors[])
+{
+    local dev_id=$1;shift
+    local error_id=$1;shift # only support single error injection for now
+
+    local mcu_id;mcu_id=$(dev_to_mcu $dev_id);rc=$?
+    [ "$rc" -ne 0 ] && err "[E] Failed to convert device ID [$dev_id] to MCU ID!" && return $rc
+    local dev_einj_file="${mcu_einj_folder}/${mcu_id}${mcu_einj_ext}"
+
+    local line
+    for line in "${mcu_alert[@]}"; do
+        [ -z "$line" ] && continue
+        local key=${line%%:*}
+        [ "$key" == "${error_id} ${dev_id}" ] || continue
+        local mcu_signal=${line##*:}
+        local value=($mcu_signal) # mcu_id gpio_id signal_name
+        local gpio_id=${value[1]}
+        prompt "MCU signal: $mcu_signal"
+        prompt "Injecting error: $error_id on device $dev_id"
+        echo "a{ub} 1 $gpio_id true" > "$dev_einj_file"
+        return 0
+    done
+
+    err "[E] Error ID [$error_id] not found for device [$dev_id]!"
+    return 1
+}
+
+#UT
+start_ut()
+{
+    local pass=0
+    local fail=0
+    local skip=0
+    ## Single EINJ Test
+    echo "## Single Injection Test ##"
+    echo "----------------------------"
+
+    einj_start
+
+    local line
+    for line in "${mcu_alert[@]}"; do
+        [ -z "$line" ] && continue
+        local key=${line%%:*}
+        local error_id=${key%% *}
+        local dev_id=${key##* }
+        local tcase=${error_id}_${dev_id}
+
+        # Do injection
+        einj_error $dev_id $error_id >/dev/null;rc=$?
+        if [ "$rc" -ne 0 ]; then
+            echo -e "Test [$error_id $dev_id] injection failed, rc=$rc: \e[1;31mSKIPPED\e[0m"
+            skip=$((skip+1))
+            continue
+        fi
+
+        # Get alert status (the test target)
+        local rslt;rslt=$(main $error_id $dev_id);rc=$?
+
+        # Test result evaluation
+        if [ "$rc" -ne 0 ]; then
+            echo -e "Test [$tcase] get error failed, rc=$rc: \e[1;31mFAIL\e[0m"
+            fail=$((fail+1))
+            continue
+        fi
+
+        if [ "$rslt" != "1" ]; then
+            echo -e "Test [$tcase] result check failed, rslt=$rslt: \e[1;31mFAIL\e[0m"
+            fail=$((fail+1))
+            continue
+        fi
+
+        echo -e "Test [$tcase] result check success, rslt=$rslt: \e[1;92mPASS\e[0m"
+        pass=$((pass+1))
+    done
+
+    einj_stop
+
+    # Test summary
+    echo "==============================================="
+    echo "Pass: $pass, Fail: $fail, Skip: $skip. Pass Rate: $((pass * 100 / (fail + pass + skip)))%"
+    echo "==============================================="
+    return $((fail+skip))
+}
+
+################################################################################
+## MAIN ##
+[ $# -ne 0 ] && if grep "^$1()" $(which $0) &> /dev/null; then func=$1;shift;$func "$@";exit $?; fi
+
+[ "$*" == "--help" ] && show_help && exit 1
+
+error_id=$1;shift
+device_id=$1;shift
+
+main "$error_id" "$device_id"
+
+exit $?
+

@@ -43,6 +43,7 @@ scripts = [
     'ocp_recovery_status_parser',
     'gb200_pwrfail_parser',
     'fpga_pwrfail_parser',
+    'mcu_event_parser',
 ]
 
 install_data(scripts, install_dir: bindir)
