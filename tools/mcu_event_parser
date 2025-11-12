@@ -51,10 +51,9 @@ run() #(cmd)
 # Load platform specific information pertaining to the MCU
 for conf_dir in "." "/tmp" "/usr/share"; do
     mcu_cfg="${conf_dir}/mcu_alert.conf"
-    source $mcu_cfg &>/dev/null;rc=$?
-    [ "$rc" -ne 0 ] && err "[E] Failed to load MCU alert config!" && exit $rc
-    break
+    source $mcu_cfg &>/dev/null && break
 done
+[ -z "$mcu_alert" ] && err "[E] Failed to load MCU alert config!" && exit 1
 # Platform conf content
 # mcu_alert=()
 # Format,
