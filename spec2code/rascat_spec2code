@@ -20,6 +20,7 @@ import os
 import pandas as pd
 import sys
 from typing import Dict
+from pprint import pprint
 
 # Add at the top of the file with other global variables
 platform_column_prefix = "Applicable for "
@@ -452,6 +453,7 @@ class ErrorCatalog:
 
                 ei_json["Device"].append(ee)
 
+            ei_json["Device"].sort(key=lambda e: e.get("error_id"))
             print(json.dumps(ei_json, indent=2))
             return 0
 
@@ -469,6 +471,43 @@ class ErrorCatalog:
         elif any(term in alert_lower for term in ['erot', 'irot']):
             return "erot-control"
         return ""
+
+    def count_per_device(self, platform):
+        with open(self._errorlist, "r", encoding='utf-8') as f:
+            fc = csv.DictReader(f)
+
+            ei_json = copy.deepcopy(event_info_json)
+
+            platform_column = platform_column_prefix + platform
+
+            total_count = 0
+            device_count = dict()
+            for row in fc:
+                if row[platform_column].lower() != "yes":
+                    continue
+
+                if row["RF Log Producer"].lower() != "eventingservice":
+                    continue
+
+                total_count += 1 # count the total number of alerts
+
+                # counting per device
+                device_name = str(row["Impacted Component"])
+                print(f"device_name = {device_name}", file=sys.stderr)
+                # if device_name is not in device_count, add it with count 0
+                if device_name not in device_count:
+                    print(f"device_name = {device_name} not in device_count", file=sys.stderr)
+                    device_count[device_name] = 0
+                # increment the count for the device
+                device_count[device_name] += 1
+                print(f"device_count[{device_name}] = {device_count[device_name]}", file=sys.stderr)
+
+            print(f"Total number of alerts: {total_count}", file=sys.stderr)
+            #pprint(device_count, stream=sys.stderr)
+            for device, count in device_count.items():
+                print(f"{device}: {count}", file=sys.stderr)
+
+            return total_count, device_count
 
 def get_hardware_signal(int_for_hmc: str) -> str:
     """Convert Int for HMC value to hardware signal name"""
@@ -801,6 +840,11 @@ def main():
 
     args = parser.parse_args()
 
+    supported_methods = [
+        m for m in dir(ErrorCatalog) if callable(getattr(ErrorCatalog, m)) and not m.startswith("__")
+    ]
+    print("\n".join(supported_methods), file=sys.stderr)
+
     # Validate and assign arguments based on conv_method
     if args.conv_method == "to_event_info_json":
         args.platform = args.arg3
@@ -812,6 +856,11 @@ def main():
         args.platform = None
         if not args.fpga_regtbl_file:
             parser.error("Missing FPGA register table file argument")
+    elif args.conv_method in supported_methods:
+        args.platform = args.arg3
+        args.fpga_regtbl_file = None
+        if not args.platform:
+            parser.error("Missing platform argument for " + args.conv_method)
 
     ras_catalog = args.ras_catalog
 
@@ -831,9 +880,7 @@ def main():
     elif args.conv_method == "get_platforms":
         rc = print("\n".join(ras_catalog.get_platforms()))
     elif args.conv_method == "get_device_list":
-        #rc = print(ras_catalog.get_device_list('Blackwell-HGX-8-GPU'))
-        from pprint import pprint
-        rc = pprint(ras_catalog.get_device_list('B300'))
+        rc = pprint(ras_catalog.get_device_list(args.platform))
     elif args.conv_method == "fpga_alert_rascat":
         if not args.fpga_regtbl_file:
             print("Error: Missing FPGA register table file argument")
@@ -845,6 +892,8 @@ def main():
         )
         # Skip cleanup since fpga_alert_rascat handles it
         return rc
+    elif args.conv_method in supported_methods:
+        rc = getattr(ras_catalog, args.conv_method)(args.platform)
     else:
         print("Wrong args: ", args.conv_method)
         rc = 1
