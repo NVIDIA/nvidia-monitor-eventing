@@ -144,6 +144,9 @@ MCU_EVENT,nvidia-monitor-eventing,[install],mcu.profile
 MCU_EVENT,nvidia-monitor-eventing,[file],mcu_bootreason_parser
 MCU_EVENT,nvidia-monitor-eventing,[install],mcu_bootreason_parser
 
+POSTCODE,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,phosphor-post-code-manager
+POSTCODE,obmc-phosphor-image,OBMC_IMAGE_EXTRA_INSTALL,phosphor-host-postd
+
 "
 
 prompt()
