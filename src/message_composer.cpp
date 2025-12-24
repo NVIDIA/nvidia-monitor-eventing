@@ -77,7 +77,7 @@ bool MessageComposer::createLog(event_info::EventNode& event)
 
     auto pNamespace = getPhosphorLoggingNamespace(event);
 
-    method.append(std::array<std::pair<std::string, std::string>, 11>(
+    method.append(std::array<std::pair<std::string, std::string>, 12>(
         {{{"xyz.openbmc_project.Logging.Entry.EventId", event.errorId},
           {"xyz.openbmc_project.Logging.Entry.Resolution",
            event.getResolution()},
@@ -89,6 +89,7 @@ bool MessageComposer::createLog(event_info::EventNode& event)
           {"DEVICE_NAME", event.device},
           {"FULL_DEVICE_NAME", event.getFullDeviceName()},
           {"EVENT_NAME", event.event},
+          {"ERROR_ID", event.errorId},
           {"RECOVERY_TYPE", !event.recovery_accessor.isEmpty()
                                 ? "property_change"
                                 : "other"}}}));
