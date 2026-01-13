@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+
+app_name=gpiomon_event_generator
+app_ver=0.1
+
+help() #(msg)
+{
+    echo "$*" >&2
+}
+
+err() #(msg)
+{
+    echo "[E] $*" >&2
+}
+
+show_help()
+{
+    help "Usage: $app_name <gpio_definition_file>"
+    help
+    exit 250
+}
+
+GPIOMON_CONF_FILE="phosphor-multi-gpio-monitor.json"
+GPIO_DESCRIPTION_FILE="gpio_description.csv"
+
+gpio2descr() #(gpio_name)
+{
+    # Description is the GPIO name without -I/-O suffix or _L/_N before them
+    local name=${gpio_name//-I/}
+    name=${name//-O/}
+    name=${name//_L/}
+    name=${name//_N/}
+    echo $name
+}
+
+gen_service_name() #(gpio_name)
+{
+    local gpio_name=$1;shift
+    local name=$(gpio2descr "$gpio_name")
+    name=${name//_/-}
+    name=${name// /-}
+    echo ${name,,}-alert.service
+}
+
+# Create & append new entry for a GPIO in phosphor-multi-gpio-monitor.json.
+# phosphor-multi-gpio-monitor.json entry example:
+# {
+#     "Name": "CPU-Boot-Done",
+#     "LineName": "CPU_BOOT_DONE-I",
+#     "EventMon": "BOTH",
+#     "Targets": {
+#         "FALLING": ["cpu-boot-undone.service"],
+#         "RISING": ["cpu-boot-done.service"]
+#     },
+#     "Continue": true
+# }
+append_gpiomon_json() #(json, gpio_name, gpio_edge)
+{
+    local json=$1;shift
+    local gpio_name=$1;shift
+    local gpio_edge=$1;shift
+
+    # Initialize JSON file if it doesn't exist or is not valid JSON
+    if [[ ! -f "$gpiomon_conf_file" ]]; then
+        echo "[]" > "$gpiomon_conf_file"
+        help "Initialized $gpiomon_conf_file as empty array"
+    elif ! jq empty "$gpiomon_conf_file" &>/dev/null; then
+        # File exists but has invalid JSON - back it up and reinitialize
+        help "WARNING: $gpiomon_conf_file exists but is not valid JSON"
+        help "Backing up to ${gpiomon_conf_file}.bak"
+        mv "$gpiomon_conf_file" "${gpiomon_conf_file}.bak"
+        echo "[]" > "$gpiomon_conf_file"
+    fi
+
+    # json entry Name is
+    local entry_name=$(gpio2descr "$gpio_name")
+
+    local line_name=${gpio_name}
+    local event_mon=$(grep "$gpio_name" "$GPIO_DESCRIPTION_FILE" | cut -d"," -f2)
+    local target=$(gen_service_name "$gpio_name")
+    local continue=true # always true for now
+
+    # Check if entry already exists
+    local exists=$(jq --arg line "$line_name" '[.[] | select(.LineName == $line)] | length' "$json")
+
+    if [[ "$exists" -gt 0 ]]; then
+        help "Updating existing entry for GPIO ($gpio_name) with EventMon ($event_mon)..."
+    else
+        help "Appending new entry for GPIO ($gpio_name) with EventMon ($event_mon)..."
+    fi
+
+    # Remove existing entry with same LineName (if exists) and add new entry
+    jq --arg name "$entry_name" \
+        --arg line "$line_name" \
+        --arg event "$event_mon" \
+        --arg edge "$event_mon" \
+        --arg target "$target" \
+        '
+        map(select(.LineName != $line)) +
+        [{
+            "Name": $name,
+            "LineName": $line,
+            "EventMon": $event,
+            "Targets": {
+                ($edge): [$target]
+            },
+            "Continue": true
+        }]
+        ' "$json" > "$json.tmp"
+
+    if [[ $? -eq 0 ]]; then
+        mv "$json.tmp" "$json"
+        return 0
+    else
+        err "Failed to update JSON file"
+        rm -f "$json.tmp"
+        return 1
+    fi
+}
+
+# Create a systemd service for a GPIO alert handler.
+# example,
+# [Unit]
+# Description=Service to Log BRD0 CPLD Authentication Failure
+# After=xyz.openbmc_project.Logging.service
+
+# [Service]
+# Type=oneshot
+# ExecStart=/usr/bin/monitor-eventingd -S -e /usr/share/mon_evt/event_info.json -d /usr/share/mon_evt/dat.json --device-id CPLD_0 --error-id HPM-CPLD-AUTH-FAIL
+create_gpio_service() #(gpio_name)
+{
+    local gpio_name=$1;shift
+
+    local service_name=$(gen_service_name "$gpio_name")
+
+    help "Generating service file ($service_name) for GPIO ($gpio_name)..."
+
+    # entry Name is the GPIO name without -I or -O suffix or _L before them
+    local name=$(gpio2descr "$gpio_name")
+    local description="Service to Log ${name//-/ } alert handler service"
+
+    local error_id=$(grep "$gpio_name" "$GPIO_DESCRIPTION_FILE" | cut -d"," -f3)
+    local device_id=$(grep "$gpio_name" "$GPIO_DESCRIPTION_FILE" | cut -d"," -f4)
+
+    cat /dev/null > "$service_name" # overwrite existing service file
+
+    # generate service file content
+    echo "[Unit]" >> "$service_name"
+    echo "Description=$description" >> "$service_name"
+    echo "After=xyz.openbmc_project.Logging.service" >> "$service_name"
+    echo "" >> "$service_name"
+    echo "[Service]" >> "$service_name"
+    echo "Type=oneshot" >> "$service_name"
+    echo "ExecStart=/usr/bin/monitor-eventingd -S -e /usr/share/mon_evt/event_info.json -d /usr/share/mon_evt/dat.json --device-id $device_id --error-id $error_id" >> "$service_name"
+    echo "" >> "$service_name"
+
+    echo "$service_name"
+
+    return 0
+}
+
+generate_gpiomon_code() #(gpiomon_conf_file, gpio_def)
+{
+    local gpiomon_conf_file=$1;shift
+    local gpio_definition_file=$1;shift
+
+    local bbappend_file="services.bbappend"
+    rm -f "$bbappend_file"
+
+    local gpio_info
+    for gpio_info in $(cat "$gpio_definition_file"); do
+        [ -z "$gpio_info" ] && continue
+        local gpio_name=$(echo "$gpio_info" | cut -d"," -f1)
+        append_gpiomon_json "$gpiomon_conf_file" "$gpio_name"
+        local service=$(create_gpio_service "$gpio_name")
+        echo "    file://${service} \\" >> $bbappend_file
+    done
+
+    cat "$bbappend_file" && rm -f "$bbappend_file"
+}
+
+# MAIN
+[ $# -ne 0 ] && if grep "^$1()" `which $0` &> /dev/null; then func=$1;shift;$func "$@";exit $?; fi
+
+gpio_definition_file=$1;shift
+[ -z "$gpio_definition_file" ] && show_help && exit $?
+if [ ! -f "$gpio_definition_file" ]; then
+    err "GPIO definition file ($gpio_definition_file) not found!"
+    show_help
+    exit $?
+fi
+
+generate_gpiomon_code "$GPIOMON_CONF_FILE" "$gpio_definition_file"
