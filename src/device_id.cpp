@@ -41,27 +41,65 @@ BracketRange::BracketRange(const DeviceIndex& left, const DeviceIndex& right) :
 {
     if (left > right)
     {
-        // marcinw:TODO: error message
-        throw std::runtime_error("BracketRange: ! left > right");
+        throw std::runtime_error(
+            "BracketRange: Invalid range [" + std::to_string(left) + "-" +
+            std::to_string(right) +
+            "] - left boundary must not exceed right boundary.");
     }
 }
 
 // BracketRangeMap ////////////////////////////////////////////////////////////
 
+/**
+ * @brief Construct a BracketRangeMap from two BracketRanges.
+ *
+ * This constructor creates a mapping from the @p from range to the @p to range.
+ * Two types of mappings are supported:
+ * 1. One-to-one mapping: Both ranges must have the same size
+ *    Example: [0-7:1-8] maps 0->1, 1->2, ..., 7->8
+ * 2. Many-to-one mapping: The @p to range must contain exactly one element
+ *    Example: [0-7:2] maps 0->2, 1->2, ..., 7->2
+ *
+ * @param[in] from The input range (domain of the mapping)
+ * @param[in] to The output range (codomain of the mapping)
+ *
+ * @throws std::runtime_error if the ranges have incompatible sizes
+ *         (i.e., from.size() != to.size() and to.size() != 1)
+ */
 BracketRangeMap::BracketRangeMap(BracketRange&& from, BracketRange&& to) :
     from(std::move(from)), to(std::move(to))
 {
     if (!(from.size() == to.size() || to.size() == 1))
     {
-        // marcinw:TODO: error message
-        throw std::runtime_error("BracketRangeMap:"
-                                 " from.size() == to.size() || to.size() == 1");
+        throw std::runtime_error(
+            "BracketRangeMap: Invalid range sizes - 'from' range has " +
+            std::to_string(from.size()) + " element(s), 'to' range has " +
+            std::to_string(to.size()) +
+            " element(s). Ranges must have equal sizes (for 1-to-1 mapping) "
+            "or 'to' must have exactly 1 element (for many-to-1 mapping).");
     }
 }
 
+/**
+ * @brief Convert a BracketRangeMap to a BracketMap (explicit std::map).
+ *
+ * This conversion operator generates the explicit key-value mapping represented
+ * by this BracketRangeMap. The behavior depends on the type of mapping:
+ *
+ * - If to.size() == 1 (many-to-one mapping):
+ *   Maps all keys from the @c from range to the single value in @c to range.
+ *   Example: [0-7:2] produces {0->2, 1->2, 2->2, ..., 7->2}
+ *
+ * - If to.size() == from.size() (one-to-one mapping):
+ *   Maps each key in @c from to the corresponding value in @c to in order.
+ *   Example: [0-7:1-8] produces {0->1, 1->2, 2->3, ..., 7->8}
+ *
+ * @return BracketMap containing all the key-value pairs of the mapping
+ */
 BracketRangeMap::operator BracketMap() const
 {
     BracketMap result;
+    // Many-to-one mapping: all keys map to the single value
     if (to.size() == 1)
     {
         const auto& value = *to.begin();
@@ -70,6 +108,7 @@ BracketRangeMap::operator BracketMap() const
             result[key] = value;
         }
     }
+    // One-to-one mapping: parallel iteration over both ranges
     else
     {
         for (auto keysIt = from.begin(), valuesIt = to.begin();

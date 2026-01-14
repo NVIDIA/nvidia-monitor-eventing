@@ -704,11 +704,22 @@ BracketRangeMap BracketRangeMap::parse(const StringRange& range)
 
 // BracketMap /////////////////////////////////////////////////////////////////
 
-/** Divide the text by ','. Pass every element to
- * 'BracketMap::parse'. 'dictSum' the results and return.
+/** Parse a bracket map from a string, supporting comma-separated series.
  *
- * Examples: "0-7:1-8,0-39", "1,4", "0-7:1-8", "9:10", "0-7",
- * "0-39", "9", "10"
+ * This function divides the input text by ',', parses each segment as a
+ * BracketRangeMap, and merges all the resulting mappings together.
+ *
+ * Supported formats:
+ * - Single mapping: "0-7:1-8", "9:10", "0-7", "0-39", "9", "10"
+ * - Comma-separated series: "0-1:0,2-3:1", "0-7:1-8,8-15:9-16"
+ *
+ * Examples:
+ * - "0-7:1-8"       → {0->1, 1->2, 2->3, ..., 7->8}
+ * - "0-1:0,2-3:1"   → {0->0, 1->0, 2->1, 3->1}
+ * - "1,4-6,9"       → {1->1, 4->4, 5->5, 6->6, 9->9}
+ *
+ * @param[in] range String representation of the bracket map
+ * @return BracketMap containing all parsed mappings
  */
 template <typename StringRange>
 BracketMap parseBracketMap(const StringRange& range)
@@ -716,16 +727,24 @@ BracketMap parseBracketMap(const StringRange& range)
     std::vector<std::string_view> elements;
     boost::split(elements, range, boost::is_any_of(","),
                  boost::token_compress_off);
-    // marcinw:TODO:
+
+    // Single element: parse directly as a BracketRangeMap
     if (elements.size() == 1)
     {
         return BracketRangeMap::parse(elements[0]);
     }
-    else // ! elements.size() == 1
+    // Multiple elements: comma-separated series of mappings
+    else // elements.size() > 1
     {
-        // marcinw:TODO: error message
-        throw std::runtime_error(
-            "parseBracketMap: ! series of mappings not supported yet");
+        BracketMap result;
+        // Parse each comma-separated segment and merge into result
+        for (const auto& element : elements)
+        {
+            BracketMap partialMap = BracketRangeMap::parse(element);
+            // Insert all key-value pairs from this segment
+            result.insert(partialMap.begin(), partialMap.end());
+        }
+        return result;
     }
 }
 
