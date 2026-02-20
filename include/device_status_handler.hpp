@@ -20,6 +20,7 @@
 #include "common.hpp"
 #include "data_accessor.hpp"
 #include "dbus_accessor.hpp"
+#include "device_id.hpp"
 #include "event_handler.hpp"
 #include "event_info.hpp"
 #include "tal_singleton.hpp"
@@ -116,6 +117,33 @@ nlohmann::json lookupRollupDeviceId(const nlohmann::json& deviceAssociation,
 }
 
 /**
+ * @brief Get rollup device from event's rollupDevicePattern and device type.
+ *
+ */
+inline nlohmann::json getRollupDeviceEntry(const event_info::EventNode& event)
+{
+    if (event.rollupDevicePattern.empty() || event.deviceTypes.empty())
+    {
+        return nlohmann::json::array();
+    }
+    device_id::DeviceIdPattern deviceTypePattern(event.getMainDeviceType());
+    std::vector<device_id::PatternIndex> indexes =
+        deviceTypePattern.match(event.device);
+    if (indexes.empty())
+    {
+        return nlohmann::json::array();
+    }
+    device_id::DeviceIdPattern rollupPattern(event.rollupDevicePattern);
+    std::vector<std::string> rollupNames = rollupPattern.evalAll(indexes[0]);
+    nlohmann::json arr = nlohmann::json::array();
+    for (const auto& name : rollupNames)
+    {
+        arr.push_back(name);
+    }
+    return arr;
+}
+
+/**
  * @brief A class for update device status into devinfofs.
  *
  */
@@ -161,6 +189,15 @@ class DeviceStatusHandler : public EventHandler
         log_dbg("(%s)Needs DeviceStatus evaluation.\n", errorId);
         auto names = lookupRollupDeviceId(eventing::profile::deviceAssociation,
                                           event.device);
+        if (names.empty() && !event.rollupDevicePattern.empty())
+        {
+            names = getRollupDeviceEntry(event);
+            if (!names.empty())
+            {
+                logs_dbg("dev(%s) rollup from pattern: %s.\n", device,
+                         names.dump().c_str());
+            }
+        }
         // names is an array of strings
         for (auto& jName : names)
         {

@@ -18,7 +18,7 @@ The Device ID Pattern Language is a powerful and flexible system for expressing 
 
 ### Key Features
 - **Compact Representation**: Express multiple device IDs with a single pattern
-- **Flexible Mappings**: Support for identity, shifted, many-to-one, and comma-separated mappings
+- **Flexible Mappings**: Support for identity, shifted, many-to-one, one-to-many, and comma-separated mappings
 - **Multi-dimensional**: Handle complex device hierarchies with multiple bracket levels
 - **Bidirectional**: Match device strings back to their pattern indexes
 
@@ -148,7 +148,17 @@ Values:  "HSC_5", "HSC_5", "HSC_5", "HSC_5"
 Mapping: inputs 0,1,2,3 all map to output 5
 ```
 
-#### 6. **Comma-Separated Series** `[range1:map1,range2:map2,...]`
+#### 6. **One-to-Many Mapping** `[single:range]`
+Maps a single input to multiple outputs.
+```
+Pattern: "GPU_[0:0-1,1:2-3]"
+Domain:  0, 1
+Values:  "GPU_0", "GPU_1", "GPU_2", "GPU_3"
+Mapping: input 0 maps to outputs 0-1; input 1 maps to outputs 2-3
+Note: This creates multiple device strings from a single input index
+```
+
+#### 7. **Comma-Separated Series** `[range1:map1,range2:map2,...]`
 Combines multiple mappings in one bracket.
 ```
 Pattern: "Device_[0-1:0,2-3:1]"
@@ -157,7 +167,7 @@ Values:  "Device_0", "Device_0", "Device_1", "Device_1"
 Mapping: 0,1→0; 2,3→1
 ```
 
-#### 7. **Explicit Input Position** `[pos|mapping]`
+#### 8. **Explicit Input Position** `[pos|mapping]`
 Specifies which input dimension this bracket uses.
 ```
 Pattern: "FPGA_[0|0-1:0,2-3:2][0|0-1:1,2-3:3]"
@@ -166,7 +176,7 @@ Values:  "FPGA_01", "FPGA_01", "FPGA_23", "FPGA_23"
 Both brackets read from input position 0
 ```
 
-#### 8. **Multi-Dimensional Patterns**
+#### 9. **Multi-Dimensional Patterns**
 Multiple brackets create multi-dimensional indexes.
 ```
 Pattern: "NVSwitch_[0-3]/Port_[0-15]"
@@ -294,7 +304,67 @@ Switch 3 ─┘
 
 ---
 
-### Use Case 4: Multi-Dimensional Device Hierarchy
+### Use Case 4: One-to-Many Mapping (SMA to Device Mapping)
+
+**Scenario**: A System Management Agent (SMA) interface maps to multiple device instances. This pattern is commonly used when one SMA interface manages multiple devices.
+- GPU_SMA_0 → GPU_0, GPU_1
+- GPU_SMA_1 → GPU_2, GPU_3
+- CX_SMA_0 → CX_0, CX_1
+- CX_SMA_1 → CX_2, CX_3
+
+**API Usage**:
+```cpp
+// Example 1: GPU_SMA to GPU mapping
+DeviceIdPattern gpuPattern("GPU_[0:0-1,1:2-3]");
+
+// Example 2: CX_SMA to CX mapping
+DeviceIdPattern cxPattern("CX_[0:0-1,1:2-3]");
+
+// Pattern has 1 dimension (SMA index)
+unsigned dims = gpuPattern.dim();  // 1
+
+// Get domain for SMA dimension
+auto smaDomain = gpuPattern.dimDomain(0);  // {0, 1}
+
+// Generate all device names
+auto allGpuDevices = gpuPattern.valuesVec();
+// Result: ["GPU_0", "GPU_1", "GPU_2", "GPU_3"]
+
+auto allCxDevices = cxPattern.valuesVec();
+// Result: ["CX_0", "CX_1", "CX_2", "CX_3"]
+
+// Evaluate specific SMA index
+std::string device0 = gpuPattern.eval(PatternIndex(0));  // "GPU_0" or "GPU_1" (one of the outputs)
+std::string device1 = gpuPattern.eval(PatternIndex(1));  // "GPU_2" or "GPU_3" (one of the outputs)
+
+// Note: Since this is one-to-many, eval() may return one of multiple possible values
+// Use valuesVec() to get all possible outputs
+
+// Match a device name back to SMA index
+auto indexes = gpuPattern.match("GPU_0");
+// Result: [PatternIndex(0)]  // GPU_SMA_0 maps to GPU_0
+
+auto indexes2 = gpuPattern.match("GPU_2");
+// Result: [PatternIndex(1)]  // GPU_SMA_1 maps to GPU_2
+```
+
+**Input/Output**:
+- **Input**: SMA index 0-1
+- **Output**: Multiple device identifiers (devices 0-1 for SMA_0; devices 2-3 for SMA_1)
+- **Type**: Non-surjective (one-to-many)
+
+**Visualization**:
+```
+SMA_0 ──→ Device_0
+      └─→ Device_1
+
+SMA_1 ──→ Device_2
+      └─→ Device_3
+```
+
+---
+
+### Use Case 5: Multi-Dimensional Device Hierarchy
 
 **Scenario**: Each NVSwitch has multiple ports.
 - 4 NVSwitches (0-3)
@@ -338,7 +408,7 @@ auto indexes = pattern.match("NVSwitch_3/Port_7");
 
 ---
 
-### Use Case 5: Parallel Brackets (Same Input Position)
+### Use Case 6: Parallel Brackets (Same Input Position)
 
 **Scenario**: Generate paired device identifiers where both digits change together.
 - Input 0,1 → "FPGA_01"
@@ -374,7 +444,7 @@ std::string name3 = pattern.eval(PatternIndex(3));  // "FPGA_23"
 
 ---
 
-### Use Case 6: Complex Real-World Example
+### Use Case 7: Complex Real-World Example
 
 **Scenario**: GPU sensor paths with shifted indexing.
 - 8 GPUs (hardware 1-8, display as 0-7)
@@ -583,6 +653,11 @@ BracketMap parseBracketMap(const StringRange& range)
 "HSC_[0-1:8,2-3:9]"  // Multiple devices share same resource
 ```
 
+**Use one-to-many** when a single device index maps to multiple output identifiers:
+```cpp
+"GPU_[0:0-1,1:2-3]"  // GPU 0 maps to devices 0-1, GPU 1 maps to devices 2-3
+```
+
 ### 2. Pattern Naming Conventions
 
 - Use descriptive prefixes: `GPU_`, `NVSwitch_`, `PCIeRetimer_`
@@ -759,6 +834,7 @@ std::cout << "Index: " << index << std::endl;
 | `[N-M]` | Range | `[0-3]` | 0,1,2,3 | "0","1","2","3" |
 | `[N-M:P-Q]` | 1-to-1 map | `[0-3:10-13]` | 0,1,2,3 | "10","11","12","13" |
 | `[N-M:P]` | Many-to-1 | `[0-3:5]` | 0,1,2,3 | "5","5","5","5" |
+| `[N:P-Q]` | 1-to-Many | `[0:0-1,1:2-3]` | 0,1 | "0","1","2","3" |
 | `[A,B,C]` | Series | `[0-1:0,2-3:1]` | 0,1,2,3 | "0","0","1","1" |
 | `[P\|...]` | Explicit pos | `[0\|1-4]` | 1,2,3,4 | "1","2","3","4" |
 
@@ -773,6 +849,9 @@ std::cout << "Index: " << index << std::endl;
 
 // Shared resources
 "HSC_[0-1:8,2-3:9]"
+
+// 1-to-many mapping
+"GPU_SMA_[0:0-1,1:2-3]"
 
 // Multi-dimensional
 "Switch_[0-3]/Port_[0-15]"

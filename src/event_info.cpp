@@ -584,6 +584,8 @@ void EventNode::loadFrom(const json& j)
     this->logNamespace =
         json_proc::getOptionalAttribute<std::string>(j, "log_namespace");
 
+    this->rollupDevicePattern = j.value("rollup_device", "");
+
     // this->originOfCondition = j.contains("origin_of_condition")
     //                               ?
     //                               j["origin_of_condition"].get<std::string>()

@@ -1247,20 +1247,20 @@ TEST(DeviceIdTest, calcInputIndexToBracketPoss)
 TEST(DeviceIdTest, calcInputDomain)
 {
     EXPECT_EQ(calcInputDomain({}, {}), PatternInputDomain());
-    auto primes =
-        syntax::BracketMap{{2, 1}, {3, 2}, {5, 3}, {7, 4}, {11, 5}, {13, 6}};
+    auto primes = syntax::BracketMap{{2, {1}}, {3, {2}},  {5, {3}},
+                                     {7, {4}}, {11, {5}}, {13, {6}}};
     EXPECT_EQ(calcInputDomain({0}, {primes}),
               PatternInputDomain(
                   std::vector<syntax::DeviceIndex>{2, 3, 5, 7, 11, 13}));
-    auto primes1 =
-        syntax::BracketMap{{3, 2}, {5, 3}, {7, 4}, {11, 5}, {13, 6}, {17, 7}};
+    auto primes1 = syntax::BracketMap{{3, {2}},  {5, {3}},  {7, {4}},
+                                      {11, {5}}, {13, {6}}, {17, {7}}};
     EXPECT_EQ(
         calcInputDomain({0, 1}, {primes, primes1}),
         PatternInputDomain(std::vector<syntax::DeviceIndex>{3, 5, 7, 11, 13}));
-    auto odds = syntax::BracketMap{{1, 1}, {3, 2},  {5, 3},  {7, 4},
-                                   {9, 5}, {11, 6}, {13, 7}, {15, 8}};
-    auto evens = syntax::BracketMap{{2, 1},  {4, 2},  {6, 3},  {8, 4},
-                                    {10, 5}, {12, 6}, {14, 7}, {16, 8}};
+    auto odds = syntax::BracketMap{{1, {1}}, {3, {2}},  {5, {3}},  {7, {4}},
+                                   {9, {5}}, {11, {6}}, {13, {7}}, {15, {8}}};
+    auto evens = syntax::BracketMap{{2, {1}},  {4, {2}},  {6, {3}},  {8, {4}},
+                                    {10, {5}}, {12, {6}}, {14, {7}}, {16, {8}}};
     EXPECT_EQ(
         calcInputDomain({0, 1}, {primes, odds}),
         PatternInputDomain(std::vector<syntax::DeviceIndex>{3, 5, 7, 11, 13}));
@@ -1276,14 +1276,14 @@ TEST(DeviceIdTest, calcInputDomain)
 
 TEST(DeviceIdTest, calcInputDomains)
 {
-    auto primes =
-        syntax::BracketMap{{2, 1}, {3, 2}, {5, 3}, {7, 4}, {11, 5}, {13, 6}};
-    auto primes1 =
-        syntax::BracketMap{{3, 2}, {5, 3}, {7, 4}, {11, 5}, {13, 6}, {17, 7}};
-    auto odds = syntax::BracketMap{{1, 1}, {3, 2},  {5, 3},  {7, 4},
-                                   {9, 5}, {11, 6}, {13, 7}, {15, 8}};
-    auto evens = syntax::BracketMap{{2, 1},  {4, 2},  {6, 3},  {8, 4},
-                                    {10, 5}, {12, 6}, {14, 7}, {16, 8}};
+    auto primes = syntax::BracketMap{{2, {1}}, {3, {2}},  {5, {3}},
+                                     {7, {4}}, {11, {5}}, {13, {6}}};
+    auto primes1 = syntax::BracketMap{{3, {2}},  {5, {3}},  {7, {4}},
+                                      {11, {5}}, {13, {6}}, {17, {7}}};
+    auto odds = syntax::BracketMap{{1, {1}}, {3, {2}},  {5, {3}},  {7, {4}},
+                                   {9, {5}}, {11, {6}}, {13, {7}}, {15, {8}}};
+    auto evens = syntax::BracketMap{{2, {1}},  {4, {2}},  {6, {3}},  {8, {4}},
+                                    {10, {5}}, {12, {6}}, {14, {7}}, {16, {8}}};
     // ""
     EXPECT_EQ(calcInputDomains({}, {}), std::vector<PatternInputDomain>({}));
     // "[0|<primes>]_[0|<primes1>]"
@@ -1435,17 +1435,17 @@ TEST(DeviceIdTest, parseBracketMap_CommaSeparatedSeries)
 {
     // Test comma-separated series of mappings: "0-1:0,2-3:1"
     // Should map: 0->0, 1->0, 2->1, 3->1
-    BracketMap expected{{0, 0}, {1, 0}, {2, 1}, {3, 1}};
+    BracketMap expected{{0, {0}}, {1, {0}}, {2, {1}}, {3, {1}}};
     EXPECT_EQ(parseBracketMap("0-1:0,2-3:1"sv), expected);
 
     // Test with more mappings: "0-1:5,2-3:6,4:7"
     // Should map: 0->5, 1->5, 2->6, 3->6, 4->7
-    BracketMap expected2{{0, 5}, {1, 5}, {2, 6}, {3, 6}, {4, 7}};
+    BracketMap expected2{{0, {5}}, {1, {5}}, {2, {6}}, {3, {6}}, {4, {7}}};
     EXPECT_EQ(parseBracketMap("0-1:5,2-3:6,4:7"sv), expected2);
 
     // Test with single values: "0:10,1:11,2:12"
     // Should map: 0->10, 1->11, 2->12
-    BracketMap expected3{{0, 10}, {1, 11}, {2, 12}};
+    BracketMap expected3{{0, {10}}, {1, {11}}, {2, {12}}};
     EXPECT_EQ(parseBracketMap("0:10,1:11,2:12"sv), expected3);
 }
 
@@ -1523,8 +1523,8 @@ TEST(DeviceIdTest, BracketRangeMap_IdentityMapping)
     BracketRangeMap identity(BracketRange(0, 7), BracketRange(0, 7));
     BracketMap resultMap = identity;
 
-    BracketMap expected{{0, 0}, {1, 1}, {2, 2}, {3, 3},
-                        {4, 4}, {5, 5}, {6, 6}, {7, 7}};
+    BracketMap expected{{0, {0}}, {1, {1}}, {2, {2}}, {3, {3}},
+                        {4, {4}}, {5, {5}}, {6, {6}}, {7, {7}}};
     EXPECT_EQ(resultMap, expected);
 }
 
@@ -1534,15 +1534,15 @@ TEST(DeviceIdTest, BracketRangeMap_OneToOneMapping)
     BracketRangeMap shifted(BracketRange(0, 7), BracketRange(1, 8));
     BracketMap resultMap = shifted;
 
-    BracketMap expected{{0, 1}, {1, 2}, {2, 3}, {3, 4},
-                        {4, 5}, {5, 6}, {6, 7}, {7, 8}};
+    BracketMap expected{{0, {1}}, {1, {2}}, {2, {3}}, {3, {4}},
+                        {4, {5}}, {5, {6}}, {6, {7}}, {7, {8}}};
     EXPECT_EQ(resultMap, expected);
 
     // Test another 1-to-1 mapping: [1-4:10-13]
     BracketRangeMap custom(BracketRange(1, 4), BracketRange(10, 13));
     BracketMap customMap = custom;
 
-    BracketMap expected2{{1, 10}, {2, 11}, {3, 12}, {4, 13}};
+    BracketMap expected2{{1, {10}}, {2, {11}}, {3, {12}}, {4, {13}}};
     EXPECT_EQ(customMap, expected2);
 }
 
@@ -1552,15 +1552,16 @@ TEST(DeviceIdTest, BracketRangeMap_ManyToOneMapping)
     BracketRangeMap manyToOne(BracketRange(0, 7), BracketRange(2, 2));
     BracketMap resultMap = manyToOne;
 
-    BracketMap expected{{0, 2}, {1, 2}, {2, 2}, {3, 2},
-                        {4, 2}, {5, 2}, {6, 2}, {7, 2}};
+    BracketMap expected{{0, {2}}, {1, {2}}, {2, {2}}, {3, {2}},
+                        {4, {2}}, {5, {2}}, {6, {2}}, {7, {2}}};
     EXPECT_EQ(resultMap, expected);
 
     // Test another many-to-1: [5-10:99]
     BracketRangeMap manyToOne2(BracketRange(5, 10), BracketRange(99, 99));
     BracketMap resultMap2 = manyToOne2;
 
-    BracketMap expected2{{5, 99}, {6, 99}, {7, 99}, {8, 99}, {9, 99}, {10, 99}};
+    BracketMap expected2{{5, {99}}, {6, {99}}, {7, {99}},
+                         {8, {99}}, {9, {99}}, {10, {99}}};
     EXPECT_EQ(resultMap2, expected2);
 }
 
@@ -1583,23 +1584,23 @@ TEST(DeviceIdTest, BracketRangeMap_InvalidSizes)
 TEST(DeviceIdTest, IndexedBracketMap_ExplicitPosition)
 {
     // Test explicit input position: [0|1-8:0-7]
-    BracketMap map{{1, 0}, {2, 1}, {3, 2}, {4, 3},
-                   {5, 4}, {6, 5}, {7, 6}, {8, 7}};
+    BracketMap map{{1, {0}}, {2, {1}}, {3, {2}}, {4, {3}},
+                   {5, {4}}, {6, {5}}, {7, {6}}, {8, {7}}};
     IndexedBracketMap indexed(0, std::move(map));
 
     EXPECT_FALSE(indexed.isImplicit());
     EXPECT_EQ(indexed.getInputPosition(), 0);
 
     BracketMap resultMap = indexed.map();
-    BracketMap expected{{1, 0}, {2, 1}, {3, 2}, {4, 3},
-                        {5, 4}, {6, 5}, {7, 6}, {8, 7}};
+    BracketMap expected{{1, {0}}, {2, {1}}, {3, {2}}, {4, {3}},
+                        {5, {4}}, {6, {5}}, {7, {6}}, {8, {7}}};
     EXPECT_EQ(resultMap, expected);
 }
 
 TEST(DeviceIdTest, IndexedBracketMap_ImplicitPosition)
 {
     // Test implicit input position (will be filled in later)
-    BracketMap map{{0, 0}, {1, 1}, {2, 2}};
+    BracketMap map{{0, {0}}, {1, {1}}, {2, {2}}};
     IndexedBracketMap indexed(std::move(map));
 
     EXPECT_TRUE(indexed.isImplicit());
@@ -1626,7 +1627,7 @@ TEST(DeviceIdTest, IndexedBracketMap_Parse)
     EXPECT_FALSE(indexed3.isImplicit());
     EXPECT_EQ(indexed3.getInputPosition(), 2);
 
-    BracketMap expected{{0, 10}, {1, 11}, {2, 12}, {3, 13}};
+    BracketMap expected{{0, {10}}, {1, {11}}, {2, {12}}, {3, {13}}};
     EXPECT_EQ(indexed3.map(), expected);
 }
 
@@ -1635,9 +1636,9 @@ TEST(DeviceIdTest, IndexedBracketMap_FillImplicitPositions)
     // Test automatic filling of implicit positions
     std::vector<IndexedBracketMap> mappings;
 
-    BracketMap map1{{0, 0}};
-    BracketMap map2{{1, 1}};
-    BracketMap map3{{2, 2}};
+    BracketMap map1{{0, {0}}};
+    BracketMap map2{{1, {1}}};
+    BracketMap map3{{2, {2}}};
 
     mappings.push_back(IndexedBracketMap(std::move(map1)));    // implicit -> 0
     mappings.push_back(IndexedBracketMap(2, std::move(map2))); // explicit 2
@@ -1913,6 +1914,115 @@ TEST(DeviceIdTest, DeviceIdPattern_SingleValue)
     EXPECT_TRUE(pat.matches("FPGA_5"));
     EXPECT_FALSE(pat.matches("FPGA_4"));
     EXPECT_FALSE(pat.matches("FPGA_6"));
+}
+
+TEST(DeviceIdTest, DeviceIdPattern_OneToManyMapping_GPU)
+{
+    // Input: GPU_SMA index (pattern domain). Output: GPU index in device
+    // strings. GPU_SMA_0 → GPU_0, GPU_1
+    DeviceIdPattern pat("GPU_[0:0-1]");
+
+    EXPECT_EQ(pat.dim(), 1);
+
+    // Domain: GPU_SMA index 0 only
+    EXPECT_THAT(pat.domainVec(), ElementsAre(PatternIndex(0)));
+
+    // eval() returns first output
+    EXPECT_EQ(pat.eval(PatternIndex(0)), "GPU_0");
+
+    // evalAll() returns all outputs
+    auto allOutputs = pat.evalAll(PatternIndex(0));
+    EXPECT_THAT(allOutputs, UnorderedElementsAre("GPU_0", "GPU_1"));
+
+    // Values should contain all unique outputs
+    EXPECT_THAT(pat.valuesVec(), UnorderedElementsAre("GPU_0", "GPU_1"));
+
+    // Test matching (non-injective) - should match both outputs
+    EXPECT_FALSE(pat.isInjective());
+    EXPECT_THAT(pat.match("GPU_0"), ElementsAre(PatternIndex(0)));
+    EXPECT_THAT(pat.match("GPU_1"), ElementsAre(PatternIndex(0)));
+
+    // GPU_SMA_[0-1] → GPU_[0-3] via GPU_[0:0-1,1:2-3]
+    DeviceIdPattern pat2("GPU_[0:0-1,1:2-3]");
+
+    EXPECT_EQ(pat2.dim(), 1);
+
+    // Domain: GPU_SMA indices 0 and 1
+    EXPECT_THAT(pat2.domainVec(),
+                UnorderedElementsAre(PatternIndex(0), PatternIndex(1)));
+
+    // eval() returns first output for each input
+    EXPECT_EQ(pat2.eval(PatternIndex(0)), "GPU_0");
+    EXPECT_EQ(pat2.eval(PatternIndex(1)), "GPU_2");
+
+    // evalAll() returns all outputs for each input
+    auto allOutputs0 = pat2.evalAll(PatternIndex(0));
+    EXPECT_THAT(allOutputs0, UnorderedElementsAre("GPU_0", "GPU_1"));
+
+    auto allOutputs1 = pat2.evalAll(PatternIndex(1));
+    EXPECT_THAT(allOutputs1, UnorderedElementsAre("GPU_2", "GPU_3"));
+
+    // Values should contain all unique outputs
+    EXPECT_THAT(pat2.valuesVec(),
+                UnorderedElementsAre("GPU_0", "GPU_1", "GPU_2", "GPU_3"));
+
+    // Test matching (non-injective)
+    EXPECT_FALSE(pat2.isInjective());
+    EXPECT_THAT(pat2.match("GPU_0"), ElementsAre(PatternIndex(0)));
+    EXPECT_THAT(pat2.match("GPU_1"), ElementsAre(PatternIndex(0)));
+    EXPECT_THAT(pat2.match("GPU_2"), ElementsAre(PatternIndex(1)));
+    EXPECT_THAT(pat2.match("GPU_3"), ElementsAre(PatternIndex(1)));
+}
+
+TEST(DeviceIdTest, DeviceIdPattern_OneToManyMapping_ConnectX)
+{
+    // Input: CX_SMA index (pattern domain). Output: CX index in device strings.
+    // CX_SMA_0 → CX_0, CX_1
+    DeviceIdPattern pat("CX_[0:0-1]");
+
+    EXPECT_EQ(pat.dim(), 1);
+    // Domain: CX_SMA index 0 only
+    EXPECT_THAT(pat.domainVec(), ElementsAre(PatternIndex(0)));
+    EXPECT_EQ(pat.eval(PatternIndex(0)), "CX_0");
+    auto allOutputs = pat.evalAll(PatternIndex(0));
+    EXPECT_THAT(allOutputs, UnorderedElementsAre("CX_0", "CX_1"));
+    EXPECT_THAT(pat.valuesVec(), UnorderedElementsAre("CX_0", "CX_1"));
+    EXPECT_FALSE(pat.isInjective());
+    EXPECT_THAT(pat.match("CX_0"), ElementsAre(PatternIndex(0)));
+    EXPECT_THAT(pat.match("CX_1"), ElementsAre(PatternIndex(0)));
+
+    // CX_SMA_[0-3] → CX_[0-7] via CX_[0:0-1,1:2-3,2:4-5,3:6-7]
+    DeviceIdPattern pat2("CX_[0:0-1,1:2-3,2:4-5,3:6-7]");
+
+    EXPECT_EQ(pat2.dim(), 1);
+    // Domain: CX_SMA indices 0-3
+    EXPECT_THAT(pat2.domainVec(),
+                UnorderedElementsAre(PatternIndex(0), PatternIndex(1),
+                                     PatternIndex(2), PatternIndex(3)));
+    EXPECT_EQ(pat2.eval(PatternIndex(0)), "CX_0");
+    EXPECT_EQ(pat2.eval(PatternIndex(1)), "CX_2");
+    EXPECT_EQ(pat2.eval(PatternIndex(2)), "CX_4");
+    EXPECT_EQ(pat2.eval(PatternIndex(3)), "CX_6");
+    EXPECT_THAT(pat2.evalAll(PatternIndex(0)),
+                UnorderedElementsAre("CX_0", "CX_1"));
+    EXPECT_THAT(pat2.evalAll(PatternIndex(1)),
+                UnorderedElementsAre("CX_2", "CX_3"));
+    EXPECT_THAT(pat2.evalAll(PatternIndex(2)),
+                UnorderedElementsAre("CX_4", "CX_5"));
+    EXPECT_THAT(pat2.evalAll(PatternIndex(3)),
+                UnorderedElementsAre("CX_6", "CX_7"));
+    EXPECT_THAT(pat2.valuesVec(),
+                UnorderedElementsAre("CX_0", "CX_1", "CX_2", "CX_3", "CX_4",
+                                     "CX_5", "CX_6", "CX_7"));
+    EXPECT_FALSE(pat2.isInjective());
+    EXPECT_THAT(pat2.match("CX_0"), ElementsAre(PatternIndex(0)));
+    EXPECT_THAT(pat2.match("CX_1"), ElementsAre(PatternIndex(0)));
+    EXPECT_THAT(pat2.match("CX_2"), ElementsAre(PatternIndex(1)));
+    EXPECT_THAT(pat2.match("CX_3"), ElementsAre(PatternIndex(1)));
+    EXPECT_THAT(pat2.match("CX_4"), ElementsAre(PatternIndex(2)));
+    EXPECT_THAT(pat2.match("CX_5"), ElementsAre(PatternIndex(2)));
+    EXPECT_THAT(pat2.match("CX_6"), ElementsAre(PatternIndex(3)));
+    EXPECT_THAT(pat2.match("CX_7"), ElementsAre(PatternIndex(3)));
 }
 
 } // namespace device_id
