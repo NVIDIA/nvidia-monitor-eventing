@@ -277,6 +277,7 @@ class ErrorCatalog:
 
                 output[row['DevicePattern']] = {key: value for key, value in row.items() if key != 'DevicePattern' and key != 'Platform'}
 
+        print(f"get_device_list: output = {output}", file=sys.stderr)
         return output
 
     def get_device_list_sim(self, platform):
@@ -299,6 +300,7 @@ class ErrorCatalog:
                 output[row['Device In RF Content']] = row['RF URI Prefix'] + \
                     (prefix + "_" if prefix != "" else "")
 
+        print(f"get_device_list_sim: output = {output}", file=sys.stderr)
         return output
 
     def to_event_info_json(self, platform):
@@ -455,6 +457,236 @@ class ErrorCatalog:
 
             ei_json["Device"].sort(key=lambda e: e.get("error_id"))
             print(json.dumps(ei_json, indent=2))
+            return 0
+
+    def to_obmc_platform_config(self, platform):
+        with open(self._errorlist, "r", encoding='utf-8') as f:
+            fc = csv.DictReader(f)
+
+            ei_json = copy.deepcopy(event_info_json)
+            dat_json = {}
+            rf_msgreg_csv = []
+
+            platform_column = platform_column_prefix + platform
+
+            if platform_column not in self._csvfields:
+                print("[E] invalid platform: ", platform)
+                return 1
+
+            output_dir = platform_column.replace(" ", "_").lower()
+            os.makedirs(output_dir, exist_ok=True)
+
+
+            device_pattern = self.get_device_list(platform)
+            device_rf_pattern = self.get_device_list_sim(platform)
+
+            def pattern2device(text):
+                import re
+
+                pattern = r"\{(.*?)\}"
+                matches = re.findall(pattern, text)
+                for i, match in enumerate(matches):
+                    key = "{" + match + "}"
+
+                    print(f"pattern2device: key = {key}", file=sys.stderr)
+                    if key not in device_pattern:
+                        print(f"pattern2device: key = {key} not in device_pattern", file=sys.stderr)
+                        continue
+                    text = text.replace(key,
+                        device_pattern[key]['Device In RF Content'])
+                    print(f"pattern2device: text = {text}", file=sys.stderr)
+                return text
+
+            def adjust_mapping_device_pattern(row):
+                for field in row.keys():
+                    if field == "Device Type":
+                        continue
+                    if row[field] == row['Device Type']:
+                        continue
+                    if "SXM" not in row[field]: # Only SXM device need to be adjusted
+                        continue
+                    if row['Device Type'] not in device_pattern:
+                        continue
+                    mapping_device_range = device_pattern[row['Device Type']]['Mapping Device Range']
+                    if mapping_device_range is None or mapping_device_range == "":
+                        continue
+                    mapping_device = row[field]
+                    if mapping_device not in device_pattern:
+                        continue
+
+                    row[field] = (
+                        device_pattern[mapping_device]['Device'] +
+                        "_" + mapping_device_range
+                    )
+                return row
+
+            # Get device RF URI from device pattern
+            def get_device_uri_without_range(device):
+                if device in device_pattern:
+                    rf_uri_prefix = device_pattern[device]['RF URI Prefix']
+                    rf_device = device_pattern[device]['Device']
+                    rf_chs_prefix = device_pattern[device]['RF Chassis URI Device Prefix']
+                    rf_chs_prefix += "_" if rf_chs_prefix != "" else ""
+                    return rf_uri_prefix + rf_chs_prefix + rf_device
+                else:
+                    print(f"get_device_uri_without_range: device = {device} not in device_pattern", file=sys.stderr)
+                    return None
+
+            # Make OOC URI per SRC "Error List".col[RF Log Origin Of Condition] directly
+            # Input: device - device name listed in "Error List".col[RF Log Origin Of Condition]
+            def make_ooc_uri(device):
+                print(f"make_ooc_uri: RF OOC device = {device}", file=sys.stderr)
+                if device in device_rf_pattern:
+                    print(f"make_ooc_uri: device = {device} in device_rf_pattern", file=sys.stderr)
+                    return device_rf_pattern[device] + device
+                else:
+                    print(f"make_ooc_uri: device = {device} not in device_rf_pattern", file=sys.stderr)
+                    print(f"Make up OOC URI for {device} as /redfish/v1/Chassis/HGX_{device}", file=sys.stderr)
+                    return "/redfish/v1/Chassis/HGX_" + device
+
+            # Make OOC URI per SRC Devices.col[FRU Location]
+            # Input: device - device that error occurred on, listed in "Error List".col[Device Type]
+            def make_ooc_uri_v2(device):
+                print(f"make_ooc_uri_v2: device = {device}", file=sys.stderr)
+                device = device.split('/')[0]
+                print(f"make_ooc_uri_v2: main device = {device}", file=sys.stderr)
+                if device in device_pattern:
+                    fru_loc = device_pattern[device].get('FRU Location', None)
+                    if fru_loc == None:
+                        print(f"make_ooc_uri_v2: fru_loc for {device} is None", file=sys.stderr)
+                        return ""
+                    range = device_pattern[device]['Mapping Device Range']
+                    if range == None or range == "":
+                        range = device_pattern[device]["Range"]
+                    return get_device_uri_without_range(fru_loc) + "_" + range
+                else:
+                    print(f"make_ooc_uri_v2: device = {device} not in device_pattern", file=sys.stderr)
+                    return None
+
+
+            def accessor_pattern_converter(accessor):
+                for key in accessor.keys():
+                    print(f"accessor_pattern_converter: key = {key}", file=sys.stderr)
+                    if key == "check":
+                        continue
+                    value = pattern2device(accessor[key])
+                    print(f"accessor_pattern_converter: value[{key}] = {value}", file=sys.stderr)
+                    if value == "":
+                        continue
+                    accessor[key] = value
+                    print(f"accessor_pattern_converter: accessor[{key}] = {accessor[key]}", file=sys.stderr)
+                return accessor
+
+            id = 0
+            for row in fc:
+                id = id + 1
+                if id == 1:
+                    continue
+
+                if row[platform_column].lower() != "yes":
+                    continue
+
+                if row["RF Log Producer"].lower() != "eventingservice":
+                    continue
+
+                if row["To HMC Code?"].lower() != "yes":
+                    continue
+
+                row_orig = row
+                row = adjust_mapping_device_pattern(row)
+                row = {key: pattern2device(value) for key, value in row.items()}
+
+                ee = copy.deepcopy(event_entry_json) # Event Entry JSON
+                de = {} # DAT Entry JSON
+                mr = {} # RF Message Registry CSV Entry
+
+                # event_info.json entry generation
+                ee["event"] = row["Impacted Component"] + " " + row["Event Name"]
+                ee["device_type"] = row["Device Type"]
+                ee["error_id"] = row["Error ID"]
+                ee["error_type"] = row["Error Type"]
+                ee["managed"] = row["RF Managed Error"].strip().lower()
+                ee["rollup_device"] = row["RF Rollup to Device"]
+                ee["category"] = self.fc_expr_to_json_list(row["Layer"])
+
+                ee["event_trigger"] = self.fc_expr_to_json_acc(
+                    row["Trigger data config"], row["Trigger check"])
+                ee["event_trigger"] = accessor_pattern_converter(ee["event_trigger"])
+
+                ee["accessor"] = self.fc_expr_to_json_acc(
+                    row["Accessor data config"], row["Accessor check"])
+                ee["accessor"] = accessor_pattern_converter(ee["accessor"])
+
+                if len(str(row["Recovery data config"]).strip()) == 0:
+                    ee.pop("recovery")
+                else:
+                    ee["recovery"] = self.fc_expr_to_json_acc(
+                        row["Recovery data config"], row["Recovery check"])
+                    ee["recovery"] = accessor_pattern_converter(ee["recovery"])
+                ee["severity"] = row["RF Log Health"]
+                ee["resolution"] = row["RF Log Resolution"]
+                ee["debounce"]["type"] = row["Debounce type"]
+                ee["debounce"]["duration"] = row["Debounce duration"]
+
+                ee["trigger_count"] = (
+                    int(row["Leaky bucket trigger count"], 10)
+                    if len(row["Leaky bucket trigger count"]) > 0 else 0
+                )
+
+                ee["event_counter_reset"] = self.fc_expr_to_json_acc(
+                    row["Leaky bucket reset type"])
+                ee["redfish"]["message_id"] = row["RF Log Message ID"]
+                ooc = make_ooc_uri_v2(row_orig["Device Type"])
+                if ooc == "":
+                    ooc = make_ooc_uri(row["RF Log Origin Of Condition"])
+                ee["redfish"]["origin_of_condition"] = ooc
+
+                ee["redfish"]["message_args"]["patterns"] = self.fc_expr_to_json_list(
+                    row["RF Log Message Args"])
+                ee["redfish"]["message_args"]["parameters"] = self.fc_expr_to_json_acc_list(
+                    row["MessageArgs Parameters"])
+
+                ee["log_namespace"] = row["RF Log Namespace"]
+                ee["telemetries"] = self.fc_expr_to_json_acc_list(
+                    row["AdditionalData data config (possibly multiple)"])
+                ee["action"] = ""
+                ee["value_as_count"] = row["Data value is event count"].strip().lower() == "true"
+                ee["description"] = row["Description"]
+
+                # Add error type if present
+                if 'Error Type' in row and row['Error Type']:
+                    ee['error_type'] = row['Error Type']
+                else:
+                    ee['error_type'] = ""  # Default empty string if not specified
+
+                ei_json["Device"].append(ee)
+
+                # dat.json entry generation
+
+                # RF Message Registry CSV Entry generation
+                mr["Error ID"] = row["Error ID"]
+                for key in ["RF Log Message ID", "RF Log Message Args", "RF Log Resolution"]:
+                    print(f"mr[{key}] = {row[key]}", file=sys.stderr)
+                    mr["Redfish MessageRegistry"] = key
+                    mr["Current"] = row[key]
+                    mr["New"] = ""
+
+                    rf_msgreg_csv.append(dict(mr))
+
+            ei_json["Device"].sort(key=lambda e: e.get("error_id"))
+
+            # Write output files
+            print(f"Writing output files \"event_info.json\" to {output_dir}", file=sys.stderr)
+            with open(os.path.join(output_dir, "event_info.json"), "w", encoding='utf-8') as f:
+                json.dump(ei_json, f, indent=2)
+            print(f"Writing output files \"dat.json\" to {output_dir}", file=sys.stderr)
+            with open(os.path.join(output_dir, "dat.json"), "w", encoding='utf-8') as f:
+                json.dump(dat_json, f, indent=2)
+            print(f"Writing output files \"rf_msgreg.csv\" to {output_dir}", file=sys.stderr)
+            with open(os.path.join(output_dir, "rf_msgreg.csv"), "w", encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=rf_msgreg_csv[0].keys())
+                writer.writeheader()
+                writer.writerows(rf_msgreg_csv)
             return 0
 
     def get_layer(self, alert_name: str) -> str:
@@ -795,6 +1027,9 @@ Blackwell-HGX-8-GPU > event_info.json
 "GB200 NVL" > event_info.json
   ./rascat_spec2code Server-RAS-Catalog.xlsx fpga_alert_rascat \
 fpga_register_table.xlsx --sheet "register table"
+
+  # Generate OpenBMC platform config files for GB200 NVL into a folder
+  ./rascat_spec2code Server-RAS-Catalog.xlsx to_obmc_platform_config "GB200 NVL"\
 """
 
 def main():
@@ -851,6 +1086,11 @@ def main():
         args.fpga_regtbl_file = None
         if not args.platform:
             parser.error("Missing platform argument for to_event_info_json")
+    elif args.conv_method == "to_obmc_platform_config":
+        args.platform = args.arg3
+        args.fpga_regtbl_file = None
+        if not args.platform:
+            parser.error("Missing platform argument for to_obmc_platform_config")
     elif args.conv_method == "fpga_alert_rascat":
         args.fpga_regtbl_file = args.arg3
         args.platform = None
@@ -875,6 +1115,8 @@ def main():
         rc = ras_catalog.to_ras_catalog(evt_inf_json)
     elif args.conv_method == "to_event_info_json":
         rc = ras_catalog.to_event_info_json(args.platform)
+    elif args.conv_method == "to_obmc_platform_config":
+        rc = ras_catalog.to_obmc_platform_config(args.platform)
     elif args.conv_method == "get_columns":
         rc = print(ras_catalog.get_columns())
     elif args.conv_method == "get_platforms":
