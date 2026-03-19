@@ -469,9 +469,19 @@ void EventDetection::bootUpEventsDetection()
     {
         auto& accessor = accViewItem.first;
         auto& eventPtr = accViewItem.second;
+
+        // Ignore UDEV-BASED events for bootup since they are don't have valid
+        // accessor to check by design.
+        if (eventPtr->errorType == "UDEV-BASED")
+        {
+            logs_dbg("Ignoring UDEV-BASED event [%s] for boot-up.\n",
+                     eventPtr->errorId.c_str());
+            continue;
+        }
+
         auto deviceType = eventPtr->getStringifiedDeviceType();
 
-        logs_dbg("BootUp check for event %s\n", eventPtr->event.c_str());
+        logs_dbg("Boot-up check for event [%s].\n", eventPtr->errorId.c_str());
 
         std::vector<data_accessor::DataAccessor> accList{};
         if (accessor.isTypeDbus())
@@ -498,8 +508,8 @@ void EventDetection::bootUpEventsDetection()
             {
                 std::stringstream ss;
                 accData.print(ss);
-                logs_err("BootUp asserted Event:'%s' acc=%s",
-                         eventPtr->event.c_str(), ss.str().c_str());
+                logs_err("Boot-up asserted Event:[%s], accessor=%s",
+                         eventPtr->errorId.c_str(), ss.str().c_str());
                 eventCandidateList.push_back(std::make_tuple(
                     eventPtr, check->getAssertedDevices(), false));
             }

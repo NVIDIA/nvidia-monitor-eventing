@@ -383,6 +383,10 @@ class EventNode : public object::Object
     /** @brief Error ID of the event **/
     std::string errorId;
 
+    /** @brief Catalog error classification from JSON @c error_type (e.g.
+     * TELEMETRY-BASED) **/
+    std::string errorType;
+
     /** @brief The Device this Error will impact **/
     std::string rollupDevicePattern;
 

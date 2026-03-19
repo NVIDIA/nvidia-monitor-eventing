@@ -516,6 +516,7 @@ void EventNode::loadFrom(const json& j)
     {
         this->errorId = j.at("error_id");
     }
+    this->errorType = j.value("error_type", "");
     readDeviceTypes(j.at("device_type"), this->event);
     this->triggerCount = j.at("trigger_count").get<int>();
     // this->eventTrigger = j.at("event_trigger");
