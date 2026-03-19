@@ -132,6 +132,7 @@ std::shared_ptr<json_schema::JsonSchema> eventNodeJsonSchema()
                             // are allowed)
             property("event", types(json::value_t::string)),
             property("error_id", types(json::value_t::string)),
+            property("error_type", types(json::value_t::string)),
             property("device_type", types(json::value_t::string)),
             property(
                 "category",
