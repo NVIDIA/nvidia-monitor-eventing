@@ -71,11 +71,11 @@ done
 # "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_0_Memory_3:ProcessorModule_SMA_0 9 CPU0_SOCAMM3_PRSNT_L"
 
 
-mcu_gpio_service="xyz.openbmc_project.NSM"
-mcu_gpio_path_prefix="/xyz/openbmc_project/gpio/"
-mcu_gpio_interface="xyz.openbmc_project.GPIO.State"
-mcu_gpio_property="States"
-mcu_device_prefix="HGX_"
+mcu_gpio_service="${mcu_gpio_service:=xyz.openbmc_project.NSM}"
+mcu_gpio_path_prefix="${mcu_gpio_path_prefix:=/xyz/openbmc_project/gpio/}"
+mcu_gpio_interface="${mcu_gpio_interface:=com.nvidia.GPIO.State}"
+mcu_gpio_property="${mcu_gpio_property:=LineStates}"
+mcu_device_prefix="${mcu_device_prefix:=HGX_}"
 
 mcu_read_gpio() #(mcu_id, gpio_id)
 {
@@ -106,24 +106,8 @@ mcu_read_gpio() #(mcu_id, gpio_id)
             ${mcu_gpio_property});rc=$?
         [ $rc -ne 0 ] && return 2
 
-
-        # Output example 1:
-        # {
-        #   "States": {
-        #     "23": true,
-        #     "4": false,
-        #     "54": true,
-        #     "76": true,
-        #     "0": false,
-        #     "14": true
-        #   }
-        # }
-        #value=$(grep -o "\"$gpio_id\"[[:space:]]*:[[:space:]]*[a-zA-Z0-9]*" \
-        #    <<< "${dbus_value}" | \
-        #    sed -E "s/\"$gpio_id\"[[:space:]]*:[[:space:]]*//");rc=$?
-
-        # Output example 2:
-        # a{ub} 6 3 true 12 false 19 true 27 false 34 true 41 false
+        # Output example:
+        # a{qb} 6 3 true 12 false 19 true 27 false 34 true 41 false
         value=$(grep -oE "$gpio_id (true|false)" <<< "$dbus_value");rc=$?
         [ $rc -ne 0 ] && return 3
     fi
@@ -221,6 +205,12 @@ einj_stop()
     return 0
 }
 
+einj_is_running()
+{
+    # must not use quotes here as it will be expanded to a list of files
+    [ -f $mcu_einj_folder/*$mcu_einj_ext ]
+}
+
 dev_to_mcu() #(target_dev_id)
 {
     local target_dev_id=$1;shift
@@ -256,12 +246,30 @@ einj_error() #(dev_id, errors[])
         local gpio_id=${value[1]}
         prompt "MCU signal: $mcu_signal"
         prompt "Injecting error: $error_id on device $dev_id"
-        echo "a{ub} 1 $gpio_id true" > "$dev_einj_file"
+        echo "a{qb} 1 $gpio_id true" > "$dev_einj_file"
         return 0
     done
 
     err "[E] Error ID [$error_id] not found for device [$dev_id]!"
     return 1
+}
+
+einj_error_all()
+{
+    return 1 # not supported yet
+}
+
+einj_clear()
+{
+    # only single einj supported, so clear all files for a single error is OK
+    rm -f $mcu_einj_folder/*$mcu_einj_ext
+    return $?
+}
+
+einj_clear_all()
+{
+    rm -rf $mcu_einj_folder
+    return $?
 }
 
 #UT
