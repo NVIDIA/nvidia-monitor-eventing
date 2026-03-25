@@ -75,7 +75,7 @@ mcu_gpio_service="${mcu_gpio_service:=xyz.openbmc_project.NSM}"
 mcu_gpio_path_prefix="${mcu_gpio_path_prefix:=/xyz/openbmc_project/gpio/}"
 mcu_gpio_interface="${mcu_gpio_interface:=com.nvidia.GPIO.State}"
 mcu_gpio_property="${mcu_gpio_property:=LineStates}"
-mcu_device_prefix="${mcu_device_prefix:=HGX_}"
+mcu_device_prefix="${mcu_device_prefix=HGX_}"
 
 mcu_read_gpio() #(mcu_id, gpio_id)
 {
