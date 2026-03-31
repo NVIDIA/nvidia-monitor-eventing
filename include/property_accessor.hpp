@@ -167,7 +167,7 @@ class PropertyValueDataHelper
         return false;
     }
     /**
-     * @brief Convert an array of integers intp a single string.
+     * @brief Convert an array of integers into a single string.
      * @param varVar
      * @param [out] data where to store values
      * @return true
@@ -226,6 +226,36 @@ class PropertyValueDataHelper
             std::vector<std::string> list =
                 std::get<std::vector<std::string>>(varVar);
             data->strValue = boost::join(list, " ");
+            data->value64 = 0;
+            data->state = PropertyValueData::StringOnly;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @brief Convert a map of integer and boolean into a single string.
+     * @param varVar
+     * @param [out] data where to store values
+     *   example: "1 true 2 false"
+     * @return true
+     */
+    static bool setMapIntBoolAsString(const PropertyVariant& varVar,
+                                      PropertyValueData* data)
+    {
+        if (std::holds_alternative<std::map<uint16_t, bool>>(varVar) == true)
+        {
+            auto map = std::get<std::map<uint16_t, bool>>(varVar);
+            for (auto& [key, value] : map)
+            {
+                if (false == data->strValue.empty())
+                {
+                    data->strValue.push_back(' ');
+                }
+                data->strValue.append(std::to_string(key));
+                data->strValue.push_back(' ');
+                data->strValue.append(value ? "true" : "false");
+            }
             data->value64 = 0;
             data->state = PropertyValueData::StringOnly;
             return true;

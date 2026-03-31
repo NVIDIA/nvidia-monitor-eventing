@@ -140,6 +140,15 @@ TEST(PropertyValue, Bitmask2Properties)
     EXPECT_EQ(prop.bitmask(propBit2), false);
 }
 
+TEST(PropertyValue, ArrayOfIntBool)
+{
+    // DBus Type: a{qb}
+    std::map<uint16_t, bool> value = {{1, true}, {2, false}};
+    PropertyVariant variant = value;
+    PropertyValue prop{variant};
+    EXPECT_EQ(prop.getString(), "1 true 2 false");
+}
+
 TEST(PropertyValue, CheckNegativeBitmaskEmptyPropertyValue)
 {
     CheckDefinitionMap accessorCHECK = {{"bitmask", "0x01"}};
