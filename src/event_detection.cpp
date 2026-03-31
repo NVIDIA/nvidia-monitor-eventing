@@ -85,17 +85,23 @@ void EventDetection::workerThreadMainLoop()
 void EventDetection::dbusEventHandlerCallback(sdbusplus::message::message& msg)
 {
     logs_dbg("entered dbusEventHandlerCallback\n");
-    std::string msgInterface;
+    std::string interface;
     boost::container::flat_map<std::string, PropertyVariant> propertiesChanged;
 
-    msg.read(msgInterface, propertiesChanged);
+    msg.read(interface, propertiesChanged);
 
     std::string objectPath = msg.get_path();
     std::string sender = msg.get_sender();
 
+    logs_dbg("objectPath=%s, interface=%s, sender=%s.\n", objectPath.c_str(),
+             interface.c_str(), sender.c_str());
+
+    logs_dbg("propertiesChanged has %zu properties.\n",
+             propertiesChanged.size());
+
     if (propertiesChanged.empty())
     {
-        logs_err("sdbusplus::message: empty propertiesChanged, return.\n");
+        logs_err("Empty propertiesChanged, skipping!\n");
         return;
     }
 
@@ -118,16 +124,25 @@ void EventDetection::dbusEventHandlerCallback(sdbusplus::message::message& msg)
          destination=:1.93 serial=6777 reply_serial=2 variant double 100
          *
          */
+        std::string property = pc.first;
         auto variant = pc.second;
-        std::string eventProperty = pc.first;
+        auto var_type_index = variant.index();
 
-        auto index = variant.index();
-        if (eventProperty.empty() || isValidVariant(variant) == false)
+        logs_dbg("property=%s, var_type_index=%d.\n", property.c_str(),
+                 var_type_index);
+
+        if (property.empty())
         {
-            logs_err("[sdbusplus::message] empty or invalid Property, skipping "
-                     "Path: %s, Intf: %s, Prop: '%s', VarIndex: %d\n",
-                     objectPath.c_str(), msgInterface.c_str(),
-                     eventProperty.c_str(), index);
+            logs_err("Empty property, skipping!\n");
+            continue;
+        }
+        if (isValidVariant(variant) == false)
+        {
+            logs_err(
+                "Invalid Property, skipping! "
+                "objectPath=%s, interface=%s, property=%s, var_type_index=%d.\n",
+                objectPath.c_str(), interface.c_str(), property.c_str(),
+                var_type_index);
             continue;
         }
 
@@ -137,17 +152,17 @@ void EventDetection::dbusEventHandlerCallback(sdbusplus::message::message& msg)
         nlohmann::json j;
         j[data_accessor::typeKey] = type;
         j[data_accessor::accessorTypeKeys[type][0]] = objectPath;
-        j[data_accessor::accessorTypeKeys[type][1]] = msgInterface;
-        j[data_accessor::accessorTypeKeys[type][2]] = eventProperty;
+        j[data_accessor::accessorTypeKeys[type][1]] = interface;
+        j[data_accessor::accessorTypeKeys[type][2]] = property;
         data_accessor::PropertyValue propertyValue(variant);
         data_accessor::DataAccessor accessor(j, propertyValue);
 
         logs_dbg(
-            "Got PC Trigger ... Path: %s, Intf: %s, Prop: '%s', VarIndex: %d, "
-            "PropertyValue: '%s'\n",
-            objectPath.c_str(), msgInterface.c_str(), eventProperty.c_str(),
-            index, propertyValue.getString().c_str());
-        logs_dbg("Passing PC Trigger into Event Discovery phase\n");
+            "Got PC Trigger ... objectPath=%s, interface=%s, property=%s, var_type_index=%d, "
+            "PropertyValue=%s.\n",
+            objectPath.c_str(), interface.c_str(), property.c_str(),
+            var_type_index, propertyValue.getString().c_str());
+        logs_dbg("Passing accessor into Event Discovery phase\n");
 
         eventDiscovery(accessor);
 

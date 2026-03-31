@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "log.hpp"
+
 #include <cstdint>
 #include <map>
 #include <string>
@@ -63,7 +65,8 @@ using PropertyVariant =
                  /*17*/ std::vector<uint32_t>,
                  /*18*/ std::vector<int64_t>,
                  /*19*/ std::vector<uint64_t>,
-                 /*20*/ std::vector<double>>;
+                 /*20*/ std::vector<double>,
+                 /*21*/ std::map<uint16_t, bool>>;
 
 /**
  * @brief returns true if the PropertyVariant has a valid value
@@ -72,7 +75,9 @@ using PropertyVariant =
  */
 inline bool isValidVariant(const PropertyVariant& variant)
 {
-    return variant.index() != 0;
+    auto index = variant.index();
+    logs_dbg("index=%d.\n", index);
+    return index != 0;
 }
 
 /**
@@ -82,5 +87,7 @@ inline bool isValidVariant(const PropertyVariant& variant)
  */
 inline bool isInvalidVariant(const PropertyVariant& variant)
 {
-    return variant.index() == 0;
+    auto index = variant.index();
+    logs_dbg("index=%d.\n", index);
+    return index == 0;
 }

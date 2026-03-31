@@ -245,7 +245,10 @@ void PropertyValue::getPropertyDataFromVariant(const PropertyVariant& varVar)
             PropertyValueDataHelper<std::vector<uint64_t>>::keepVectorsAsString(
                 varVar, &_data) ||
             PropertyValueDataHelper<std::vector<double>>::keepVectorsAsString(
-                varVar, &_data);
+                varVar, &_data) ||
+            PropertyValueDataHelper<
+                std::map<uint16_t, bool>>::setMapIntBoolAsString(varVar,
+                                                                 &_data);
     }
     if (done == false) // varVar.index() == 0 or type not handled above
     {
