@@ -144,8 +144,8 @@ std::string matchedRegx(const std::string& str, const std::string& rgx);
 
 bool existsRegx(const std::string& str, const std::string& rgx);
 
-std::tuple<std::vector<int>, std::string>
-    getMinMaxRange(const std::string& rgx);
+std::tuple<std::vector<int>, std::string> getMinMaxRange(
+    const std::string& rgx);
 
 std::string removeRange(const std::string& str);
 
@@ -310,9 +310,8 @@ std::regex createRegexDigitsRange(const std::string& pattern);
  *
  * @return a Object path without ranges
  */
-std::string
-    introduceDeviceInObjectpath(const std::string& objPath,
-                                const device_id::PatternIndex& deviceIndex);
+std::string introduceDeviceInObjectpath(
+    const std::string& objPath, const device_id::PatternIndex& deviceIndex);
 
 /**
  * @brief Read device health on the DBUS
@@ -335,8 +334,7 @@ class Severity
     static constexpr const char* severityLookup[SEVERITY_TOP] = {
         "OK", "Warning", "Critical"};
 
-    Severity() : severity(SEVERITY_OK)
-    {}
+    Severity() : severity(SEVERITY_OK) {}
 
     Severity(const Severity& other)
     {
@@ -346,8 +344,7 @@ class Severity
         }
     }
 
-    Severity(enum SEVERITY init_severity) : severity(init_severity)
-    {}
+    Severity(enum SEVERITY init_severity) : severity(init_severity) {}
 
     Severity(std::string init_severity)
     {
@@ -420,8 +417,8 @@ class Severity
         Severity maxSev("OK");
         for (auto sev : severities)
         {
-            maxSev.set_severity(sev.value() > maxSev.value() ? sev.value()
-                                                             : maxSev.value());
+            maxSev.set_severity(
+                sev.value() > maxSev.value() ? sev.value() : maxSev.value());
         }
         return maxSev.string();
     }

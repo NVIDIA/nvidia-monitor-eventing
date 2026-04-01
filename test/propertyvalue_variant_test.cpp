@@ -290,8 +290,8 @@ TEST(PropertyValue, NotBitmask)
     uint64_t bit_4 = 0x10;
     uint64_t mask = 0x07;
 
-    EXPECT_EQ(bits_0_1_2.bitmask(bits_0_1_2), true); // itself
-    EXPECT_EQ(bits_0_1_2.bitmask(mask), true);       // same value
+    EXPECT_EQ(bits_0_1_2.bitmask(bits_0_1_2), true);    // itself
+    EXPECT_EQ(bits_0_1_2.bitmask(mask), true);          // same value
 
     EXPECT_NE(bits_0_1_2.notBitmask(bits_0_1_2), true); // itself
     EXPECT_NE(bits_0_1_2.notBitmask(mask), true);       // same value

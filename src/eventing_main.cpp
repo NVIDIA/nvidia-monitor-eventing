@@ -538,12 +538,12 @@ int main(int argc, char* argv[])
     // Initialization
     try
     {
-        event_info::loadFromFile(eventing::profile::eventMap,
-                                 eventing::profile::propertyFilterSet,
-                                 eventing::profile::eventTriggerView,
-                                 eventing::profile::eventAccessorView,
-                                 eventing::profile::eventRecoveryView,
-                                 eventing::configuration.event);
+        event_info::loadFromFile(
+            eventing::profile::eventMap, eventing::profile::propertyFilterSet,
+            eventing::profile::eventTriggerView,
+            eventing::profile::eventAccessorView,
+            eventing::profile::eventRecoveryView,
+            eventing::configuration.event);
     }
     catch (const std::exception& e)
     {

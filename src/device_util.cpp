@@ -76,9 +76,9 @@ DeviceIdMap expandDeviceRange(const std::string& deviceRegx)
     return expandDeviceRange(devicePattern);
 }
 
-device_id::PatternIndex
-    determineDeviceIndex(const device_id::DeviceIdPattern& objPathPattern,
-                         const std::string& objPath)
+device_id::PatternIndex determineDeviceIndex(
+    const device_id::DeviceIdPattern& objPathPattern,
+    const std::string& objPath)
 {
     auto indexes = objPathPattern.match(objPath);
     if (indexes.size() > 0)
@@ -88,10 +88,10 @@ device_id::PatternIndex
     return device_id::PatternIndex();
 }
 
-std::string
-    determineDeviceName(const device_id::DeviceIdPattern& objPathPattern,
-                        const std::string& objPath,
-                        const device_id::DeviceIdPattern& deviceTypePattern)
+std::string determineDeviceName(
+    const device_id::DeviceIdPattern& objPathPattern,
+    const std::string& objPath,
+    const device_id::DeviceIdPattern& deviceTypePattern)
 {
     std::string deviceName{""};
     auto index = determineDeviceIndex(objPathPattern, objPath);
@@ -128,9 +128,9 @@ std::string getFirstDeviceTypePattern(const std::string& devicesPatterns)
     return devices.front();
 }
 
-std::string
-    determineDeviceName(const device_id::DeviceIdPattern& deviceTypePattern,
-                        const device_id::PatternIndex& index)
+std::string determineDeviceName(
+    const device_id::DeviceIdPattern& deviceTypePattern,
+    const device_id::PatternIndex& index)
 {
     std::string name{""};
     if (false == deviceTypePattern.pattern().empty())

@@ -76,8 +76,7 @@ class CmdLineArg
     {
         optCount = calcOptCount(optFlag, optFmt);
     }
-    ~CmdLineArg()
-    {}
+    ~CmdLineArg() {}
 
     bool needOpt() const
     {
@@ -273,8 +272,8 @@ class CmdLine
                 {
                     if ((curPos + 1 >= argc) || isArgName(argv[curPos + 1]))
                     {
-                        throw std::runtime_error("Argument " + argStr +
-                                                 " needs parameter!");
+                        throw std::runtime_error(
+                            "Argument " + argStr + " needs parameter!");
                         return -2;
                     }
                     arg->addOpt(argv[++curPos]);

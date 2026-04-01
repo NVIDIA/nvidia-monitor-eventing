@@ -49,14 +49,14 @@ TEST(DeviceIdTest, PatternIndex_Construction_outoperator)
     std::cout << PatternIndex() << std::endl;  // expected output: '()'
     std::cout << PatternIndex(7) << std::endl; // expected output: '(7)'
     std::cout << PatternIndex(4, 6, 5)
-              << std::endl; // expected output: '(4, 6, 5)'
+              << std::endl;                    // expected output: '(4, 6, 5)'
     std::cout << PatternIndex(-3, 7) << std::endl; // expected output: '(_, 7)'
     std::cout << PatternIndex(-3, 7, -2, -1)
-              << std::endl; // expected output: '(_, 7)'
+              << std::endl;                        // expected output: '(_, 7)'
     std::cout << PatternIndex(PatternIndex::unspecified, 7)
-              << std::endl; // expected output: '(_, 7)'
+              << std::endl;                        // expected output: '(_, 7)'
     std::cout << PatternIndex(PatternIndex::unspecified)
-              << std::endl; // expected output: '()'
+              << std::endl;                        // expected output: '()'
 }
 
 TEST(DeviceIdTest, PatternIndex_dim)
@@ -127,8 +127,8 @@ TEST(DeviceIdTest, CartesianProductRange_PatternInputDomain1)
 
 // DeviceIdPattern ////////////////////////////////////////////////////////////
 
-std::map<unsigned, unsigned>
-    mappingsSum(const std::vector<std::map<unsigned, unsigned>>& maps);
+std::map<unsigned, unsigned> mappingsSum(
+    const std::vector<std::map<unsigned, unsigned>>& maps);
 
 // testing::internal::PrintTo(
 //     mappingsSum(

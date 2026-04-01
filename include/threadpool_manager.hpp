@@ -65,8 +65,8 @@ class ThreadpoolManager
         }
     }
 
-    ThreadpoolManager(ThreadpoolManager const&) = delete;
-    ThreadpoolManager& operator=(ThreadpoolManager const&) = delete;
+    ThreadpoolManager(const ThreadpoolManager&) = delete;
+    ThreadpoolManager& operator=(const ThreadpoolManager&) = delete;
 
   private:
     AcquireState try_acquire()
@@ -157,8 +157,8 @@ class ThreadpoolGuard
         return _success;
     }
 
-    ThreadpoolGuard(ThreadpoolGuard const&) = delete;
-    ThreadpoolGuard& operator=(ThreadpoolGuard const&) = delete;
+    ThreadpoolGuard(const ThreadpoolGuard&) = delete;
+    ThreadpoolGuard& operator=(const ThreadpoolGuard&) = delete;
 
   private:
     ThreadpoolManager* _threadpool;

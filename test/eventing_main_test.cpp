@@ -182,8 +182,7 @@ TEST_F(EventingMainTest, InvalidEventFile)
 class MockEventNode : public event_info::EventNode
 {
   public:
-    MockEventNode() : EventNode("MockEvent")
-    {}
+    MockEventNode() : EventNode("MockEvent") {}
 
     // Add message args to simulate real events
     void setupMessageArgs(int numArgs)

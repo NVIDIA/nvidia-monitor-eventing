@@ -221,8 +221,8 @@ const nlohmann::json& nodeAt(const nlohmann::json& js, const JsonPath& jsPath)
     }
     else
     {
-        throw std::runtime_error("Path '" + to_string(jsPath) +
-                                 "' doesn't exist in the given json");
+        throw std::runtime_error(
+            "Path '" + to_string(jsPath) + "' doesn't exist in the given json");
     }
 }
 

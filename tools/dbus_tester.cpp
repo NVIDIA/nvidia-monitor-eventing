@@ -42,7 +42,6 @@ void syncGetGpuMgrData(unsigned devId, const std::string& property)
     method.append(1);
     if (!silent)
     {
-
         std::cout << "\"busctl call xyz.openbmc_project.GpuMgr "
                   << "/xyz/openbmc_project/GpuMgr "
                   << "xyz.openbmc_project.GpuMgr.Server "
@@ -93,29 +92,29 @@ void asyncGetGpuMgrData(unsigned responsesLimit, boost::asio::io_context& io,
         std::cout << "Registering " << cmd << std::endl;
     }
 
-    conn->async_send(
-        method, [responsesLimit, cmd, &io](boost::system::error_code ec,
-                                           sdbusplus::message::message& ret) {
-            if (!silent)
+    conn->async_send(method, [responsesLimit, cmd,
+                              &io](boost::system::error_code ec,
+                                   sdbusplus::message::message& ret) {
+        if (!silent)
+        {
+            std::cout << cmd << ": ";
+            if (ec || ret.is_method_error())
             {
-                std::cout << cmd << ": ";
-                if (ec || ret.is_method_error())
-                {
-                    std::cout << "ERROR: " << ec.message() << std::endl;
-                }
-                else
-                {
-                    std::cout << "OK" << std::endl;
-                }
+                std::cout << "ERROR: " << ec.message() << std::endl;
             }
-            unsigned x = responsesReceived;
-            x++;
-            responsesReceived = x;
-            if (x >= responsesLimit)
+            else
             {
-                io.stop();
+                std::cout << "OK" << std::endl;
             }
-        });
+        }
+        unsigned x = responsesReceived;
+        x++;
+        responsesReceived = x;
+        if (x >= responsesLimit)
+        {
+            io.stop();
+        }
+    });
 }
 
 void usage()

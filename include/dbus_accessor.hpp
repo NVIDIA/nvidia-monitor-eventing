@@ -175,11 +175,9 @@ class ObjectMapper
      */
     using FullTreeType = std::map<std::string, ValueType>;
 
-    ObjectMapper() : bus(sdbusplus::bus::new_default_system())
-    {}
+    ObjectMapper() : bus(sdbusplus::bus::new_default_system()) {}
 
-    ObjectMapper(sdbusplus::bus::bus&& bus) : bus(std::move(bus))
-    {}
+    ObjectMapper(sdbusplus::bus::bus&& bus) : bus(std::move(bus)) {}
 
     /**
      * @brief Mimic the 'GetObject' method of 'ObjectMapper'
@@ -280,9 +278,9 @@ class ObjectMapper
      *
      * or an empty vector if error in method call occured.
      */
-    std::vector<std::string>
-        getSubTreePaths(const std::string& subtree, int depth,
-                        const std::vector<std::string>& interfaces = {})
+    std::vector<std::string> getSubTreePaths(
+        const std::string& subtree, int depth,
+        const std::vector<std::string>& interfaces = {})
     {
         return static_cast<T*>(this)->getSubTreePathsImpl(this->bus, subtree,
                                                           depth, interfaces);
@@ -361,9 +359,9 @@ class ObjectMapper
      *
      */
 
-    std::vector<std::string>
-        getAllDevIdObjPaths(const std::string& devId,
-                            const std::vector<std::string>& interfaces = {})
+    std::vector<std::string> getAllDevIdObjPaths(
+        const std::string& devId,
+        const std::vector<std::string>& interfaces = {})
     {
         return getDevIdPaths(interfaces, [&devId](const std::string& objPath) {
             return !(isObjPathPrimaryDevId(objPath, devId) ||
@@ -388,9 +386,9 @@ class ObjectMapper
      *
      */
 
-    std::vector<std::string>
-        getPrimaryDevIdPaths(const std::string& devId,
-                             const std::vector<std::string>& interfaces = {})
+    std::vector<std::string> getPrimaryDevIdPaths(
+        const std::string& devId,
+        const std::vector<std::string>& interfaces = {})
     {
         return getDevIdPaths(interfaces, [&devId](const std::string& objPath) {
             return !isObjPathPrimaryDevId(objPath, devId);
@@ -435,10 +433,9 @@ class ObjectMapper
         }
     }
 
-    sdbusplus::message::message getMethod(const std::string& objectPath,
-                                          const std::string& managerInterface,
-                                          const std::string& callInterface,
-                                          const std::string& method)
+    sdbusplus::message::message getMethod(
+        const std::string& objectPath, const std::string& managerInterface,
+        const std::string& callInterface, const std::string& method)
     {
         return this->bus.new_method_call(
             this->getManager(objectPath, managerInterface), objectPath,
@@ -517,10 +514,8 @@ class ObjectMapper
 
 class DirectObjectMapper : public ObjectMapper<DirectObjectMapper>
 {
-
   public:
-    DirectObjectMapper()
-    {}
+    DirectObjectMapper() {}
 
     DirectObjectMapper(sdbusplus::bus::bus&& bus) : ObjectMapper(std::move(bus))
     {}
@@ -529,23 +524,19 @@ class DirectObjectMapper : public ObjectMapper<DirectObjectMapper>
                             const std::string& objectPath,
                             const std::vector<std::string>& interfaces) const;
 
-    std::vector<std::string>
-        getSubTreePathsImpl(sdbusplus::bus::bus& bus,
-                            const std::string& subtree, int depth,
-                            const std::vector<std::string>& interfaces) const;
+    std::vector<std::string> getSubTreePathsImpl(
+        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        const std::vector<std::string>& interfaces) const;
 
-    FullTreeType
-        getSubtreeImpl(sdbusplus::bus::bus& bus, const std::string& subtree,
-                       int depth,
-                       const std::vector<std::string>& interfaces) const;
+    FullTreeType getSubtreeImpl(
+        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        const std::vector<std::string>& interfaces) const;
 };
 
 class CachingObjectMapper : public ObjectMapper<CachingObjectMapper>
 {
-
   public:
-    CachingObjectMapper() : ObjectMapper(), isInitialized(false)
-    {}
+    CachingObjectMapper() : ObjectMapper(), isInitialized(false) {}
 
     CachingObjectMapper(sdbusplus::bus::bus&& bus) :
         ObjectMapper(std::move(bus)), isInitialized(false)
@@ -555,13 +546,11 @@ class CachingObjectMapper : public ObjectMapper<CachingObjectMapper>
                             const std::string& objectPath,
                             const std::vector<std::string>& interfaces);
 
-    std::vector<std::string>
-        getSubTreePathsImpl(sdbusplus::bus::bus& bus,
-                            const std::string& subtree, int depth,
-                            const std::vector<std::string>& interfaces);
-    std::vector<std::string>
-        getSubTreePathsImpl(sdbusplus::bus::bus& bus,
-                            const std::vector<std::string>& interfaces);
+    std::vector<std::string> getSubTreePathsImpl(
+        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        const std::vector<std::string>& interfaces);
+    std::vector<std::string> getSubTreePathsImpl(
+        sdbusplus::bus::bus& bus, const std::vector<std::string>& interfaces);
 
     // Not implemented for now
     FullTreeType getSubtreeImpl(sdbusplus::bus::bus& bus,
@@ -621,8 +610,7 @@ class DbusDelayer
 
     static const char* stateToStr(State state);
 
-    DbusDelayer() : mutex(), state(State::idle)
-    {}
+    DbusDelayer() : mutex(), state(State::idle) {}
     virtual ~DbusDelayer() = default;
 
     std::chrono::milliseconds callStartAttempt(const std::string& signature);
@@ -701,7 +689,6 @@ class DbusDelayerStateGuard
 
 class DelayedMethod
 {
-
   public:
     DelayedMethod(DbusDelayer* dbusDelayer, sdbusplus::bus::bus& bus,
                   const std::string& service, const std::string& object,
@@ -734,8 +721,8 @@ class DelayedMethod
         _method.append(arg);
     }
 
-    sdbusplus::message::message
-        call(std::optional<sdbusplus::SdBusDuration> timeout = std::nullopt);
+    sdbusplus::message::message call(
+        std::optional<sdbusplus::SdBusDuration> timeout = std::nullopt);
 
   private:
     DbusDelayer* _dbusDelayer;

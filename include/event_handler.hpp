@@ -64,10 +64,9 @@ class ClearEvent : public EventHandler
      * @param event
      * @return eventing::RcCode
      */
-    eventing::RcCode
-        process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode process(
+        [[maybe_unused]] event_info::EventNode& event) override
     {
-
         if (event.accessor.isTypeDeviceCoreApi())
         {
             std::string property = event.accessor.getProperty();

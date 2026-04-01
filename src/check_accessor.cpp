@@ -308,8 +308,8 @@ bool CheckAccessor::subCheck(const DataAccessor& jsonAcc, DataAccessor& dataAcc,
             int zero_index_bit_shift = 0;
             for (auto& index : devRange)
             {
-                PropertyVariant bitmask(bitmapValue.getInteger()
-                                        << zero_index_bit_shift++);
+                PropertyVariant bitmask(
+                    bitmapValue.getInteger() << zero_index_bit_shift++);
                 if (dataAcc.getDataValue().check(checkMap, bitmask) == true)
                 {
                     ret = true;

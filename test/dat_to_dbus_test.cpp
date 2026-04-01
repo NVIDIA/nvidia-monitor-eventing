@@ -427,18 +427,18 @@ TEST(DatToDbusTest, JsonTest)
     event_handler::DATTraverse datTraverser("");
     datTraverser.setDAT(devMap);
 
-    EXPECT_THAT(datTraverser.getAssociationConnectedDevices("Baseboard"),
-                UnorderedElementsAre(
-                    "Baseboard", "NVSwitch3", "PCIeSwitch", "PCIeSwitch_ERoT",
-                    "HSC_STBY", "NVSwitch3_ERoT", "HSC9", "VR", "NVSwitch2",
-                    "NVSwitch2_ERoT", "NVSwitch1", "NVSwitch1_ERoT", "HSC8",
-                    "NVSwitch0", "NVSwitch0_ERoT", "GPU7", "PCIeRetimer7",
-                    "GPU7_ERoT", "HSC7", "GPU6", "PCIeRetimer6", "GPU6_ERoT",
-                    "HSC6", "GPU5", "PCIeRetimer5", "GPU5_ERoT", "HSC5", "GPU4",
-                    "PCIeRetimer4", "GPU4_ERoT", "HSC4", "GPU3", "PCIeRetimer3",
-                    "GPU3_ERoT", "HSC3", "GPU2", "PCIeRetimer2", "GPU2_ERoT",
-                    "HSC2", "GPU1", "PCIeRetimer1", "GPU1_ERoT", "HSC1", "GPU0",
-                    "PCIeRetimer0", "GPU0_ERoT", "HSC0"));
+    EXPECT_THAT(
+        datTraverser.getAssociationConnectedDevices("Baseboard"),
+        UnorderedElementsAre(
+            "Baseboard", "NVSwitch3", "PCIeSwitch", "PCIeSwitch_ERoT",
+            "HSC_STBY", "NVSwitch3_ERoT", "HSC9", "VR", "NVSwitch2",
+            "NVSwitch2_ERoT", "NVSwitch1", "NVSwitch1_ERoT", "HSC8",
+            "NVSwitch0", "NVSwitch0_ERoT", "GPU7", "PCIeRetimer7", "GPU7_ERoT",
+            "HSC7", "GPU6", "PCIeRetimer6", "GPU6_ERoT", "HSC6", "GPU5",
+            "PCIeRetimer5", "GPU5_ERoT", "HSC5", "GPU4", "PCIeRetimer4",
+            "GPU4_ERoT", "HSC4", "GPU3", "PCIeRetimer3", "GPU3_ERoT", "HSC3",
+            "GPU2", "PCIeRetimer2", "GPU2_ERoT", "HSC2", "GPU1", "PCIeRetimer1",
+            "GPU1_ERoT", "HSC1", "GPU0", "PCIeRetimer0", "GPU0_ERoT", "HSC0"));
     EXPECT_THAT(datTraverser.getAssociationConnectedDevices("FPGA"),
                 UnorderedElementsAre("FPGA", "HMC", "HMC_ERoT", "HSC_STBY",
                                      "FPGA_ERoT"));
@@ -510,28 +510,28 @@ TEST(DatToDbusTest, JsonTest)
                 UnorderedElementsAre("HSC9"));
     EXPECT_THAT(datTraverser.getAssociationConnectedDevices("HSC_STBY"),
                 UnorderedElementsAre("HSC_STBY"));
-    EXPECT_THAT(datTraverser.getAssociationConnectedDevices("NVSwitch0"),
-                UnorderedElementsAre("NVSwitch0", "PCIeSwitch",
-                                     "PCIeSwitch_ERoT", "HSC_STBY",
-                                     "NVSwitch0_ERoT", "HSC8", "VR"));
+    EXPECT_THAT(
+        datTraverser.getAssociationConnectedDevices("NVSwitch0"),
+        UnorderedElementsAre("NVSwitch0", "PCIeSwitch", "PCIeSwitch_ERoT",
+                             "HSC_STBY", "NVSwitch0_ERoT", "HSC8", "VR"));
     EXPECT_THAT(datTraverser.getAssociationConnectedDevices("NVSwitch0_ERoT"),
                 UnorderedElementsAre("NVSwitch0_ERoT"));
-    EXPECT_THAT(datTraverser.getAssociationConnectedDevices("NVSwitch1"),
-                UnorderedElementsAre("NVSwitch1", "PCIeSwitch",
-                                     "PCIeSwitch_ERoT", "HSC_STBY",
-                                     "NVSwitch1_ERoT", "HSC8", "VR"));
+    EXPECT_THAT(
+        datTraverser.getAssociationConnectedDevices("NVSwitch1"),
+        UnorderedElementsAre("NVSwitch1", "PCIeSwitch", "PCIeSwitch_ERoT",
+                             "HSC_STBY", "NVSwitch1_ERoT", "HSC8", "VR"));
     EXPECT_THAT(datTraverser.getAssociationConnectedDevices("NVSwitch1_ERoT"),
                 UnorderedElementsAre("NVSwitch1_ERoT"));
-    EXPECT_THAT(datTraverser.getAssociationConnectedDevices("NVSwitch2"),
-                UnorderedElementsAre("NVSwitch2", "PCIeSwitch",
-                                     "PCIeSwitch_ERoT", "HSC_STBY",
-                                     "NVSwitch2_ERoT", "HSC9", "VR"));
+    EXPECT_THAT(
+        datTraverser.getAssociationConnectedDevices("NVSwitch2"),
+        UnorderedElementsAre("NVSwitch2", "PCIeSwitch", "PCIeSwitch_ERoT",
+                             "HSC_STBY", "NVSwitch2_ERoT", "HSC9", "VR"));
     EXPECT_THAT(datTraverser.getAssociationConnectedDevices("NVSwitch2_ERoT"),
                 UnorderedElementsAre("NVSwitch2_ERoT"));
-    EXPECT_THAT(datTraverser.getAssociationConnectedDevices("NVSwitch3"),
-                UnorderedElementsAre("NVSwitch3", "PCIeSwitch",
-                                     "PCIeSwitch_ERoT", "HSC_STBY",
-                                     "NVSwitch3_ERoT", "HSC9", "VR"));
+    EXPECT_THAT(
+        datTraverser.getAssociationConnectedDevices("NVSwitch3"),
+        UnorderedElementsAre("NVSwitch3", "PCIeSwitch", "PCIeSwitch_ERoT",
+                             "HSC_STBY", "NVSwitch3_ERoT", "HSC9", "VR"));
     EXPECT_THAT(datTraverser.getAssociationConnectedDevices("NVSwitch3_ERoT"),
                 UnorderedElementsAre("NVSwitch3_ERoT"));
     EXPECT_THAT(

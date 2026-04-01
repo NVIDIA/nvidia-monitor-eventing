@@ -50,9 +50,9 @@ bool existsRange(const std::string& str);
 DeviceIdMap expandDeviceRange(const std::string& deviceRegx);
 DeviceIdMap expandDeviceRange(const device_id::DeviceIdPattern& patternObj);
 
-device_id::PatternIndex
-    determineDeviceIndex(const device_id::DeviceIdPattern& objPathPattern,
-                         const std::string& objPath);
+device_id::PatternIndex determineDeviceIndex(
+    const device_id::DeviceIdPattern& objPathPattern,
+    const std::string& objPath);
 
 /**
  * @brief determine device name from DBus object path.
@@ -114,10 +114,10 @@ std::string determineDeviceName(const std::string& objPathPattern,
    @endcode
  *
  */
-std::string
-    determineDeviceName(const device_id::DeviceIdPattern& objPathPattern,
-                        const std::string& objPath,
-                        const device_id::DeviceIdPattern& deviceTypePattern);
+std::string determineDeviceName(
+    const device_id::DeviceIdPattern& objPathPattern,
+    const std::string& objPath,
+    const device_id::DeviceIdPattern& deviceTypePattern);
 
 /**
  * @brief Returns the first device from a device_type pattern that can be
@@ -127,9 +127,9 @@ std::string
  * @param index
  * @return the first device name according to the index
  */
-std::string
-    determineDeviceName(const device_id::DeviceIdPattern& deviceTypePattern,
-                        const device_id::PatternIndex& index);
+std::string determineDeviceName(
+    const device_id::DeviceIdPattern& deviceTypePattern,
+    const device_id::PatternIndex& index);
 
 /**
  * @brief Returns the first element from a pattern having separator such as '/'

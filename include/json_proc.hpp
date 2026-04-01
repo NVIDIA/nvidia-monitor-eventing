@@ -48,8 +48,7 @@ namespace json_proc
 class JsonPattern
 {
   public:
-    explicit JsonPattern(const nlohmann::json& js) : js(js)
-    {}
+    explicit JsonPattern(const nlohmann::json& js) : js(js) {}
 
     /**
      * @brief Evaluate the patterned json element

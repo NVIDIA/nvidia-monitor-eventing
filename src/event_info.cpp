@@ -157,7 +157,6 @@ void loadFromJson(EventMap& eventMap, PropertyFilterSet& propertyFilterSet,
 
         for (const auto& event : el.value())
         {
-
             ss.str(std::string()); // Clearing the stream first
             ss << "\tcreate event (" << event["event"] << ").\n";
             logs_dbg("%s", ss.str().c_str());
@@ -217,8 +216,8 @@ void loadRawEventsFromFile(EventMap& eventMap, const std::string& file)
     std::ifstream i(file);
     if (!i.is_open())
     {
-        throw std::runtime_error("Failed to open event definition file: " +
-                                 file);
+        throw std::runtime_error(
+            "Failed to open event definition file: " + file);
     }
 
     try
@@ -317,8 +316,8 @@ void printSet(const PropertyFilterSet& propertyFilterSet)
  * [1]: "Uncontained ECC Error"
  * @endcode
  */
-std::vector<MessageArgPattern>
-    loadMessageArgsPatterns(const json& messageArgsJson)
+std::vector<MessageArgPattern> loadMessageArgsPatterns(
+    const json& messageArgsJson)
 {
     std::vector<MessageArgPattern> result;
     for (const json& elem : messageArgsJson["patterns"])
@@ -372,9 +371,8 @@ std::vector<MessageArgPattern>
  * @param[in] toExcl The index in the json array @c accessorsJson to which end
  * constructing @c DataAccessor objects, exclusive
  */
-std::vector<data_accessor::DataAccessor>
-    loadMessageArgsAccessors(const json& accessorsJson, unsigned fromIncl,
-                             unsigned toExcl)
+std::vector<data_accessor::DataAccessor> loadMessageArgsAccessors(
+    const json& accessorsJson, unsigned fromIncl, unsigned toExcl)
 {
     std::vector<data_accessor::DataAccessor> result;
     for (unsigned i = fromIncl; i < toExcl; ++i)
@@ -522,8 +520,8 @@ void EventNode::loadFrom(const json& j)
     // this->eventTrigger = j.at("event_trigger");
 
     this->eventCategories =
-        json_proc::getOptionalAttribute<std::vector<EventCategory>>(j,
-                                                                    "category");
+        json_proc::getOptionalAttribute<std::vector<EventCategory>>(
+            j, "category");
 
     this->subType = j.value("sub_type", "");
 
@@ -843,16 +841,16 @@ std::string EventNode::getFullDeviceName() const
     return getFullDeviceName(index);
 }
 
-std::vector<std::string>
-    EventNode::getFullDeviceNameSeparated(device_id::PatternIndex& index) const
+std::vector<std::string> EventNode::getFullDeviceNameSeparated(
+    device_id::PatternIndex& index) const
 {
     std::vector<std::string> fullDevices;
     auto fullDeviceNameSlash = getFullDeviceName(index);
     return EventNode::separateFullDeviceName(fullDeviceNameSlash);
 }
 
-std::vector<std::string>
-    EventNode::separateFullDeviceName(const std::string& fullName)
+std::vector<std::string> EventNode::separateFullDeviceName(
+    const std::string& fullName)
 {
     std::vector<std::string> fullDevices;
     if (!fullName.empty())
@@ -944,9 +942,8 @@ bool EventNode::isDeviceTypeMatch(const std::string& deviceId) const
     return !pattern.match(deviceId).empty();
 }
 
-std::unique_ptr<EventNode>
-    EventNode::loadEventByErrorId(const std::string& errorId,
-                                  const std::string& file)
+std::unique_ptr<EventNode> EventNode::loadEventByErrorId(
+    const std::string& errorId, const std::string& file)
 {
     logs_dbg("Looking for event with error_id: %s in file: %s\n",
              errorId.c_str(), file.c_str());

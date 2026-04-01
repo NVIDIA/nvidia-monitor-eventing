@@ -259,24 +259,25 @@ struct tms_cycle
  */
 static const struct tms_cycle _tms_cycle_lookup[][16] = {
     /*	    TLR        RTI        SelDR      CapDR      SDR        Ex1DR*/
-    /* TLR  */ {{0x00, 0},
-                {0x00, 1},
-                {0x02, 2},
-                {0x02, 3},
-                {0x02, 4},
-                {0x0a, 4},
-                /*	    PDR        Ex2DR      UpdDR      SelIR      CapIR SIR*/
-                {0x0a, 5},
-                {0x2a, 6},
-                {0x1a, 5},
-                {0x06, 3},
-                {0x06, 4},
-                {0x06, 5},
-                /*	    Ex1IR      PIR        Ex2IR      UpdIR*/
-                {0x16, 5},
-                {0x16, 6},
-                {0x56, 7},
-                {0x36, 6}},
+    /* TLR  */ {
+        {0x00, 0},
+        {0x00, 1},
+        {0x02, 2},
+        {0x02, 3},
+        {0x02, 4},
+        {0x0a, 4},
+        /*	    PDR        Ex2DR      UpdDR      SelIR      CapIR SIR*/
+        {0x0a, 5},
+        {0x2a, 6},
+        {0x1a, 5},
+        {0x06, 3},
+        {0x06, 4},
+        {0x06, 5},
+        /*	    Ex1IR      PIR        Ex2IR      UpdIR*/
+        {0x16, 5},
+        {0x16, 6},
+        {0x56, 7},
+        {0x36, 6}},
 
     /*	    TLR        RTI        SelDR      CapDR      SDR        Ex1DR*/
     /* RTI  */

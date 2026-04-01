@@ -118,8 +118,8 @@ bool JsonPropertiesCheck::rawCheck(
     return result;
 }
 
-std::pair<std::string, std::shared_ptr<JsonSchema>>
-    property(std::string name, std::shared_ptr<JsonSchema> checker)
+std::pair<std::string, std::shared_ptr<JsonSchema>> property(
+    std::string name, std::shared_ptr<JsonSchema> checker)
 {
     return std::make_pair(name, checker);
 }
@@ -140,8 +140,8 @@ bool JsonItemsCheck::rawCheck(const nlohmann::json& element,
     return result;
 }
 
-std::shared_ptr<JsonFeatureChecker>
-    items(std::shared_ptr<JsonSchema> elementSchema)
+std::shared_ptr<JsonFeatureChecker> items(
+    std::shared_ptr<JsonSchema> elementSchema)
 {
     return JsonItemsCheck::create(elementSchema);
 }
@@ -274,11 +274,11 @@ bool JsonStringLengthCheck::rawCheck(
     json_proc::ProblemsCollector& problemsCollector)
 {
     unsigned len = element.get<std::string>().length();
-    return singleCheck(checkLength(len),
-                       "String expected to be " + relation + " " +
-                           std::to_string(bound) +
-                           " (actual length: " + std::to_string(len) + ")",
-                       elementPath, problemsCollector);
+    return singleCheck(
+        checkLength(len),
+        "String expected to be " + relation + " " + std::to_string(bound) +
+            " (actual length: " + std::to_string(len) + ")",
+        elementPath, problemsCollector);
 }
 
 // JsonStringMinLengthCheck ///////////////////////////////////////////////////

@@ -83,8 +83,7 @@ static std::map<std::string, std::vector<std::string>> accessorTypeKeys = {
 class DataAccessor
 {
   public:
-    DataAccessor() : _dataValue(PropertyValue())
-    {}
+    DataAccessor() : _dataValue(PropertyValue()) {}
 
     explicit DataAccessor(const nlohmann::json& acc,
                           const PropertyValue& value = PropertyValue()) :
@@ -189,8 +188,8 @@ class DataAccessor
                     {
                         device_id::DeviceIdPattern pat1(patPath);
                         device_id::DeviceIdPattern pat2(otherPatPath);
-                        objPathMatches =
-                            pat1.matches(otherPatPath) || pat2.matches(patPath);
+                        objPathMatches = pat1.matches(otherPatPath) ||
+                                         pat2.matches(patPath);
                     }
                     if (!objPathMatches)
                     {

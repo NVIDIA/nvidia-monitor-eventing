@@ -28,9 +28,9 @@ std::shared_ptr<json_schema::JsonSchema> accessorCheckerSchema()
         types(json::value_t::object),
         anyOf(
             schema(requiredProperties("not_equal"),
-                   properties(
-                       literal(false),
-                       property("not_equal", types(json::value_t::string)))),
+                   properties(literal(false),
+                              property("not_equal",
+                                       types(json::value_t::string)))),
 
             schema(requiredProperties("equal"),
                    properties(literal(false),

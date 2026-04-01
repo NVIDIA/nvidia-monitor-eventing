@@ -36,9 +36,9 @@ namespace json_schema
 std::string singleQuote(const std::string& sth);
 
 template <typename T>
-std::string
-    setToString(const std::vector<T>& elements,
-                const std::function<std::string(const T& elem)>& transform)
+std::string setToString(
+    const std::vector<T>& elements,
+    const std::function<std::string(const T& elem)>& transform)
 {
     std::vector<std::string> output;
     std::transform(elements.begin(), elements.end(), std::back_inserter(output),
@@ -85,8 +85,7 @@ class JsonLiteralSchema : public JsonSchema
 {
     bool value;
 
-    JsonLiteralSchema(bool value) : value(value)
-    {}
+    JsonLiteralSchema(bool value) : value(value) {}
 
   public:
     bool rawCheck(const nlohmann::json& element,
@@ -188,22 +187,20 @@ class JsonPropertiesCheck : public JsonFeatureChecker
     }
 
     template <typename... Args>
-    static std::shared_ptr<JsonPropertiesCheck>
-        create(std::shared_ptr<JsonSchema> additionalPropertiesSchema,
-               Args... args)
+    static std::shared_ptr<JsonPropertiesCheck> create(
+        std::shared_ptr<JsonSchema> additionalPropertiesSchema, Args... args)
     {
         return std::shared_ptr<JsonPropertiesCheck>(
             new JsonPropertiesCheck(additionalPropertiesSchema, args...));
     }
 };
 
-std::pair<std::string, std::shared_ptr<JsonSchema>>
-    property(std::string name, std::shared_ptr<JsonSchema> checker);
+std::pair<std::string, std::shared_ptr<JsonSchema>> property(
+    std::string name, std::shared_ptr<JsonSchema> checker);
 
 template <typename... Args>
-std::shared_ptr<JsonFeatureChecker>
-    properties(std::shared_ptr<JsonSchema> additionalPropertiesSchema,
-               Args... args)
+std::shared_ptr<JsonFeatureChecker> properties(
+    std::shared_ptr<JsonSchema> additionalPropertiesSchema, Args... args)
 {
     return JsonPropertiesCheck::create(additionalPropertiesSchema, args...);
 }
@@ -228,16 +225,16 @@ class JsonItemsCheck : public JsonFeatureChecker
         return elemType == nlohmann::json::value_t::array;
     }
 
-    static std::shared_ptr<JsonItemsCheck>
-        create(std::shared_ptr<JsonSchema> elementSchema)
+    static std::shared_ptr<JsonItemsCheck> create(
+        std::shared_ptr<JsonSchema> elementSchema)
     {
         return std::shared_ptr<JsonItemsCheck>(
             new JsonItemsCheck(elementSchema));
     }
 };
 
-std::shared_ptr<JsonFeatureChecker>
-    items(std::shared_ptr<JsonSchema> elementSchema);
+std::shared_ptr<JsonFeatureChecker> items(
+    std::shared_ptr<JsonSchema> elementSchema);
 
 // JsonEnumCheck //////////////////////////////////////////////////////////////
 
@@ -294,8 +291,8 @@ class JsonRequiredPropertiesCheck : public JsonFeatureChecker
     }
 
     template <typename... Args>
-    static std::shared_ptr<JsonRequiredPropertiesCheck>
-        create(const Args&... args)
+    static std::shared_ptr<JsonRequiredPropertiesCheck> create(
+        const Args&... args)
     {
         return std::shared_ptr<JsonRequiredPropertiesCheck>(
             new JsonRequiredPropertiesCheck(args...));
@@ -315,8 +312,7 @@ class JsonBoundCheck : public JsonFeatureChecker
   protected:
     double bound;
 
-    JsonBoundCheck(const double& bound) : bound(bound)
-    {}
+    JsonBoundCheck(const double& bound) : bound(bound) {}
 
     std::string boundCheckErrorMsg(const nlohmann::json& element,
                                    const std::string& relation);
@@ -334,8 +330,7 @@ class JsonBoundCheck : public JsonFeatureChecker
 
 class JsonLowerBoundCheck : public JsonBoundCheck
 {
-    JsonLowerBoundCheck(const double& bound) : JsonBoundCheck(bound)
-    {}
+    JsonLowerBoundCheck(const double& bound) : JsonBoundCheck(bound) {}
 
   public:
     bool rawCheck(const nlohmann::json& element,
@@ -355,8 +350,7 @@ std::shared_ptr<JsonFeatureChecker> minimum(const double& arg);
 
 class JsonUpperBoundCheck : public JsonBoundCheck
 {
-    JsonUpperBoundCheck(const double& bound) : JsonBoundCheck(bound)
-    {}
+    JsonUpperBoundCheck(const double& bound) : JsonBoundCheck(bound) {}
 
   public:
     bool rawCheck(const nlohmann::json& element,

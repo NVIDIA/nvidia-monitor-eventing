@@ -227,10 +227,9 @@ bool Selftest::isDeviceCached(const std::string& devName,
     return true; /* already cached */
 }
 
-eventing::RcCode Selftest::perform(const dat_traverse::Device& dev,
-                                   ReportResult& reportRes,
-                                   std::vector<std::string> layersToIgnore,
-                                   const bool& doEventDetermination)
+eventing::RcCode Selftest::perform(
+    const dat_traverse::Device& dev, ReportResult& reportRes,
+    std::vector<std::string> layersToIgnore, const bool& doEventDetermination)
 {
     shortlog_dbg(<< "selftest: device visited: '" << dev.name << "'");
 
@@ -248,30 +247,30 @@ eventing::RcCode Selftest::perform(const dat_traverse::Device& dev,
         shortlog_dbg(<< "doing event determination for device: '" << dev.name);
     }
 
-    auto fillTpRes = [](selftest::TestPointResult& tp,
-                        const std::string& expVal,
-                        const data_accessor::PropertyValue& readVal,
-                        const std::string& name, auto& severity,
-                        bool isDevice) {
-        tp.targetName = name;
-        tp.valExpected = expVal;
-        tp.severity = severity;
-        tp.isTypeDevice = isDevice;
-        // it will empty when if DataAccessor::read() has failed
-        if (readVal.empty())
-        {
-            tp.valRead = "Error - TP read failed.";
-            tp.result = false;
-        }
-        else
-        {
-            tp.valRead = readVal.getString();
-            // in case of empty expected value default to positive result
-            tp.result = (expVal.size() == 0)
-                            ? true
-                            : readVal == data_accessor::PropertyValue(expVal);
-        }
-    };
+    auto fillTpRes =
+        [](selftest::TestPointResult& tp, const std::string& expVal,
+           const data_accessor::PropertyValue& readVal, const std::string& name,
+           auto& severity, bool isDevice) {
+            tp.targetName = name;
+            tp.valExpected = expVal;
+            tp.severity = severity;
+            tp.isTypeDevice = isDevice;
+            // it will empty when if DataAccessor::read() has failed
+            if (readVal.empty())
+            {
+                tp.valRead = "Error - TP read failed.";
+                tp.result = false;
+            }
+            else
+            {
+                tp.valRead = readVal.getString();
+                // in case of empty expected value default to positive result
+                tp.result =
+                    (expVal.size() == 0)
+                        ? true
+                        : readVal == data_accessor::PropertyValue(expVal);
+            }
+        };
 
     PROFILING_SWITCH(selftest::TsLatcher TS("selftest-perform-" + dev.name));
     auto& availableLayers = dev.test;
@@ -300,9 +299,9 @@ eventing::RcCode Selftest::perform(const dat_traverse::Device& dev,
                 const std::string& devName = acc.read();
                 if (this->_dat.count(devName) == 0)
                 {
-                    std::cerr << "Error: invalid device key: " << devName
-                              << " in nested tp in selftest perform"
-                              << std::endl;
+                    std::cerr
+                        << "Error: invalid device key: " << devName
+                        << " in nested tp in selftest perform" << std::endl;
                     return eventing::RcCode::error;
                 }
 
@@ -343,10 +342,9 @@ eventing::RcCode Selftest::perform(const dat_traverse::Device& dev,
     return eventing::RcCode::succ;
 }
 
-eventing::RcCode
-    Selftest::performEntireTree(ReportResult& reportRes,
-                                std::vector<std::string> layersToIgnore,
-                                const bool& doEventDetermination)
+eventing::RcCode Selftest::performEntireTree(
+    ReportResult& reportRes, std::vector<std::string> layersToIgnore,
+    const bool& doEventDetermination)
 {
     PROFILING_SWITCH(selftest::TsLatcher TS("selftest-perform-entire-tree"));
 
@@ -544,10 +542,9 @@ eventing::RcCode DoSelftest([[maybe_unused]] const dat_traverse::Device& dev,
 namespace event_handler
 {
 
-bool RootCauseTracer::findRootCause(const std::string& triggeringDevice,
-                                    const selftest::ReportResult& report,
-                                    const event_info::EventNode& eventNode,
-                                    std::string& rootCauseDevice)
+bool RootCauseTracer::findRootCause(
+    const std::string& triggeringDevice, const selftest::ReportResult& report,
+    const event_info::EventNode& eventNode, std::string& rootCauseDevice)
 {
     if (eventNode.hasFixedOriginOfCondition())
     {
@@ -604,8 +601,8 @@ void RootCauseTracer::updateRootCause(
     DATTraverse::setOriginOfCondition(dev, status);
 }
 
-eventing::RcCode
-    RootCauseTracer::process([[maybe_unused]] event_info::EventNode& event)
+eventing::RcCode RootCauseTracer::process(
+    [[maybe_unused]] event_info::EventNode& event)
 {
     std::string problemDevice = event.device;
     if ((problemDevice.length() == 0) || (_dat.count(problemDevice) == 0))

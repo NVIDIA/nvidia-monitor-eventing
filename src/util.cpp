@@ -342,8 +342,8 @@ std::string makeRangeForRegexSearch(const std::string& rangeStr)
     std::string matchRegx{rangeStr};
     while (rangePosition != std::string::npos)
     {
-        auto size =
-            matchRegx.find_first_of("]", rangePosition) - rangePosition + 1;
+        auto size = matchRegx.find_first_of("]", rangePosition) -
+                    rangePosition + 1;
         matchRegx.replace(rangePosition, size, match);
         rangePosition = matchRegx.find_first_of("[", rangePosition + size - 1);
     }
@@ -456,9 +456,8 @@ std::regex createRegexDigitsRange(const std::string& pattern)
     TEST(IntroduceDeviceInObjectpath, DoubleDeviceWithDeviceData)
     TEST(IntroduceDeviceInObjectpath, NoRangeWithDeviceIdData)
  */
-std::string
-    introduceDeviceInObjectpath(const std::string& objPath,
-                                const device_id::PatternIndex& deviceIndex)
+std::string introduceDeviceInObjectpath(
+    const std::string& objPath, const device_id::PatternIndex& deviceIndex)
 {
     std::string ret{objPath};
     device_id::DeviceIdPattern objPattern(objPath);
@@ -579,8 +578,8 @@ int writeJson2File(const std::string& filePath, const nlohmann::json& j)
         {
             auto now = std::chrono::steady_clock::now();
             auto elapsed =
-                std::chrono::duration_cast<std::chrono::milliseconds>(now -
-                                                                      start)
+                std::chrono::duration_cast<std::chrono::milliseconds>(
+                    now - start)
                     .count();
 
             if (elapsed >= FLOCK_TIMEOUT)

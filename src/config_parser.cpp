@@ -20,10 +20,8 @@
 namespace config_parser
 {
 
-ConfigParser::ConfigParser()
-{}
+ConfigParser::ConfigParser() {}
 
-ConfigParser::~ConfigParser()
-{}
+ConfigParser::~ConfigParser() {}
 
 } // namespace config_parser

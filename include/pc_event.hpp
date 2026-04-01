@@ -35,10 +35,9 @@ struct PcDataType
 class PcQueueType
 {
   public:
-    PcQueueType(size_t queueSize) : _queue(queueSize), _mutex{}
-    {}
+    PcQueueType(size_t queueSize) : _queue(queueSize), _mutex{} {}
 
-    bool push(PcDataType const& d)
+    bool push(const PcDataType& d)
     {
         std::scoped_lock lock(_mutex);
         return _queue.push(d);

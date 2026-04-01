@@ -105,11 +105,9 @@ class ObjectMapper
      */
     using FullTreeType = std::map<std::string, ValueType>;
 
-    ObjectMapper() : bus(sdbusplus::bus::new_default_system())
-    {}
+    ObjectMapper() : bus(sdbusplus::bus::new_default_system()) {}
 
-    ObjectMapper(sdbusplus::bus::bus&& bus) : bus(std::move(bus))
-    {}
+    ObjectMapper(sdbusplus::bus::bus&& bus) : bus(std::move(bus)) {}
 
     /**
      * @brief Mimic the 'GetObject' method of 'ObjectMapper'
@@ -210,9 +208,9 @@ class ObjectMapper
      *
      * or an empty vector if error in method call occured.
      */
-    std::vector<std::string>
-        getSubTreePaths(const std::string& subtree, int depth,
-                        const std::vector<std::string>& interfaces = {})
+    std::vector<std::string> getSubTreePaths(
+        const std::string& subtree, int depth,
+        const std::vector<std::string>& interfaces = {})
     {
         return static_cast<T*>(this)->getSubTreePathsImpl(this->bus, subtree,
                                                           depth, interfaces);
@@ -291,9 +289,9 @@ class ObjectMapper
      *
      */
 
-    std::vector<std::string>
-        getAllDevIdObjPaths(const std::string& devId,
-                            const std::vector<std::string>& interfaces = {})
+    std::vector<std::string> getAllDevIdObjPaths(
+        const std::string& devId,
+        const std::vector<std::string>& interfaces = {})
     {
         return getDevIdPaths(interfaces, [&devId](const std::string& objPath) {
             return !(isObjPathPrimaryDevId(objPath, devId) ||
@@ -318,9 +316,9 @@ class ObjectMapper
      *
      */
 
-    std::vector<std::string>
-        getPrimaryDevIdPaths(const std::string& devId,
-                             const std::vector<std::string>& interfaces = {})
+    std::vector<std::string> getPrimaryDevIdPaths(
+        const std::string& devId,
+        const std::vector<std::string>& interfaces = {})
     {
         return getDevIdPaths(interfaces, [&devId](const std::string& objPath) {
             return !isObjPathPrimaryDevId(objPath, devId);
@@ -449,10 +447,8 @@ class ObjectMapper
 
 class DirectObjectMapper : public ObjectMapper<DirectObjectMapper>
 {
-
   public:
-    DirectObjectMapper()
-    {}
+    DirectObjectMapper() {}
 
     DirectObjectMapper(sdbusplus::bus::bus&& bus) : ObjectMapper(std::move(bus))
     {}
@@ -461,15 +457,13 @@ class DirectObjectMapper : public ObjectMapper<DirectObjectMapper>
                             const std::string& objectPath,
                             const std::vector<std::string>& interfaces) const;
 
-    std::vector<std::string>
-        getSubTreePathsImpl(sdbusplus::bus::bus& bus,
-                            const std::string& subtree, int depth,
-                            const std::vector<std::string>& interfaces) const;
+    std::vector<std::string> getSubTreePathsImpl(
+        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        const std::vector<std::string>& interfaces) const;
 
-    FullTreeType
-        getSubtreeImpl(sdbusplus::bus::bus& bus, const std::string& subtree,
-                       int depth,
-                       const std::vector<std::string>& interfaces) const;
+    FullTreeType getSubtreeImpl(
+        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        const std::vector<std::string>& interfaces) const;
 };
 
 /**

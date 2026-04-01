@@ -325,8 +325,8 @@ unsigned CartesianProductRange::product(
     return result;
 }
 
-std::map<unsigned, unsigned>
-    mappingsSum(const std::vector<std::map<unsigned, unsigned>>& maps)
+std::map<unsigned, unsigned> mappingsSum(
+    const std::vector<std::map<unsigned, unsigned>>& maps)
 {
     std::map<unsigned, unsigned> result;
     for (unsigned i = 0; i < maps.size(); ++i)
@@ -353,8 +353,7 @@ std::map<unsigned, unsigned>
 
 // PatternInputDomain ////////////////////////////////////////////////////////
 
-PatternInputDomain::PatternInputDomain() : _unspecified(true), _domain()
-{}
+PatternInputDomain::PatternInputDomain() : _unspecified(true), _domain() {}
 
 std::size_t PatternInputDomain::size() const
 {
@@ -609,9 +608,9 @@ PatternInputDomain DeviceIdPattern::dimDomain(unsigned axis) const
  *
  * @param[in] allBracketMappings
  */
-PatternInputDomain
-    calcInputDomain(const std::vector<unsigned>& bracketPositions,
-                    const std::vector<syntax::BracketMap>& allBracketMappings)
+PatternInputDomain calcInputDomain(
+    const std::vector<unsigned>& bracketPositions,
+    const std::vector<syntax::BracketMap>& allBracketMappings)
 {
     if (bracketPositions.empty())
     {
@@ -629,13 +628,13 @@ PatternInputDomain
             allBracketMappings.at(bracketPositions.at(0)) | std::views::keys;
         std::set<unsigned> resultSet(firstBracketArgs.begin(),
                                      firstBracketArgs.end());
-        std::erase_if(
-            resultSet, [&allBracketMappings, &bracketPositions](unsigned elem) {
-                return !std::ranges::all_of(
-                    bracketPositions, [&allBracketMappings, elem](unsigned i) {
-                        return allBracketMappings.at(i).contains(elem);
-                    });
-            });
+        std::erase_if(resultSet, [&allBracketMappings,
+                                  &bracketPositions](unsigned elem) {
+            return !std::ranges::all_of(
+                bracketPositions, [&allBracketMappings, elem](unsigned i) {
+                    return allBracketMappings.at(i).contains(elem);
+                });
+        });
         return PatternInputDomain(resultSet);
     }
 }
