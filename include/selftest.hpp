@@ -240,8 +240,8 @@ class Selftest : public event_handler::EventHandler
      * @return eventing::RcCode::succ when all testpoints passed, otherwise
      * eventing::RcCode::error (failed TP or failed test operation)
      */
-    eventing::RcCode
-        process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode process(
+        [[maybe_unused]] event_info::EventNode& event) override
     {
         if (_dat.count(event.device) == 0)
         {
@@ -293,10 +293,9 @@ class Selftest : public event_handler::EventHandler
      * @return eventing::RcCode meaning testing operation status, not test
      * results
      */
-    eventing::RcCode
-        performEntireTree(ReportResult& reportRes,
-                          std::vector<std::string> layersToIgnore = {},
-                          const bool& doEventDetermination = false);
+    eventing::RcCode performEntireTree(
+        ReportResult& reportRes, std::vector<std::string> layersToIgnore = {},
+        const bool& doEventDetermination = false);
 
     /**
      * @brief Checks selftest result of particular device -> testpoints
@@ -428,8 +427,8 @@ class RootCauseTracer : public EventHandler
      * selftest failed). Warning - does not mean a root cause was found, but op
      * success.
      */
-    eventing::RcCode
-        process([[maybe_unused]] event_info::EventNode& event) override;
+    eventing::RcCode process(
+        [[maybe_unused]] event_info::EventNode& event) override;
 
   private:
     /**

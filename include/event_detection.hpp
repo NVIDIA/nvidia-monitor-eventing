@@ -184,9 +184,9 @@ class EventDetection : public object::Object
      * @param iface
      * @return a list of std::unique_ptr<sdbusplus::bus::match_t>
      */
-    DbusEventHandlerList
-        startEventDetection(EventDetection* evtDet,
-                            std::shared_ptr<sdbusplus::asio::connection> conn);
+    DbusEventHandlerList startEventDetection(
+        EventDetection* evtDet,
+        std::shared_ptr<sdbusplus::asio::connection> conn);
     /**
      * @brief  Reset device health on DBus back to OK
      *
@@ -291,10 +291,10 @@ class EventDetection : public object::Object
         try
         {
             devId = deviceNames.at(0);
-            dbus::DelayedMethod method(bus, "xyz.openbmc_project.Logging",
-                                       "/xyz/openbmc_project/logging",
-                                       "xyz.openbmc_project.Logging.Namespace",
-                                       "GetAll");
+            dbus::DelayedMethod method(
+                bus, "xyz.openbmc_project.Logging",
+                "/xyz/openbmc_project/logging",
+                "xyz.openbmc_project.Logging.Namespace", "GetAll");
             method.append(devId);
             method.append(
                 "xyz.openbmc_project.Logging.Namespace.ResolvedFilterType.Unresolved");
@@ -390,7 +390,6 @@ class EventDetection : public object::Object
             }
             if (foundAllDevices)
             {
-
                 logs_err("Resolving log %s for device '%s' for event '%s'\n",
                          objectPath.first.str.c_str(), fullDeviceName.c_str(),
                          eventName.c_str());
@@ -405,9 +404,9 @@ class EventDetection : public object::Object
      * @param possibleEventsPatternList list of possible event patterns
      * @return an EventCandidateList with the Events to be generated
      */
-    EventCandidateList
-        EventsDetection(const data_accessor::DataAccessor& pcTrigger,
-                        const EventNodeSharedList& possibleEventPatternList)
+    EventCandidateList EventsDetection(
+        const data_accessor::DataAccessor& pcTrigger,
+        const EventNodeSharedList& possibleEventPatternList)
     {
         EventCandidateList eventCandidateList;
         std::stringstream ss;

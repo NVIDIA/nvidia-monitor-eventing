@@ -81,13 +81,11 @@ DeviceType::operator std::string() const
     throw std::runtime_error("Cannot convert - invalid device type");
 }
 
-Device::~Device()
-{}
+Device::~Device() {}
 
 void Device::populateMap(std::map<std::string, dat_traverse::Device>& dat,
                          const nlohmann::json& j)
 {
-
     for (const auto& el : j.items())
     {
         auto deviceName = el.key();
@@ -349,8 +347,7 @@ bool Device::canSetHealthOnDbus() const
 namespace event_handler
 {
 
-DATTraverse::~DATTraverse()
-{}
+DATTraverse::~DATTraverse() {}
 
 void DATTraverse::printBranch(
     const std::map<std::string, dat_traverse::Device>& dat,
@@ -408,8 +405,8 @@ std::vector<std::string> DATTraverse::getTestLayerSubAssociations(
 {
     if (!dat.contains(rootDevice))
     {
-        throw std::runtime_error(std::string("DAT doesn't contain device") +
-                                 rootDevice);
+        throw std::runtime_error(
+            std::string("DAT doesn't contain device") + rootDevice);
     }
     std::deque<dat_traverse::Device*> fringe{&dat.at(rootDevice)};
     std::vector<std::string> result{rootDevice};
@@ -420,8 +417,8 @@ std::vector<std::string> DATTraverse::getTestLayerSubAssociations(
     std::function<bool(const std::string&)> eventCategoriesChooser =
         [&eventNodeCategories](const std::string& layer) -> bool {
         return std::find(eventNodeCategories.cbegin(),
-                         eventNodeCategories.cend(),
-                         layer) != eventNodeCategories.cend();
+                         eventNodeCategories.cend(), layer) !=
+               eventNodeCategories.cend();
     };
     auto* layersChooser = eventNodeCategories.empty() ? &allLayersChooser
                                                       : &eventCategoriesChooser;
@@ -497,8 +494,8 @@ std::vector<std::string> DATTraverse::getSubAssociations(
     return childVec;
 }
 
-std::vector<std::string>
-    DATTraverse::getAssociationConnectedDevices(const std::string& rootDevice)
+std::vector<std::string> DATTraverse::getAssociationConnectedDevices(
+    const std::string& rootDevice)
 {
     return childTraverse(
         dat, rootDevice,
@@ -643,7 +640,6 @@ std::vector<std::tuple<std::string, std::string, std::string>>
     dbusGetDeviceAssociations(const std::string& manager,
                               const std::string& devicePath)
 {
-
     using namespace sdbusplus;
     std::variant<PropertyType> dbusResult;
     auto theBus = bus::new_default_system();

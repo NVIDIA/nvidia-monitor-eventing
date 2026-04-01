@@ -139,8 +139,8 @@ struct IndexedBracketMap
     // marcinw:TODO:
     // ranges::input_range
     template <typename BracketMappingsRange>
-    static void
-        fillImplicitInputPositions(BracketMappingsRange& bracketMappings);
+    static void fillImplicitInputPositions(
+        BracketMappingsRange& bracketMappings);
 
   private:
     int inputPosition;
@@ -174,8 +174,7 @@ class PatternIndex
   public:
     static const int unspecified;
 
-    PatternIndex() : indexes()
-    {}
+    PatternIndex() : indexes() {}
 
     /** @brief Construct the index tuple from the given indexes sequence
      *
@@ -310,8 +309,7 @@ class DeviceIdPattern
      * (Totally valid.)
      */
     // marcinw:TODO: make sure constructor is consistent with fields
-    DeviceIdPattern() : DeviceIdPattern(std::string(""))
-    {}
+    DeviceIdPattern() : DeviceIdPattern(std::string("")) {}
 
     /**
      * @brief Plug the numbers from @c into brackets occuring in the pattern.
@@ -561,9 +559,9 @@ class DeviceIdPattern
 
 // Helper functions ///////////////////////////////////////////////////////////
 
-PatternInputDomain
-    calcInputDomain(const std::vector<unsigned>& bracketPositions,
-                    const std::vector<syntax::BracketMap>& allBracketMappings);
+PatternInputDomain calcInputDomain(
+    const std::vector<unsigned>& bracketPositions,
+    const std::vector<syntax::BracketMap>& allBracketMappings);
 
 std::vector<PatternInputDomain> calcInputDomains(
     const std::vector<std::vector<unsigned>>& inputPosToBracketPos,

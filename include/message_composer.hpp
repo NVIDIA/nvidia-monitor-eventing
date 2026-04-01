@@ -56,8 +56,8 @@ class MessageComposer : public event_handler::EventHandler
      * @param event
      * @return eventing::RcCode
      */
-    eventing::RcCode
-        process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode process(
+        [[maybe_unused]] event_info::EventNode& event) override
     {
         bool success = createLog(event);
         if (success)
@@ -81,8 +81,8 @@ class MessageComposer : public event_handler::EventHandler
      * If no associated object path could be found return an empty string.
      */
     template <typename ObjectMapperType = dbus::DirectObjectMapper>
-    std::string
-        getOriginOfConditionObjectPath(const std::string& deviceId) const
+    std::string getOriginOfConditionObjectPath(
+        const std::string& deviceId) const
     {
         ObjectMapperType om;
         auto paths = om.getPrimaryDevIdPaths(deviceId);
@@ -162,8 +162,8 @@ class MessageComposer : public event_handler::EventHandler
      *
      * If no associated object path could be found return an empty string.
      */
-    static std::string
-        getPhosphorLoggingNamespace(const event_info::EventNode& event)
+    static std::string getPhosphorLoggingNamespace(
+        const event_info::EventNode& event)
     {
         std::string pNamespace = event.device;
         if (event.subType != "")

@@ -105,9 +105,8 @@ event_info::EventNode& EventInstantiator::getInstantiatedEvent() const
     return *event_instance;
 }
 
-event_info::EventNode
-    EventInstantiator::instantiateEvent(const event_info::EventNode& event_node,
-                                        const std::string& device_id)
+event_info::EventNode EventInstantiator::instantiateEvent(
+    const event_info::EventNode& event_node, const std::string& device_id)
 {
     log_dbg(
         "Instantiating event node for device %s, event: %s, error_id: %s.\n",

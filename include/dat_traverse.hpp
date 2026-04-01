@@ -84,8 +84,7 @@ class DeviceType
     };
     static std::map<std::string, enum types> valuesAllowed;
 
-    DeviceType() : type(DeviceType::types::UNKNOWN_TYPE)
-    {}
+    DeviceType() : type(DeviceType::types::UNKNOWN_TYPE) {}
     DeviceType(const std::string& type);
 
     DeviceType::types get() const;
@@ -249,8 +248,8 @@ class DATTraverse : public event_handler::EventHandler
      * @param event
      * @return eventing::RcCode
      */
-    eventing::RcCode
-        process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode process(
+        [[maybe_unused]] event_info::EventNode& event) override
     {
         std::string problemDevice = event.device;
         if (problemDevice.length() == 0)
@@ -297,8 +296,8 @@ class DATTraverse : public event_handler::EventHandler
      *  @return Vector of device names (keys from @dat map)
      *  reachable from @rootDevice, excluding the @rootDevice
      */
-    std::vector<std::string>
-        getAssociationConnectedDevices(const std::string& rootDevice);
+    std::vector<std::string> getAssociationConnectedDevices(
+        const std::string& rootDevice);
 
     /**
      * @brief Populate 'Associations' property of the devices in dbus with
@@ -369,10 +368,9 @@ class DATTraverse : public event_handler::EventHandler
      *
      * @return vector of associated devices to device argument
      */
-    static std::vector<std::string>
-        getSubAssociations(std::map<std::string, dat_traverse::Device>& dat,
-                           const std::string& device,
-                           const bool doTraverseTestpoints = false);
+    static std::vector<std::string> getSubAssociations(
+        std::map<std::string, dat_traverse::Device>& dat,
+        const std::string& device, const bool doTraverseTestpoints = false);
 
     /**
      * @brief Return a list of devices reachable from @c rootDevice in an

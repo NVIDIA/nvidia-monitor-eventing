@@ -52,9 +52,9 @@ std::string wrongTypeMsg(const std::string& entityName,
 }
 
 template <typename T>
-std::string
-    setToString(const std::vector<T>& elements,
-                const std::function<std::string(const T& elem)>& transform)
+std::string setToString(
+    const std::vector<T>& elements,
+    const std::function<std::string(const T& elem)>& transform)
 {
     std::vector<std::string> output;
     std::transform(elements.begin(), elements.end(), std::back_inserter(output),
@@ -62,9 +62,9 @@ std::string
     return std::string("{") + boost::algorithm::join(output, ", ") + "}";
 }
 
-std::string
-    wrongTypeMsg(const std::string& entityName, const nlohmann::json& json,
-                 const std::vector<nlohmann::json::value_t>& expectedTypes)
+std::string wrongTypeMsg(
+    const std::string& entityName, const nlohmann::json& json,
+    const std::vector<nlohmann::json::value_t>& expectedTypes)
 {
     std::vector<std::string> output;
     std::transform(expectedTypes.begin(), expectedTypes.end(),
@@ -110,17 +110,16 @@ bool checkAttributeExists(const std::string& attrName,
     auto hasAttr = objectJson.contains(attrName);
     if (!hasAttr)
     {
-        problems +=
-            std::string("Missing mandatory attribute '") + attrName + "'";
+        problems += std::string("Missing mandatory attribute '") + attrName +
+                    "'";
     }
     return hasAttr;
 }
 
 template <typename T>
-bool checkMandatoryAttributeType(const std::string& attrName,
-                                 const nlohmann::json& objectJson,
-                                 const T& expected,
-                                 nlohmann::ordered_json& problems)
+bool checkMandatoryAttributeType(
+    const std::string& attrName, const nlohmann::json& objectJson,
+    const T& expected, nlohmann::ordered_json& problems)
 {
     return checkAttributeExists(attrName, objectJson, problems) &&
            checkProperType("'" + attrName + "' attribute",
@@ -128,10 +127,9 @@ bool checkMandatoryAttributeType(const std::string& attrName,
 }
 
 template <typename T>
-bool checkOptionalAttributeType(const std::string& attrName,
-                                const nlohmann::json& objectJson,
-                                const T& expected,
-                                nlohmann::ordered_json& problems)
+bool checkOptionalAttributeType(
+    const std::string& attrName, const nlohmann::json& objectJson,
+    const T& expected, nlohmann::ordered_json& problems)
 {
     return !objectJson.contains(attrName) ||
            checkProperType("'" + attrName + "' attribute",
@@ -211,8 +209,8 @@ ArtifactTest<ArtifactType>::ArtifactTest(
 {}
 
 template <typename ArtifactType>
-Test::Result
-    ArtifactTest<ArtifactType>::rawRun(const nlohmann::json& resultsSoFar)
+Test::Result ArtifactTest<ArtifactType>::rawRun(
+    const nlohmann::json& resultsSoFar)
 {
     ResultExt testResultAndArtifact = rawRunWithArtifact(resultsSoFar);
     // marcinw:TODO: std::move?
@@ -372,8 +370,8 @@ std::string Test::alreadyPerformedErrMsg() const
 
 // JsonReadTest ///////////////////////////////////////////////////////////////
 
-std::shared_ptr<JsonReadTest>
-    JsonReadTest::create(const std::string& jsonFileName)
+std::shared_ptr<JsonReadTest> JsonReadTest::create(
+    const std::string& jsonFileName)
 {
     return std::shared_ptr<JsonReadTest>(new JsonReadTest(jsonFileName));
 }
@@ -402,10 +400,10 @@ JsonReadTest::ResultExt JsonReadTest::rawRunWithArtifact(
 
 // JsonSchemaTest /////////////////////////////////////////////////////////////
 
-std::shared_ptr<JsonSchemaTest>
-    JsonSchemaTest::create(const std::string& instanceName,
-                           std::shared_ptr<json_schema::JsonSchema> schema,
-                           std::shared_ptr<JsonReadTest> jsonReadTest)
+std::shared_ptr<JsonSchemaTest> JsonSchemaTest::create(
+    const std::string& instanceName,
+    std::shared_ptr<json_schema::JsonSchema> schema,
+    std::shared_ptr<JsonReadTest> jsonReadTest)
 {
     return std::shared_ptr<JsonSchemaTest>(
         new JsonSchemaTest(instanceName, schema, jsonReadTest));
@@ -424,8 +422,8 @@ std::string JsonSchemaTest::getDescription() const
            "' conforms to its schema";
 }
 
-Test::Result
-    JsonSchemaTest::rawRun([[maybe_unused]] const nlohmann::json& resultsSoFar)
+Test::Result JsonSchemaTest::rawRun(
+    [[maybe_unused]] const nlohmann::json& resultsSoFar)
 {
     std::vector<json_proc::JsonFormatProblem> problems;
     if (schema->check(Dependency<JsonReadTest>::get()->getArtifact(), problems))
@@ -452,8 +450,8 @@ std::vector<std::shared_ptr<Test>> JsonSchemaTest::newTests() const
 
 // DatParseTest ///////////////////////////////////////////////////////////////
 
-std::shared_ptr<DatParseTest>
-    DatParseTest::create(std::shared_ptr<JsonSchemaTest> datJsonSchemaTestDep)
+std::shared_ptr<DatParseTest> DatParseTest::create(
+    std::shared_ptr<JsonSchemaTest> datJsonSchemaTestDep)
 {
     return std::shared_ptr<DatParseTest>(
         new DatParseTest(datJsonSchemaTestDep));
@@ -618,9 +616,9 @@ Test::Result EventInfoInnerConsistencyTest::rawRun(
 
 // EventInfoParseTest /////////////////////////////////////////////////////////
 
-std::shared_ptr<EventInfoParseTest>
-    EventInfoParseTest::create(std::shared_ptr<EventInfoInnerConsistencyTest>
-                                   eventInfoInnerConsistencyTest)
+std::shared_ptr<EventInfoParseTest> EventInfoParseTest::create(
+    std::shared_ptr<EventInfoInnerConsistencyTest>
+        eventInfoInnerConsistencyTest)
 {
     return std::shared_ptr<EventInfoParseTest>(
         new EventInfoParseTest(eventInfoInnerConsistencyTest));
@@ -896,15 +894,16 @@ int run(const std::string& datFile, const std::string& eventInfoFile,
     // When modifying this list always make sure the order preserves
     // dependencies (if 'x' depends on 'y' then 'y' must be earlier on the
     // list). Ensuring proper ordering automatically yet to be done
-    std::deque<std::shared_ptr<Test>> tests{datJsonReadTest,
-                                            datJsonSchematTest,
-                                            datParseTest,
-                                            eventInfoJsonReadTest,
-                                            eventInfoJsonSchemaTest,
-                                            eventInfoInnerConsistencyTest,
-                                            eventInfoParseTest,
-                                            eventInfoDatInterConsistencyTest,
-                                            possibleOriginsOfConditionTest};
+    std::deque<std::shared_ptr<Test>> tests{
+        datJsonReadTest,
+        datJsonSchematTest,
+        datParseTest,
+        eventInfoJsonReadTest,
+        eventInfoJsonSchemaTest,
+        eventInfoInnerConsistencyTest,
+        eventInfoParseTest,
+        eventInfoDatInterConsistencyTest,
+        possibleOriginsOfConditionTest};
 
     nlohmann::ordered_json diagnosticsResult = nlohmann::json::object();
     while (!tests.empty())

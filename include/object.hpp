@@ -28,10 +28,8 @@ namespace object
 class Object
 {
   public:
-    Object(const std::string& name = "") : _name(name)
-    {}
-    virtual ~Object()
-    {}
+    Object(const std::string& name = "") : _name(name) {}
+    virtual ~Object() {}
 
   public:
     std::string getName(void)

@@ -50,8 +50,7 @@ std::map<std::string, std::string> severityMapper{
     {"Warning", "Warning"},  {"warning", "Warning"},  {"Critical", "Critical"},
     {"critical", "Critical"}};
 
-MessageComposer::~MessageComposer()
-{}
+MessageComposer::~MessageComposer() {}
 
 bool MessageComposer::createLog(event_info::EventNode& event)
 {

@@ -45,9 +45,9 @@ void updateChassisHealthOnSHM(std::string deviceName, std::string healthStatus)
         std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch())
             .count());
-    tal::TelemetryAggregator::updateTelemetry(inventoryObjPath, ifaceName,
-                                              propName, smbusData, timestamp, 0,
-                                              propValue);
+    tal::TelemetryAggregator::updateTelemetry(
+        inventoryObjPath, ifaceName, propName, smbusData, timestamp, 0,
+        propValue);
 }
 
 void updateChassisHealthRollupOnSHM(std::string deviceName,
@@ -64,9 +64,9 @@ void updateChassisHealthRollupOnSHM(std::string deviceName,
             std::chrono::steady_clock::now().time_since_epoch())
             .count());
 
-    tal::TelemetryAggregator::updateTelemetry(inventoryObjPath, ifaceName,
-                                              propName, smbusData, timestamp, 0,
-                                              propValue);
+    tal::TelemetryAggregator::updateTelemetry(
+        inventoryObjPath, ifaceName, propName, smbusData, timestamp, 0,
+        propValue);
 }
 
 void updateSystemHealthOnSHM(std::string deviceName, std::string healthStatus)
@@ -81,9 +81,9 @@ void updateSystemHealthOnSHM(std::string deviceName, std::string healthStatus)
         std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch())
             .count());
-    tal::TelemetryAggregator::updateTelemetry(inventoryObjPath, ifaceName,
-                                              propName, smbusData, timestamp, 0,
-                                              propValue);
+    tal::TelemetryAggregator::updateTelemetry(
+        inventoryObjPath, ifaceName, propName, smbusData, timestamp, 0,
+        propValue);
 }
 void updateSystemHealthRollupOnSHM(std::string deviceName,
                                    std::string healthStatus)
@@ -99,9 +99,9 @@ void updateSystemHealthRollupOnSHM(std::string deviceName,
             std::chrono::steady_clock::now().time_since_epoch())
             .count());
 
-    tal::TelemetryAggregator::updateTelemetry(inventoryObjPath, ifaceName,
-                                              propName, smbusData, timestamp, 0,
-                                              propValue);
+    tal::TelemetryAggregator::updateTelemetry(
+        inventoryObjPath, ifaceName, propName, smbusData, timestamp, 0,
+        propValue);
 }
 
 class TalHealthMRD

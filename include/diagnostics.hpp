@@ -501,8 +501,7 @@ class Dependency
   protected:
     std::shared_ptr<TestType> test;
 
-    Dependency(std::shared_ptr<TestType> test) : test(test)
-    {}
+    Dependency(std::shared_ptr<TestType> test) : test(test) {}
 
   public:
     std::shared_ptr<TestType> get() const
@@ -537,8 +536,8 @@ class ArtifactTest : public Test
     std::optional<ArtifactType> artifact;
 
     Result rawRun(const nlohmann::json& resultsSoFar);
-    virtual ResultExt
-        rawRunWithArtifact(const nlohmann::json& resultsSoFar) = 0;
+    virtual ResultExt rawRunWithArtifact(
+        const nlohmann::json& resultsSoFar) = 0;
 
   public:
     /** @brief All arguments are passed as-is to the @c Test constructor, which
@@ -577,8 +576,8 @@ class JsonReadTest : public ArtifactTest<nlohmann::ordered_json>
   public:
     std::string getDescription() const;
     ResultExt rawRunWithArtifact(const nlohmann::json& resultsSoFar);
-    static std::shared_ptr<JsonReadTest>
-        create(const std::string& jsonFileName);
+    static std::shared_ptr<JsonReadTest> create(
+        const std::string& jsonFileName);
 
   private:
     std::string jsonFileName;
@@ -594,10 +593,10 @@ class JsonSchemaTest : public Test, public Dependency<JsonReadTest>
   public:
     std::string getDescription() const;
     Result rawRun(const nlohmann::json& resultsSoFar);
-    static std::shared_ptr<JsonSchemaTest>
-        create(const std::string& instanceName,
-               std::shared_ptr<json_schema::JsonSchema> schema,
-               std::shared_ptr<JsonReadTest> jsonReadTest);
+    static std::shared_ptr<JsonSchemaTest> create(
+        const std::string& instanceName,
+        std::shared_ptr<json_schema::JsonSchema> schema,
+        std::shared_ptr<JsonReadTest> jsonReadTest);
 
   protected:
     std::shared_ptr<json_schema::JsonSchema> schema;
@@ -625,8 +624,8 @@ class DatParseTest :
   public:
     std::string getDescription() const;
     ResultExt rawRunWithArtifact(const nlohmann::json& resultsSoFar);
-    static std::shared_ptr<DatParseTest>
-        create(std::shared_ptr<JsonSchemaTest> datJsonSchemaTestDep);
+    static std::shared_ptr<DatParseTest> create(
+        std::shared_ptr<JsonSchemaTest> datJsonSchemaTestDep);
 
   private:
     DatParseTest(std::shared_ptr<JsonSchemaTest> datJsonSchemaTestDep);
@@ -651,8 +650,8 @@ class EventInfoInnerConsistencyTest :
   public:
     std::string getDescription() const;
     Test::Result rawRun(const nlohmann::json& resultsSoFar);
-    static std::shared_ptr<EventInfoInnerConsistencyTest>
-        create(std::shared_ptr<JsonSchemaTest> eventInfoJsonSchemaTest);
+    static std::shared_ptr<EventInfoInnerConsistencyTest> create(
+        std::shared_ptr<JsonSchemaTest> eventInfoJsonSchemaTest);
 
   private:
     EventInfoInnerConsistencyTest(
@@ -672,9 +671,9 @@ class EventInfoParseTest :
   public:
     std::string getDescription() const;
     ResultExt rawRunWithArtifact(const nlohmann::json& resultsSoFar);
-    static std::shared_ptr<EventInfoParseTest>
-        create(std::shared_ptr<EventInfoInnerConsistencyTest>
-                   eventInfoInnerConsistencyTest);
+    static std::shared_ptr<EventInfoParseTest> create(
+        std::shared_ptr<EventInfoInnerConsistencyTest>
+            eventInfoInnerConsistencyTest);
 
   private:
     EventInfoParseTest(std::shared_ptr<EventInfoInnerConsistencyTest>
@@ -700,9 +699,9 @@ class EventInfoDatInterConsistencyTest :
   public:
     std::string getDescription() const;
     Test::Result rawRun(const nlohmann::json& resultsSoFar);
-    static std::shared_ptr<EventInfoDatInterConsistencyTest>
-        create(std::shared_ptr<DatParseTest> datParseTest,
-               std::shared_ptr<EventInfoParseTest> eventInfoParseTest);
+    static std::shared_ptr<EventInfoDatInterConsistencyTest> create(
+        std::shared_ptr<DatParseTest> datParseTest,
+        std::shared_ptr<EventInfoParseTest> eventInfoParseTest);
 
   private:
     EventInfoDatInterConsistencyTest(
@@ -722,9 +721,9 @@ class PossibleOriginsOfConditionTest :
   public:
     std::string getDescription() const;
     Test::Result rawRun(const nlohmann::json& resultsSoFar);
-    static std::shared_ptr<PossibleOriginsOfConditionTest>
-        create(std::shared_ptr<EventInfoDatInterConsistencyTest>
-                   eventInfoDatInterConsistencyTest);
+    static std::shared_ptr<PossibleOriginsOfConditionTest> create(
+        std::shared_ptr<EventInfoDatInterConsistencyTest>
+            eventInfoDatInterConsistencyTest);
 
   private:
     PossibleOriginsOfConditionTest(

@@ -47,8 +47,7 @@ class DeviceStatus
     };
 
   public:
-    DeviceStatus()
-    {}
+    DeviceStatus() {}
 
     /**
      * @brief Get Device object from cache by device name. If not exist, create
@@ -137,8 +136,8 @@ class DeviceStatusHandler : public EventHandler
      * @param event
      * @return eventing::RcCode
      */
-    eventing::RcCode
-        process([[maybe_unused]] event_info::EventNode& event) override
+    eventing::RcCode process(
+        [[maybe_unused]] event_info::EventNode& event) override
     {
         const char* const device = event.device.c_str();
         const char* const errorId = event.errorId.c_str();

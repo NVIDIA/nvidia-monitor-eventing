@@ -31,11 +31,10 @@ DbusDelayerConstLowerBound defaultDbusDelayer;
 
 using namespace phosphor::logging;
 
-static std::string errorMsg(const std::string& description,
-                            const std::string& objpath,
-                            const std::string& interface,
-                            const std::string& property = std::string{""},
-                            const char* eWhat = nullptr)
+static std::string errorMsg(
+    const std::string& description, const std::string& objpath,
+    const std::string& interface, const std::string& property = std::string{""},
+    const char* eWhat = nullptr)
 {
     std::string msg{};
     msg += description;
@@ -392,8 +391,8 @@ CachingObjectMapper::ValueType CachingObjectMapper::scopeManagers(
         for (std::vector<std::string>::const_iterator it = interfaces.cbegin();
              it != interfaces.cend() && implementsAny; ++it)
         {
-            implementsAny =
-                std::find(intfs.cbegin(), intfs.cend(), *it) != intfs.cend();
+            implementsAny = std::find(intfs.cbegin(), intfs.cend(), *it) !=
+                            intfs.cend();
         }
         if (implementsAny)
         {
@@ -432,8 +431,8 @@ std::string timeToStringMsec(
     return ss.str();
 }
 
-std::chrono::milliseconds
-    DbusDelayer::callStartAttempt(const std::string& signature)
+std::chrono::milliseconds DbusDelayer::callStartAttempt(
+    const std::string& signature)
 {
     if (this->state == State::idle)
     {
@@ -565,7 +564,6 @@ std::vector<std::string> DirectObjectMapper::getSubTreePathsImpl(
     sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
     const std::vector<std::string>& interfaces) const
 {
-
     std::vector<std::string> result;
     DelayedMethod method(bus, "xyz.openbmc_project.ObjectMapper",
                          "/xyz/openbmc_project/object_mapper",
@@ -596,8 +594,8 @@ DirectObjectMapper::FullTreeType DirectObjectMapper::getSubtreeImpl(
 
 // DelayedMethod //////////////////////////////////////////////////////////////
 
-sdbusplus::message::message
-    DelayedMethod::call(std::optional<sdbusplus::SdBusDuration> timeout)
+sdbusplus::message::message DelayedMethod::call(
+    std::optional<sdbusplus::SdBusDuration> timeout)
 {
     const std::lock_guard<std::mutex> lock(_dbusDelayer->mutex);
     // 'ddsg' makes sure that '_dbusDelayer' is always left in

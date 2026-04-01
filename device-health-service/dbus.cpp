@@ -190,12 +190,11 @@ std::vector<std::string> DirectObjectMapper::getSubTreePathsImpl(
     sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
     const std::vector<std::string>& interfaces) const
 {
-
     std::vector<std::string> result;
-    auto method = bus.new_method_call("xyz.openbmc_project.ObjectMapper",
-                                      "/xyz/openbmc_project/object_mapper",
-                                      "xyz.openbmc_project.ObjectMapper",
-                                      "GetSubTreePaths");
+    auto method = bus.new_method_call(
+        "xyz.openbmc_project.ObjectMapper",
+        "/xyz/openbmc_project/object_mapper",
+        "xyz.openbmc_project.ObjectMapper", "GetSubTreePaths");
     method.append(subtree);
     method.append(depth);
     method.append(interfaces);

@@ -122,10 +122,10 @@ TEST(DataAccessor, CheckPositiveScriptCMDLINE)
     mctp.close();
 
     // make filename executable
-    std::filesystem::permissions(filename,
-                                 std::filesystem::perms::owner_all |
-                                     std::filesystem::perms::group_all,
-                                 std::filesystem::perm_options::add);
+    std::filesystem::permissions(
+        filename,
+        std::filesystem::perms::owner_all | std::filesystem::perms::group_all,
+        std::filesystem::perm_options::add);
 
     DataAccessor cmdAccessor{jsonCMDLINE};
     CheckAccessor accCheck{""};
@@ -600,7 +600,6 @@ TEST(DataAccessor, CopyOperator)
 
 TEST(DataAccessor, CompareDeviceId)
 {
-
     auto failedNvOverTemp =
         R"(
        {

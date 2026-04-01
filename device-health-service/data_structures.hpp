@@ -139,8 +139,7 @@ class TmpFileManager
         });
     }
 
-    ~TmpFileManager()
-    {}
+    ~TmpFileManager() {}
 
   private:
     std::unique_ptr<bip::managed_mapped_file> file;

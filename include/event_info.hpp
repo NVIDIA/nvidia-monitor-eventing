@@ -333,7 +333,6 @@ class EventCategory
  */
 class EventNode : public object::Object
 {
-
   public:
     EventNode(const std::string& name = __PRETTY_FUNCTION__) :
         object::Object(name), triggerCount(0), valueAsCount(false)
@@ -623,12 +622,12 @@ class EventNode : public object::Object
     std::string getFullDeviceName() const;
 
     /** @returns the full device name not joined by a separator such as '/' */
-    std::vector<std::string>
-        getFullDeviceNameSeparated(device_id::PatternIndex& index) const;
+    std::vector<std::string> getFullDeviceNameSeparated(
+        device_id::PatternIndex& index) const;
 
     /** just separates a full device name @sa getFullDeviceName() */
-    static std::vector<std::string>
-        separateFullDeviceName(const std::string& fullName);
+    static std::vector<std::string> separateFullDeviceName(
+        const std::string& fullName);
 
     /**
      * @brief Check if a device ID matches this event's device type pattern
@@ -662,8 +661,8 @@ class EventNode : public object::Object
      * @return std::unique_ptr<EventNode> Pointer to loaded event or nullptr if
      * not found
      */
-    static std::unique_ptr<EventNode>
-        loadEventByErrorId(const std::string& errorId, const std::string& file);
+    static std::unique_ptr<EventNode> loadEventByErrorId(
+        const std::string& errorId, const std::string& file);
 };
 
 using EventMap = std::map<std::string, std::vector<event_info::EventNode>>;

@@ -51,8 +51,8 @@ class EventInstantiator : public EventHandler
      * @param event_node Original event node with patterns
      * @return eventing::RcCode Return code indicating success or failure
      */
-    virtual eventing::RcCode
-        process(event_info::EventNode& event_node) override;
+    virtual eventing::RcCode process(
+        event_info::EventNode& event_node) override;
 
     /**
      * @brief Get the instantiated event
@@ -69,9 +69,8 @@ class EventInstantiator : public EventHandler
      * @param device_id Specific device ID
      * @return event_info::EventNode New event node with specific device info
      */
-    event_info::EventNode
-        instantiateEvent(const event_info::EventNode& event_node,
-                         const std::string& device_id);
+    event_info::EventNode instantiateEvent(
+        const event_info::EventNode& event_node, const std::string& device_id);
 
     /**
      * @brief Instantiated event with specific device information
