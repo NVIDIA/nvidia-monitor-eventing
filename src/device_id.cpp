@@ -72,12 +72,15 @@ BracketRange::BracketRange(const DeviceIndex& left, const DeviceIndex& right) :
 BracketRangeMap::BracketRangeMap(BracketRange&& from, BracketRange&& to) :
     from(std::move(from)), to(std::move(to))
 {
-    if (!(from.size() == to.size() || to.size() == 1 || from.size() == 1))
+    const auto fromSize = this->from.size();
+    const auto toSize = this->to.size();
+
+    if (!(fromSize == toSize || toSize == 1 || fromSize == 1))
     {
         throw std::runtime_error(
             "BracketRangeMap: Invalid range sizes - 'from' range has " +
-            std::to_string(from.size()) + " element(s), 'to' range has " +
-            std::to_string(to.size()) +
+            std::to_string(fromSize) + " element(s), 'to' range has " +
+            std::to_string(toSize) +
             " element(s). Ranges must have equal sizes (for 1-to-1 mapping), "
             "'to' must have exactly 1 element (for many-to-1 mapping), or "
             "'from' must have exactly 1 element (for 1-to-many mapping).");

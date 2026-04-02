@@ -77,7 +77,7 @@ bool CheckAccessor::loopDevices(const DeviceIndexesList& deviceIndexes,
     {
         auto deviceName = this->_devIdData.pattern.eval(index);
         dataAcc.read(deviceName, &index);
-        if (subCheck(jsonAcc, dataAcc, deviceName, index[0]))
+        if (subCheck(jsonAcc, dataAcc, deviceName, index))
         {
             ret = true; // it at least one passes the entire check also passes
         }
@@ -120,8 +120,7 @@ bool CheckAccessor::check(const DataAccessor& jsonAcc, // template Accessor
             {
                 auto device = util::determineDeviceName(_devIdData.pattern,
                                                         _devIdData.index);
-                return subCheck(jsonAcc, tempAccData, device,
-                                _devIdData.index[0]);
+                return subCheck(jsonAcc, tempAccData, device, _devIdData.index);
             }
         }
     }
@@ -187,7 +186,6 @@ bool CheckAccessor::privCheck(const DataAccessor& jsonAcc,
 
     if (jsonAcc.existsCheckKey() == true)
     {
-        ret = false;
         /*
          * Note:
          *   As read(device) is for a single device, there are cases where
@@ -283,6 +281,19 @@ bool CheckAccessor::check(const DataAccessor& jsonAcc,
 bool CheckAccessor::subCheck(const DataAccessor& jsonAcc, DataAccessor& dataAcc,
                              const std::string& dev2Read, const int deviceId)
 {
+    if (deviceId == util::InvalidDeviceId)
+    {
+        return subCheck(jsonAcc, dataAcc, dev2Read, _devIdData.index);
+    }
+
+    return subCheck(jsonAcc, dataAcc, dev2Read,
+                    device_id::PatternIndex(deviceId));
+}
+
+bool CheckAccessor::subCheck(const DataAccessor& jsonAcc, DataAccessor& dataAcc,
+                             const std::string& dev2Read,
+                             const device_id::PatternIndex& patternIndex)
+{
     if (dataAcc.hasData() == false)
     {
         return false; // without data nothing to do
@@ -322,7 +333,7 @@ bool CheckAccessor::subCheck(const DataAccessor& jsonAcc, DataAccessor& dataAcc,
     else if (dataAcc.getDataValue().check(checkMap, PropertyVariant()))
     {
         ret = true;
-        buildSingleAssertedDeviceName(dataAcc, dev2Read, deviceId);
+        buildSingleAssertedDeviceName(dataAcc, dev2Read, patternIndex);
     }
     if (ret == true)
     {
