@@ -150,6 +150,10 @@ class CheckAccessor
                   const std::string& dev2Read,
                   const int deviceId = util::InvalidDeviceId);
 
+    bool subCheck(const DataAccessor& jsonAcc, DataAccessor& dataAcc,
+                  const std::string& dev2Read,
+                  const device_id::PatternIndex& patternIndex);
+
   private:
     /*
      * @sa check() that is the wrapper for privCheck()

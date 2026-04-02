@@ -744,6 +744,475 @@ TEST(CheckAccessor, Logic)
     EXPECT_EQ(checkObj->passed(), true);
 }
 
+TEST(EventDetectionTest, FullEntryHpmSmaCpuSocammAbsentEvaluatesAllInstances)
+{
+    auto fullEventEntry = R"(
+      {
+        "event": "SOCAMM HPM_SMA-CPU_SOCAMM-ABSENT Abnormal State Change",
+        "device_type": "ProcessorModule_[0-1]_Memory_[0-7]",
+        "error_id": "HPM_SMA-CPU_SOCAMM-ABSENT",
+        "error_type": "MCU-ALERT",
+        "managed": "yes",
+        "rollup_device": "CPU_[0-1]",
+        "category": [],
+        "event_trigger": {
+          "type": "DBUS",
+          "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+          "interface": "com.nvidia.GPIO.State",
+          "property": "LineStates"
+        },
+        "accessor": {
+          "type": "CMDLINE",
+          "executable": "mcu_event_parser",
+          "arguments": "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_[0-1]_Memory_[0-7]",
+          "check": {
+            "equal": "1"
+          }
+        },
+        "severity": "Critical",
+        "resolution": "Check memory slots on the board once any chance to power off the system.",
+        "debounce": {
+          "type": "",
+          "duration": ""
+        },
+        "trigger_count": 0,
+        "event_counter_reset": {},
+        "redfish": {
+          "message_id": "ResourceEvent.1.0.ResourceErrorsDetected",
+          "origin_of_condition": "/redfish/v1/Systems/HGX_Baseboard_0/Memory/ProcessorModule_[0-1]_Memory_[0-7]",
+          "message_args": {
+            "patterns": [
+              "ProcessorModule_[0-1]_Memory_[0-7] CPU_SOCAMM-ABSENT",
+              "Abnormal State Change"
+            ],
+            "parameters": []
+          }
+        },
+        "telemetries": [],
+        "action": "",
+        "value_as_count": false,
+        "description": "",
+        "log_namespace": "Baseboard_0"
+      }
+    )";
+
+    event_info::EventNode event("HPM_SMA-CPU_SOCAMM-ABSENT");
+    ASSERT_NO_THROW(event.loadFrom(nlohmann::json::parse(fullEventEntry)));
+
+    EXPECT_EQ(event.errorId, "HPM_SMA-CPU_SOCAMM-ABSENT");
+    EXPECT_EQ(event.getMessageId(), "ResourceEvent.1.0.ResourceErrorsDetected");
+    EXPECT_EQ(event.getStringifiedDeviceType(),
+              "ProcessorModule_[0-1]_Memory_[0-7]");
+
+    auto deviceTypeData = event.getDataDeviceType();
+    auto deviceDomain = deviceTypeData.pattern.domainVec();
+    EXPECT_EQ(deviceTypeData.pattern.dim(), 2);
+    ASSERT_EQ(deviceDomain.size(), 16);
+    ASSERT_TRUE(event.originOfCondition.has_value());
+
+    const device_id::DeviceIdPattern rollupDevicePattern(
+        event.rollupDevicePattern);
+    const device_id::DeviceIdPattern triggerObjectPattern(
+        event.trigger.getDbusObjectPath());
+    const device_id::DeviceIdPattern accessorArgumentsPattern(
+        event.accessor.getArguments());
+    const device_id::DeviceIdPattern originOfConditionPattern(
+        event.originOfCondition.value());
+    const device_id::DeviceIdPattern messageArg0Pattern(
+        event.messageRegistry.messageArgsJsonPattern["patterns"][0]
+            .get<std::string>());
+
+    for (const auto& index : deviceDomain)
+    {
+        // index: (0, 0), (0, 1), ..., (0, 7), (1, 0), ..., (1, 7)
+        const int hpm = index[0];
+        const int memory = index[1];
+        SCOPED_TRACE(::testing::Message()
+                     << "hpm=" << hpm << ", memory=" << memory);
+
+        const std::string expectedDevice =
+            "ProcessorModule_" + std::to_string(hpm) + "_Memory_" +
+            std::to_string(memory);
+        const std::string expectedMessageArgs =
+            expectedDevice + " CPU_SOCAMM-ABSENT, Abnormal State Change";
+        const std::string expectedOriginOfCondition =
+            "/redfish/v1/Systems/HGX_Baseboard_0/Memory/" + expectedDevice;
+        const std::string expectedRollupDevice = "CPU_" + std::to_string(hpm);
+        const std::string expectedTriggerObject =
+            "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_" +
+            std::to_string(hpm);
+        const std::string expectedAccessorArguments =
+            "HPM_SMA-CPU_SOCAMM-ABSENT " + expectedDevice;
+        const std::string expectedMessageArg0 =
+            expectedDevice + " CPU_SOCAMM-ABSENT";
+        const nlohmann::json pcTriggerJson = {
+            {"type", "DBUS"},
+            {"object", expectedTriggerObject},
+            {"interface", "com.nvidia.GPIO.State"},
+            {"property", "LineStates"}};
+
+        nlohmann::json accessorJson = event.configEventNode["accessor"];
+        accessorJson["executable"] = "/bin/echo";
+        accessorJson["check"]["equal"] = expectedAccessorArguments;
+
+        data_accessor::DataAccessor pcTriggerAcc(
+            pcTriggerJson, data_accessor::PropertyValue(std::string{"1"}));
+        data_accessor::DataAccessor accessorUnderTest(accessorJson);
+        data_accessor::CheckAccessor checkObj(event.getStringifiedDeviceType());
+
+        auto checkRet =
+            checkObj.check(event.trigger, accessorUnderTest, pcTriggerAcc);
+        ASSERT_EQ(checkRet, true);
+        auto assertedData = checkObj.getAssertedDevices();
+        ASSERT_EQ(assertedData.size(), 1);
+        EXPECT_EQ(assertedData[0].device, expectedDevice);
+        EXPECT_EQ(assertedData[0].deviceIndexTuple, index);
+
+        event.device = assertedData[0].device;
+        event.setDeviceIndexTuple(assertedData[0].deviceIndexTuple);
+
+        EXPECT_EQ(deviceTypeData.pattern.eval(index), expectedDevice);
+        EXPECT_EQ(rollupDevicePattern.eval(index), expectedRollupDevice);
+        EXPECT_EQ(triggerObjectPattern.eval(index), expectedTriggerObject);
+        EXPECT_EQ(accessorArgumentsPattern.eval(index),
+                  expectedAccessorArguments);
+        EXPECT_EQ(originOfConditionPattern.eval(index),
+                  expectedOriginOfCondition);
+        EXPECT_EQ(messageArg0Pattern.eval(index), expectedMessageArg0);
+        EXPECT_EQ(event.getFullDeviceName(), expectedDevice);
+        EXPECT_EQ(event.getStringMessageArgs(), expectedMessageArgs);
+        ASSERT_TRUE(event.getOriginOfCondition().has_value());
+        EXPECT_EQ(event.getOriginOfCondition().value(),
+                  expectedOriginOfCondition);
+    }
+}
+
+TEST(EventDetectionTest, FullEntryGpuNvlinkTrainingErrorEvaluatesAllInstances)
+{
+    auto fullEventEntry = R"(
+      {
+        "event": "GPU GPU NVLink Training Error",
+        "device_type": "GPU_[0-3]/NVLink_[0-17]",
+        "error_id": "GPU-NVLINK-TRAINING-ERROR",
+        "error_type": "TELEMETRY-BASED",
+        "managed": "yes",
+        "rollup_device": "GPU_[0-3]",
+        "category": [
+          "NVLink Error"
+        ],
+        "event_trigger": {},
+        "accessor": {
+          "type": "DBUS",
+          "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]/Ports/NVLink_[0-17]",
+          "interface": "xyz.openbmc_project.Metrics.PortMetricsOem3",
+          "property": "TrainingError",
+          "check": {
+            "not_equal": "0"
+          }
+        },
+        "recovery": {
+          "type": "DBUS",
+          "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]/Ports/NVLink_[0-17]",
+          "interface": "xyz.openbmc_project.Metrics.PortMetricsOem3",
+          "property": "TrainingError",
+          "check": {
+            "equal": "0"
+          }
+        },
+        "severity": "Critical",
+        "resolution": "Reset the GPU or power cycle the Baseboard. If problem persists, isolate the server for RMA evaluation.",
+        "debounce": {
+          "type": "",
+          "duration": ""
+        },
+        "trigger_count": 0,
+        "event_counter_reset": {
+          "type": "",
+          "metadata": ""
+        },
+        "redfish": {
+          "message_id": "ResourceEvent.1.0.ResourceErrorsDetected",
+          "origin_of_condition": "/redfish/v1/Chassis/HGX_ProcessorModule_[0-1:0,2-3:1]",
+          "message_args": {
+            "patterns": [
+              "GPU_[0-3] NVLink_[0-17]",
+              "NVLink Training Error"
+            ],
+            "parameters": []
+          }
+        },
+        "telemetries": [
+          {
+            "name": "NVLink Runtime Error Count",
+            "type": "DBUS",
+            "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]/Ports/NVLink_[0-17]",
+            "interface": "xyz.openbmc_project.Metrics.PortMetricsOem3",
+            "property": "RuntimeError"
+          }
+        ],
+        "action": "",
+        "value_as_count": false,
+        "description": "GPU has experienced a failure on one NVLink connection to an NVSwitch.",
+        "log_namespace": "GPU_[0-3]"
+      }
+    )";
+
+    event_info::EventNode event("GPU-NVLINK-TRAINING-ERROR");
+    ASSERT_NO_THROW(event.loadFrom(nlohmann::json::parse(fullEventEntry)));
+
+    EXPECT_EQ(event.errorId, "GPU-NVLINK-TRAINING-ERROR");
+    EXPECT_EQ(event.getMessageId(), "ResourceEvent.1.0.ResourceErrorsDetected");
+    EXPECT_EQ(event.getStringifiedDeviceType(), "GPU_[0-3]/NVLink_[0-17]");
+
+    auto deviceTypeData = event.getDataDeviceType();
+    auto deviceDomain = deviceTypeData.pattern.domainVec();
+    EXPECT_EQ(deviceTypeData.pattern.dim(), 2);
+    ASSERT_EQ(deviceDomain.size(), 72);
+    ASSERT_TRUE(event.originOfCondition.has_value());
+    ASSERT_FALSE(event.recovery_accessor.isEmpty());
+    ASSERT_FALSE(event.telemetries.empty());
+    ASSERT_TRUE(event.logNamespace.has_value());
+
+    const device_id::DeviceIdPattern rollupDevicePattern(
+        event.rollupDevicePattern);
+    const device_id::DeviceIdPattern accessorObjectPattern(
+        event.accessor.getDbusObjectPath());
+    const device_id::DeviceIdPattern recoveryObjectPattern(
+        event.recovery_accessor.getDbusObjectPath());
+    const device_id::DeviceIdPattern originOfConditionPattern(
+        event.originOfCondition.value());
+    const device_id::DeviceIdPattern messageArg0Pattern(
+        event.messageRegistry.messageArgsJsonPattern["patterns"][0]
+            .get<std::string>());
+    const device_id::DeviceIdPattern telemetryObjectPattern(
+        event.telemetries.at(0).getDbusObjectPath());
+    const device_id::DeviceIdPattern logNamespacePattern(
+        event.logNamespace.value());
+
+    for (const auto& index : deviceDomain)
+    {
+        const int gpu = index[0];
+        const int nvlink = index[1];
+        SCOPED_TRACE(::testing::Message()
+                     << "gpu=" << gpu << ", nvlink=" << nvlink);
+
+        const std::string expectedMainDevice = "GPU_" + std::to_string(gpu);
+        const std::string expectedFullDevice =
+            expectedMainDevice + "/NVLink_" + std::to_string(nvlink);
+        const std::string expectedAccessorObject =
+            "/xyz/openbmc_project/inventory/system/accelerator/" +
+            expectedMainDevice + "/Ports/NVLink_" + std::to_string(nvlink);
+        const std::string expectedOriginOfCondition =
+            "/redfish/v1/Chassis/HGX_ProcessorModule_" +
+            std::to_string(gpu / 2);
+        const std::string expectedMessageArg0 =
+            expectedMainDevice + " NVLink_" + std::to_string(nvlink);
+        const std::string expectedMessageArgs =
+            expectedMessageArg0 + ", NVLink Training Error";
+
+        const nlohmann::json pcAccessorJson = {
+            {"type", "DBUS"},
+            {"object", expectedAccessorObject},
+            {"interface", "xyz.openbmc_project.Metrics.PortMetricsOem3"},
+            {"property", "TrainingError"}};
+
+        data_accessor::DataAccessor pcAccessorAcc(
+            pcAccessorJson, data_accessor::PropertyValue(int32_t(1)));
+        data_accessor::CheckAccessor checkObj(event.getStringifiedDeviceType());
+
+        auto checkRet = checkObj.check(event.accessor, pcAccessorAcc);
+        ASSERT_EQ(checkRet, true);
+        auto assertedData = checkObj.getAssertedDevices();
+        ASSERT_EQ(assertedData.size(), 1);
+        EXPECT_EQ(assertedData[0].device, expectedMainDevice);
+        EXPECT_EQ(assertedData[0].deviceIndexTuple, index);
+
+        event.device = assertedData[0].device;
+        event.setDeviceIndexTuple(assertedData[0].deviceIndexTuple);
+
+        EXPECT_EQ(deviceTypeData.pattern.eval(index), expectedFullDevice);
+        EXPECT_EQ(rollupDevicePattern.eval(index), expectedMainDevice);
+        EXPECT_EQ(accessorObjectPattern.eval(index), expectedAccessorObject);
+        EXPECT_EQ(recoveryObjectPattern.eval(index), expectedAccessorObject);
+        EXPECT_EQ(originOfConditionPattern.eval(index),
+                  expectedOriginOfCondition);
+        EXPECT_EQ(messageArg0Pattern.eval(index), expectedMessageArg0);
+        EXPECT_EQ(telemetryObjectPattern.eval(index), expectedAccessorObject);
+        EXPECT_EQ(logNamespacePattern.eval(index), expectedMainDevice);
+        EXPECT_EQ(event.getFullDeviceName(), expectedFullDevice);
+        EXPECT_EQ(event.getStringMessageArgs(), expectedMessageArgs);
+        ASSERT_TRUE(event.getOriginOfCondition().has_value());
+        EXPECT_EQ(event.getOriginOfCondition().value(),
+                  expectedOriginOfCondition);
+    }
+}
+
+TEST(EventDetectionTest, FullEntryGpuSmaGpuThermalOvertEvaluatesAllInstances)
+{
+    auto fullEventEntry = R"(
+      {
+        "event": "GPU GPU Overtemp Indicator",
+        "device_type": "GPU_[0-3]",
+        "error_id": "GPU_SMA-GPU-THERMAL-OVERT",
+        "error_type": "GPIO-ALERT",
+        "managed": "yes",
+        "rollup_device": "GPU_[0-3]",
+        "category": [],
+        "event_trigger": {},
+        "accessor": {},
+        "severity": "Critical",
+        "resolution": "Power off the Baseboard as soon as possible. Check thermal environment to ensure the Baseboard operates within thermal specifications and power cycle the Baseboard to recover.",
+        "debounce": {
+          "type": "",
+          "duration": ""
+        },
+        "trigger_count": 0,
+        "event_counter_reset": {},
+        "redfish": {
+          "message_id": "ResourceEvent.1.0.ResourceErrorsDetected",
+          "origin_of_condition": "/redfish/v1/Chassis/HGX_ProcessorModule_[0-1:0,2-3:1]",
+          "message_args": {
+            "patterns": [
+              "GPU_[0-3] GPU-THERMAL-OVERT",
+              "Abnormal State Change"
+            ],
+            "parameters": []
+          }
+        },
+        "telemetries": [],
+        "action": "",
+        "value_as_count": false,
+        "description": "",
+        "log_namespace": "Baseboard_0"
+      }
+    )";
+
+    event_info::EventNode event("GPU_SMA-GPU-THERMAL-OVERT");
+    ASSERT_NO_THROW(event.loadFrom(nlohmann::json::parse(fullEventEntry)));
+
+    EXPECT_EQ(event.errorId, "GPU_SMA-GPU-THERMAL-OVERT");
+    EXPECT_EQ(event.getMessageId(), "ResourceEvent.1.0.ResourceErrorsDetected");
+    EXPECT_EQ(event.getStringifiedDeviceType(), "GPU_[0-3]");
+
+    auto deviceTypeData = event.getDataDeviceType();
+    auto deviceDomain = deviceTypeData.pattern.domainVec();
+    EXPECT_EQ(deviceTypeData.pattern.dim(), 1);
+    ASSERT_EQ(deviceDomain.size(), 4);
+    ASSERT_TRUE(event.originOfCondition.has_value());
+    ASSERT_TRUE(event.logNamespace.has_value());
+    ASSERT_TRUE(event.trigger.isEmpty());
+    ASSERT_TRUE(event.accessor.isEmpty());
+
+    const device_id::DeviceIdPattern rollupDevicePattern(
+        event.rollupDevicePattern);
+    const device_id::DeviceIdPattern originOfConditionPattern(
+        event.originOfCondition.value());
+    const device_id::DeviceIdPattern messageArg0Pattern(
+        event.messageRegistry.messageArgsJsonPattern["patterns"][0]
+            .get<std::string>());
+
+    for (const auto& index : deviceDomain)
+    {
+        const int gpu = index[0];
+        SCOPED_TRACE(::testing::Message() << "gpu=" << gpu);
+
+        const std::string expectedDevice = "GPU_" + std::to_string(gpu);
+        const std::string expectedOriginOfCondition =
+            "/redfish/v1/Chassis/HGX_ProcessorModule_" +
+            std::to_string(gpu / 2);
+        const std::string expectedMessageArg0 =
+            expectedDevice + " GPU-THERMAL-OVERT";
+        const std::string expectedMessageArgs =
+            expectedMessageArg0 + ", Abnormal State Change";
+
+        event.device = expectedDevice;
+        event.setDeviceIndexTuple(index);
+
+        EXPECT_EQ(deviceTypeData.pattern.eval(index), expectedDevice);
+        EXPECT_EQ(rollupDevicePattern.eval(index), expectedDevice);
+        EXPECT_EQ(originOfConditionPattern.eval(index),
+                  expectedOriginOfCondition);
+        EXPECT_EQ(messageArg0Pattern.eval(index), expectedMessageArg0);
+        EXPECT_EQ(event.getFullDeviceName(), expectedDevice);
+        EXPECT_EQ(event.getStringMessageArgs(), expectedMessageArgs);
+        ASSERT_TRUE(event.getOriginOfCondition().has_value());
+        EXPECT_EQ(event.getOriginOfCondition().value(),
+                  expectedOriginOfCondition);
+        EXPECT_EQ(event.logNamespace.value(), "Baseboard_0");
+    }
+}
+
+TEST(CheckAccessor, MultiDimensionalCmdlineWithPreReadDataPreservesTuple)
+{
+    const std::string deviceType = "ProcessorModule_[0-1]_Memory_[0-7]";
+    const std::string matchedArgs =
+        "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_1_Memory_5";
+
+    const nlohmann::json jsonAccessor = {
+        {"type", "CMDLINE"},
+        {"executable", "/bin/echo"},
+        {"arguments",
+         "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_[0-1]_Memory_[0-7]"},
+        {"check", {{"equal", matchedArgs}}}};
+
+    const nlohmann::json actualAccessor = {{"type", "CMDLINE"},
+                                           {"executable", "/bin/echo"},
+                                           {"arguments", matchedArgs}};
+
+    data_accessor::DataAccessor eventAccessor(jsonAccessor);
+    data_accessor::DataAccessor accessorWithData(
+        actualAccessor, data_accessor::PropertyValue(matchedArgs));
+
+    data_accessor::CheckAccessor checkObj(deviceType);
+    auto ret = checkObj.check(eventAccessor, accessorWithData);
+
+    EXPECT_EQ(ret, true);
+    auto assertedData = checkObj.getAssertedDevices();
+    ASSERT_EQ(assertedData.size(), 1);
+    EXPECT_EQ(assertedData[0].device, "ProcessorModule_1_Memory_5");
+    EXPECT_EQ(assertedData[0].deviceIndexTuple, device_id::PatternIndex(1, 5));
+}
+
+TEST(CheckAccessor, MultiDimensionalCmdlineLoopDevicesPreservesTuple)
+{
+    const std::string deviceType = "ProcessorModule_[0-1]_Memory_[0-7]";
+
+    const nlohmann::json triggerJson = {
+        {"type", "DBUS"},
+        {"object", "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]"},
+        {"interface", "com.nvidia.GPIO.State"},
+        {"property", "LineStates"},
+        {"check", {{"equal", "1"}}}};
+
+    const nlohmann::json pcTriggerJson = {
+        {"type", "DBUS"},
+        {"object", "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_1"},
+        {"interface", "com.nvidia.GPIO.State"},
+        {"property", "LineStates"}};
+
+    const nlohmann::json accessorJson = {
+        {"type", "CMDLINE"},
+        {"executable", "/bin/echo"},
+        {"arguments",
+         "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_[0-1]_Memory_[0-7]"},
+        {"check",
+         {{"equal", "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_1_Memory_5"}}}};
+
+    data_accessor::DataAccessor eventTrigger(triggerJson);
+    data_accessor::DataAccessor pcTrigger(
+        pcTriggerJson, data_accessor::PropertyValue(std::string{"1"}));
+    data_accessor::DataAccessor eventAccessor(accessorJson);
+
+    data_accessor::CheckAccessor checkObj(deviceType);
+    auto ret = checkObj.check(eventTrigger, eventAccessor, pcTrigger);
+
+    EXPECT_EQ(ret, true);
+    auto assertedData = checkObj.getAssertedDevices();
+    ASSERT_EQ(assertedData.size(), 1);
+    EXPECT_EQ(assertedData[0].device, "ProcessorModule_1_Memory_5");
+    EXPECT_EQ(assertedData[0].deviceIndexTuple, device_id::PatternIndex(1, 5));
+}
+
 TEST(CheckAccessor, LogicDiffEventType)
 {
     auto eventInfo =

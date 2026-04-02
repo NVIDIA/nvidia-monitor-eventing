@@ -295,8 +295,9 @@ int EventDetection::eventDiscovery(const data_accessor::DataAccessor& accessor,
         auto itr = eventTriggerView.equal_range(accessor);
         for (auto it = itr.first; it != itr.second; it++)
         {
-            logs_dbg("Discovered event with matching trigger: %s\n",
-                     it->second->event.c_str());
+            logs_dbg(
+                "Discovered event with matching trigger: %s, error_id=%s\n",
+                it->second->event.c_str(), it->second->errorId.c_str());
             eventPtrs.push_back(it->second);
             // later recovery events will check this set
             uniqueEvents.insert(it->second.get());
@@ -308,21 +309,23 @@ int EventDetection::eventDiscovery(const data_accessor::DataAccessor& accessor,
             // do not allow a single event going more than once
             if (uniqueEvents.count(recvIt->second.get()) == 0)
             {
-                logs_dbg("Discovered event with matching recovery: %s\n",
-                         recvIt->second->event.c_str());
+                logs_dbg(
+                    "Discovered event with matching recovery: %s, error_id=%s\n",
+                    recvIt->second->event.c_str(),
+                    recvIt->second->errorId.c_str());
                 eventPtrs.push_back(recvIt->second);
             }
         }
         if (eventPtrs.empty())
         {
             logs_dbg("Not found neither in eventTriggerView nor in "
-                     "eventRecoveryView PC Trigger %s",
+                     "eventRecoveryView PC Trigger %s.\n",
                      ss.str().c_str());
         }
     }
     else
     {
-        logs_err("In Bootup Event Detection phase Accessor data='%s' acc=%s",
+        logs_err("In Bootup Event Detection phase Accessor data='%s' acc=%s\n",
                  accessor.getDataValue().getString().c_str(), ss.str().c_str());
 
         // Accessors comming from Seltest must have data, avoiding TP failed
@@ -331,7 +334,7 @@ int EventDetection::eventDiscovery(const data_accessor::DataAccessor& accessor,
             auto itr = eventAccessorView.equal_range(accessor);
             if (itr.first == itr.second)
             {
-                logs_err("Accessor not found in eventAccessorView acc=%s",
+                logs_err("Accessor not found in eventAccessorView acc=%s\n",
                          ss.str().c_str());
             }
             else
@@ -339,8 +342,8 @@ int EventDetection::eventDiscovery(const data_accessor::DataAccessor& accessor,
                 for (auto it = itr.first; it != itr.second; it++)
                 {
                     logs_err(
-                        "Discovered bootup event with matching accessor: %s\n",
-                        it->second->event.c_str());
+                        "Discovered bootup event with matching accessor: %s, error_id=%s\n",
+                        it->second->event.c_str(), it->second->errorId.c_str());
                     eventPtrs.push_back(it->second);
                 }
             }
