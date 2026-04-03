@@ -81,8 +81,12 @@ struct BracketRange
 };
 
 // BracketMap ("1,4-8,0-7:1-8") ///////////////////////////////////////////////
+// Supports following mappings: each key maps to a vector of values
+// - one-to-one: {0->[1], 1->[2], ...} (vectors with one element)
+// - many-to-one: {0->[2], 1->[2], ...} (vectors with one element)
+// - one-to-many: {0->[0, 1], 1->[2, 3], ...} (vectors with multiple elements)
 
-using BracketMap = std::map<DeviceIndex, DeviceIndex>;
+using BracketMap = std::map<DeviceIndex, std::vector<DeviceIndex>>;
 
 // BracketRangeMap (eg. "0-7:1-8") ////////////////////////////////////////////
 
@@ -93,8 +97,10 @@ struct BracketRangeMap
 
     /**
      * Ranges must be of the same length (eg. "0-7" and "1-8"), or the @c to
-     * range must contain just 1 element (eg. "0-7" and "2"). Otherwise there is
-     * too little information to define the mapping.
+     * range must contain just 1 element (eg. "0-7" and "2") for many-to-one,
+     * or the @c from range must contain just 1 element (eg. "0" and "0-1")
+     * for one-to-many. Otherwise there is too little information to define
+     * the mapping.
      */
     BracketRangeMap(BracketRange&& from, BracketRange&& to);
 
@@ -126,6 +132,12 @@ struct IndexedBracketMap
     void setInputPosition(unsigned pos);
     int getInputPosition() const;
     BracketMap map() const;
+
+    /**
+     * @brief Check if this contains one-to-many mappings
+     * @return true if any value in indexMap has size > 1
+     */
+    bool hasOneToMany() const;
 
     static const int indexPosImplicit;
 
@@ -337,6 +349,22 @@ class DeviceIdPattern
      *
      **/
     std::string eval(const PatternIndex& pi) const;
+
+    /**
+     * @brief Evaluate pattern with one-to-many expansion, returning all
+     * possible outputs
+     *
+     * For patterns with one-to-many mappings, this function returns all
+     * possible output strings. For regular patterns, it returns a
+     * single-element vector.
+     *
+     * Example: For pattern "GPU_SMA_[0:0-1,1:2-3]" with input (0):
+     *   - Returns {"GPU_SMA_0", "GPU_SMA_1"}
+     *
+     * @param[in] pi Pattern index to evaluate
+     * @return Vector of all possible output strings
+     */
+    std::vector<std::string> evalAll(const PatternIndex& pi) const;
 
     template <typename... Args>
     std::string operator()(Args... args)
@@ -710,14 +738,17 @@ BracketRangeMap BracketRangeMap::parse(const StringRange& range)
  * Supported formats:
  * - Single mapping: "0-7:1-8", "9:10", "0-7", "0-39", "9", "10"
  * - Comma-separated series: "0-1:0,2-3:1", "0-7:1-8,8-15:9-16"
+ * - One-to-many mapping: "0:0-1", "1:2-3" (single input maps to multiple
+ * outputs)
  *
  * Examples:
- * - "0-7:1-8"       → {0->1, 1->2, 2->3, ..., 7->8}
- * - "0-1:0,2-3:1"   → {0->0, 1->0, 2->1, 3->1}
- * - "1,4-6,9"       → {1->1, 4->4, 5->5, 6->6, 9->9}
+ * - "0-7:1-8"       → {0->[1], 1->[2], 2->[3], ..., 7->[8]}
+ * - "0-1:0,2-3:1"   → {0->[0], 1->[0], 2->[1], 3->[1]}
+ * - "0:0-1"         → {0->[0, 1]} (one-to-many)
+ * - "1,4-6,9"       → {1->[1], 4->[4], 5->[5], 6->[6], 9->[9]}
  *
  * @param[in] range String representation of the bracket map
- * @return BracketMap containing all parsed mappings
+ * @return BracketMap containing all parsed mappings (values are vectors)
  */
 template <typename StringRange>
 BracketMap parseBracketMap(const StringRange& range)
@@ -749,10 +780,10 @@ BracketMap parseBracketMap(const StringRange& range)
 // IndexedBracketMap //////////////////////////////////////////////////////////
 
 /** Divide the text by '|'. Extract what's on the left. Pass the
- * right to 'parseBracketMap'.
+ * right to 'parseBracketMap' or 'parseBracketMapWithOneToMany'.
  *
  * Examples: "0|0-7:1-8,0-39", "1|1,4", "0-7:1-8", "9:10", "0-7",
- * "0-39", "9", "10"
+ * "0-39", "9", "10", "0|0:0-1" (one-to-many)
  */
 template <typename StringRange>
 IndexedBracketMap IndexedBracketMap::parse(const StringRange& range)
@@ -760,14 +791,18 @@ IndexedBracketMap IndexedBracketMap::parse(const StringRange& range)
     std::vector<std::string_view> elements;
     boost::split(elements, range, boost::is_any_of("|"),
                  boost::token_compress_off);
+
+    // Parse with BracketMap
     if (elements.size() == 1)
     {
-        return IndexedBracketMap(parseBracketMap(elements[0]));
+        BracketMap bracketMap = parseBracketMap(elements[0]);
+        return IndexedBracketMap(std::move(bracketMap));
     }
     else if (elements.size() == 2)
     {
-        return IndexedBracketMap(parseNonNegativeInt(elements[0]),
-                                 parseBracketMap(elements[1]));
+        unsigned inputPos = parseNonNegativeInt(elements[0]);
+        BracketMap bracketMap = parseBracketMap(elements[1]);
+        return IndexedBracketMap(inputPos, std::move(bracketMap));
     }
     else
     {

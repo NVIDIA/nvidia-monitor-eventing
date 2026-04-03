@@ -54,29 +54,33 @@ BracketRange::BracketRange(const DeviceIndex& left, const DeviceIndex& right) :
  * @brief Construct a BracketRangeMap from two BracketRanges.
  *
  * This constructor creates a mapping from the @p from range to the @p to range.
- * Two types of mappings are supported:
+ * Three types of mappings are supported:
  * 1. One-to-one mapping: Both ranges must have the same size
  *    Example: [0-7:1-8] maps 0->1, 1->2, ..., 7->8
  * 2. Many-to-one mapping: The @p to range must contain exactly one element
  *    Example: [0-7:2] maps 0->2, 1->2, ..., 7->2
+ * 3. One-to-many mapping: The @p from range must contain exactly one element
+ *    Example: [0:0-1] maps 0->0, 0->1
  *
  * @param[in] from The input range (domain of the mapping)
  * @param[in] to The output range (codomain of the mapping)
  *
  * @throws std::runtime_error if the ranges have incompatible sizes
- *         (i.e., from.size() != to.size() and to.size() != 1)
+ *         (i.e., from.size() != to.size() and to.size() != 1 and from.size() !=
+ * 1)
  */
 BracketRangeMap::BracketRangeMap(BracketRange&& from, BracketRange&& to) :
     from(std::move(from)), to(std::move(to))
 {
-    if (!(from.size() == to.size() || to.size() == 1))
+    if (!(from.size() == to.size() || to.size() == 1 || from.size() == 1))
     {
         throw std::runtime_error(
             "BracketRangeMap: Invalid range sizes - 'from' range has " +
             std::to_string(from.size()) + " element(s), 'to' range has " +
             std::to_string(to.size()) +
-            " element(s). Ranges must have equal sizes (for 1-to-1 mapping) "
-            "or 'to' must have exactly 1 element (for many-to-1 mapping).");
+            " element(s). Ranges must have equal sizes (for 1-to-1 mapping), "
+            "'to' must have exactly 1 element (for many-to-1 mapping), or "
+            "'from' must have exactly 1 element (for 1-to-many mapping).");
     }
 }
 
@@ -92,20 +96,38 @@ BracketRangeMap::BracketRangeMap(BracketRange&& from, BracketRange&& to) :
  *
  * - If to.size() == from.size() (one-to-one mapping):
  *   Maps each key in @c from to the corresponding value in @c to in order.
- *   Example: [0-7:1-8] produces {0->1, 1->2, 2->3, ..., 7->8}
+ *   Example: [0-7:1-8] produces {0->[1], 1->[2], 2->[3], ..., 7->[8]}
+ *
+ * - If from.size() == 1 (one-to-many mapping):
+ *   Maps the single key to all values in the @c to range.
+ *   Example: [0:0-1] produces {0->[0, 1]}
  *
  * @return BracketMap containing all the key-value pairs of the mapping
+ *         (values are vectors, with single element for one-to-one/many-to-one,
+ *          multiple elements for one-to-many)
  */
 BracketRangeMap::operator BracketMap() const
 {
     BracketMap result;
+
+    // One-to-many mapping: single key maps to multiple values
+    if (from.size() == 1 && to.size() > 1)
+    {
+        const auto& key = *from.begin();
+        std::vector<DeviceIndex> values;
+        for (const auto& value : to)
+        {
+            values.push_back(value);
+        }
+        result[key] = values;
+    }
     // Many-to-one mapping: all keys map to the single value
-    if (to.size() == 1)
+    else if (to.size() == 1)
     {
         const auto& value = *to.begin();
         for (const auto& key : from)
         {
-            result[key] = value;
+            result[key] = {value}; // Vector with single element
         }
     }
     // One-to-one mapping: parallel iteration over both ranges
@@ -114,7 +136,7 @@ BracketRangeMap::operator BracketMap() const
         for (auto keysIt = from.begin(), valuesIt = to.begin();
              keysIt != from.end(); ++keysIt, ++valuesIt)
         {
-            result[*keysIt] = *valuesIt;
+            result[*keysIt] = {*valuesIt}; // Vector with single element
         }
     }
     return result;
@@ -141,6 +163,19 @@ int IndexedBracketMap::getInputPosition() const
 BracketMap IndexedBracketMap::map() const
 {
     return indexMap;
+}
+
+bool IndexedBracketMap::hasOneToMany() const
+{
+    // Check if any value vector has more than one element
+    for (const auto& [key, values] : indexMap)
+    {
+        if (values.size() > 1)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace syntax
@@ -434,16 +469,19 @@ DeviceIdPattern::DeviceIdPattern(const std::string& devIdPattern) :
     }
     // _bracketPosToInputPos = vector{ [0]: 0, [1]: 0 }
 
+    // Store all mappings (now BracketMap supports one-to-many natively with
+    // vectors)
     for (const auto& ibm : indexedBracketMappings)
     {
         _bracketInputMappings.push_back(ibm.map());
     }
     // _bracketInputMappings = vector{
-    //     [0]: map{ [1]: 0, [2]: 1, [3]: 2, [4]: 3,
-    //               [5]: 4, [6]: 5, [7]: 6, [8]: 7 },
-    //     [1]: map{ [1]: 1, [2]: 2, [3]: 3, [4]: 4,
-    //               [5]: 5, [6]: 6, [7]: 7, [8]: 8 }
+    //     [0]: map{ [1]: [0], [2]: [1], [3]: [2], [4]: [3],
+    //               [5]: [4], [6]: [5], [7]: [6], [8]: [7] },
+    //     [1]: map{ [1]: [1], [2]: [2], [3]: [3], [4]: [4],
+    //               [5]: [5], [6]: [6], [7]: [7], [8]: [8] }
     // }
+    // For one-to-many: [0]: map{ [0]: [0, 1], [1]: [2, 3] }
 
     // calcInputIndexToBracketPoss(_bracketPosToInputPos) =
     //     vector{ [0]: vector{ [0]: 0, [1]: 1 } }
@@ -458,7 +496,11 @@ std::string DeviceIdPattern::eval(const PatternIndex& pi) const
     // Calculate the values of brackets for the given pattern index
     auto evalBracket = [this, &pi](auto bracketPos) {
         auto inputPos = _bracketPosToInputPos[bracketPos];
-        return _bracketInputMappings.at(bracketPos).at(pi[inputPos]);
+        auto inputValue = pi[inputPos];
+        const auto& mapping = _bracketInputMappings.at(bracketPos);
+        const auto& values = mapping.at(inputValue);
+        // Use first value (for one-to-many, this is the first output)
+        return values[0];
     };
     auto values = std::views::iota(0u, _bracketInputMappings.size()) |
                   std::views::transform(evalBracket);
@@ -471,6 +513,67 @@ std::string DeviceIdPattern::eval(const PatternIndex& pi) const
         ss << _patternNonBracketFragments[i + 1];
     }
     return ss.str();
+}
+
+std::vector<std::string> DeviceIdPattern::evalAll(const PatternIndex& pi) const
+{
+    checkIsInDomain(pi);
+
+    // Get all output values for each bracket (now stored as vectors in
+    // BracketMap)
+    std::vector<std::vector<unsigned>> bracketOutputs;
+    bool hasOneToMany = false;
+
+    for (unsigned bracketPos = 0; bracketPos < _bracketPosToInputPos.size();
+         ++bracketPos)
+    {
+        auto inputPos = _bracketPosToInputPos[bracketPos];
+        auto inputValue = pi[inputPos];
+        const auto& mapping = _bracketInputMappings.at(bracketPos);
+        const auto& values = mapping.at(inputValue);
+
+        bracketOutputs.push_back(values);
+        if (values.size() > 1)
+        {
+            hasOneToMany = true;
+        }
+    }
+
+    // If no one-to-many mappings, return single result
+    if (!hasOneToMany)
+    {
+        return {eval(pi)};
+    }
+
+    // Generate all combinations of bracket outputs
+    std::vector<std::string> results;
+
+    // Calculate total combinations
+    unsigned totalCombinations = 1;
+    for (const auto& outputs : bracketOutputs)
+    {
+        totalCombinations *= outputs.size();
+    }
+
+    // Generate each combination
+    for (unsigned combo = 0; combo < totalCombinations; ++combo)
+    {
+        std::stringstream ss;
+        ss << _patternNonBracketFragments[0];
+
+        unsigned remainder = combo;
+        for (unsigned i = 0; i < bracketOutputs.size(); ++i)
+        {
+            unsigned index = remainder % bracketOutputs[i].size();
+            remainder /= bracketOutputs[i].size();
+            ss << bracketOutputs[i][index];
+            ss << _patternNonBracketFragments[i + 1];
+        }
+
+        results.push_back(ss.str());
+    }
+
+    return results;
 }
 
 CartesianProductRange DeviceIdPattern::domain() const
@@ -487,6 +590,40 @@ std::vector<PatternIndex> DeviceIdPattern::domainVec() const
 std::vector<std::string> DeviceIdPattern::values() const
 {
     // marcinw:TODO: change implementation to return a range over values
+    // Check if any bracket has one-to-many (one input -> multiple outputs)
+    bool hasOneToMany = false;
+    for (const auto& mapping : _bracketInputMappings)
+    {
+        for (const auto& entry : mapping)
+        {
+            if (entry.second.size() > 1)
+            {
+                hasOneToMany = true;
+                break;
+            }
+        }
+        if (hasOneToMany)
+        {
+            break;
+        }
+    }
+    if (hasOneToMany)
+    {
+        // Return all unique outputs (order unspecified)
+        std::set<std::string> uniqueValues;
+        for (const auto& x : domain())
+        {
+            auto allOutputs = evalAll(x);
+            for (const auto& s : allOutputs)
+            {
+                uniqueValues.insert(s);
+            }
+        }
+        return std::vector<std::string>(uniqueValues.begin(),
+                                        uniqueValues.end());
+    }
+    // One value per domain element, in domain order (preserves API: values[i]
+    // == eval(domain()[i]))
     std::vector<std::string> result;
     for (const auto& x : domain())
     {
@@ -513,10 +650,13 @@ bool DeviceIdPattern::matches(const std::string& str) const
 std::vector<PatternIndex> DeviceIdPattern::match(const std::string& str) const
 {
     // marcinw:TODO: more efficient implementation
+    // For one-to-many patterns, str may match any output from evalAll(arg)
     std::vector<PatternIndex> res;
     for (const auto& arg : this->domain())
     {
-        if (this->eval(arg) == str)
+        auto allOutputs = this->evalAll(arg);
+        if (std::find(allOutputs.begin(), allOutputs.end(), str) !=
+            allOutputs.end())
         {
             res.push_back(arg);
         }
