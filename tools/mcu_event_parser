@@ -108,9 +108,12 @@ mcu_read_gpio() #(mcu_id, gpio_id)
 
         # Output example:
         # a{qb} 6 3 true 12 false 19 true 27 false 34 true 41 false
-        value=$(grep -oE "$gpio_id (true|false)" <<< "$dbus_value");rc=$?
+        value=$(grep -oE " $gpio_id (true|false) " <<< "$dbus_value");rc=$?
         [ $rc -ne 0 ] && return 3
     fi
+
+    # value example: " 34 true "
+    value=$(echo $value)
 
     # value example: 34 true
     value=${value##* }
