@@ -557,7 +557,7 @@ class ErrorCatalog:
                         return ""
                     range = device_pattern[device]['Mapping Device Range']
                     if range == None or range == "":
-                        range = device_pattern[device]["Range"]
+                        range = device_pattern[fru_loc]["Range"]
                     return get_device_uri_without_range(fru_loc) + "_" + range
                 else:
                     print(f"make_ooc_uri_v2: device = {device} not in device_pattern", file=sys.stderr)
