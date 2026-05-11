@@ -303,7 +303,7 @@ class ErrorCatalog:
         print(f"get_device_list_sim: output = {output}", file=sys.stderr)
         return output
 
-    def to_event_info_json(self, platform):
+    def to_event_info_json(self, platform, to_code="yes"):
         with open(self._errorlist, "r", encoding='utf-8') as f:
             fc = csv.DictReader(f)
 
@@ -389,7 +389,7 @@ class ErrorCatalog:
                 if row["RF Log Producer"].lower() != "eventingservice":
                     continue
 
-                if row["To HMC Code?"].lower() != "yes":
+                if row["To HMC Code?"].lower() != to_code:
                     continue
 
                 row = adjust_mapping_device_pattern(row)
@@ -459,7 +459,7 @@ class ErrorCatalog:
             print(json.dumps(ei_json, indent=2))
             return 0
 
-    def to_obmc_platform_config(self, platform):
+    def to_obmc_platform_config(self, platform, to_code="yes"):
         with open(self._errorlist, "r", encoding='utf-8') as f:
             fc = csv.DictReader(f)
 
@@ -589,7 +589,7 @@ class ErrorCatalog:
                 if row["RF Log Producer"].lower() != "eventingservice":
                     continue
 
-                if row["To HMC Code?"].lower() != "yes":
+                if row["To HMC Code?"].lower() != to_code:
                     continue
 
                 row_orig = row
@@ -1073,6 +1073,12 @@ def main():
              "(default: 'register table')"
     )
 
+    parser.add_argument(
+        "--to_code",
+        default="yes",
+        help="Filter rows by 'To HMC Code?' column value (default: 'yes')"
+    )
+
     args = parser.parse_args()
 
     supported_methods = [
@@ -1114,9 +1120,9 @@ def main():
     if args.conv_method == "to_ras_catalog":
         rc = ras_catalog.to_ras_catalog(evt_inf_json)
     elif args.conv_method == "to_event_info_json":
-        rc = ras_catalog.to_event_info_json(args.platform)
+        rc = ras_catalog.to_event_info_json(args.platform, args.to_code)
     elif args.conv_method == "to_obmc_platform_config":
-        rc = ras_catalog.to_obmc_platform_config(args.platform)
+        rc = ras_catalog.to_obmc_platform_config(args.platform, args.to_code)
     elif args.conv_method == "get_columns":
         rc = print(ras_catalog.get_columns())
     elif args.conv_method == "get_platforms":
