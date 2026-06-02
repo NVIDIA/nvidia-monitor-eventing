@@ -286,9 +286,16 @@ RangeInformation getRangeInformation(const std::string& str)
         auto auxPosition = str.find(matchedRegex);
         if (auxPosition != std::string::npos)
         {
-            while (auxPosition-- && str.at(auxPosition) != ' ')
-                ;
-            stringPosition = ++auxPosition;
+            // Walk left without underflowing size_t. Stop at index 0 or
+            // at a space character; the prior form used post-decrement
+            // in the loop condition which decremented auxPosition past
+            // zero and only avoided UB by relying on the immediate
+            // ++auxPosition fix-up below.
+            while (auxPosition > 0 && str.at(auxPosition - 1) != ' ')
+            {
+                --auxPosition;
+            }
+            stringPosition = auxPosition;
             while (auxPosition < str.size() && str.at(auxPosition) != ' ')
             {
                 sizeString++;
