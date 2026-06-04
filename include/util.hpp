@@ -336,12 +336,14 @@ class Severity
 
     Severity() : severity(SEVERITY_OK) {}
 
-    Severity(const Severity& other)
+    Severity(const Severity& other) : severity(other.severity)
     {
-        if (this != &other)
-        {
-            this->severity = other.severity;
-        }
+        // The previous body had a `this != &other` guard around the
+        // assignment, which is meaningful for operator= (where the
+        // object is already constructed) but inside a constructor it
+        // left `severity` uninitialized on the self-copy path. Use a
+        // member-initializer-list so the field is initialized on
+        // every path; self-copy via constructor is UB anyway.
     }
 
     Severity(enum SEVERITY init_severity) : severity(init_severity) {}
