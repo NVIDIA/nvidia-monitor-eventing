@@ -124,7 +124,7 @@ void interfacesAddedCallback(sdbusplus::message_t message)
 {
     boost::container::flat_map<std::string, PropertiesChangedMap>
         interfacesAddedMap;
-    sdbusplus::message::object_path path;
+    sdbusplus::object_path path;
     try
     {
         message.read(path, interfacesAddedMap);

@@ -45,7 +45,7 @@ constexpr auto getCall = "Get";
 constexpr auto setCall = "Set";
 
 using DbusPropertyChangedHandler = std::unique_ptr<sdbusplus::bus::match_t>;
-using CallbackFunction = sdbusplus::bus::match::match::callback_t;
+using CallbackFunction = sdbusplus::bus::match_t::callback_t;
 using DbusAsioConnection = std::shared_ptr<sdbusplus::asio::connection>;
 
 /**
@@ -64,14 +64,14 @@ DbusPropertyChangedHandler registerServicePropertyChanged(
 
 /**
  * @brief overloaded function
- * @param bus       the bus type sdbusplus::bus::bus&
+ * @param bus       the bus type sdbusplus::bus_t&
  * @param objectPath
  * @param interface
  * @param callback
  * @return
  */
 DbusPropertyChangedHandler registerServicePropertyChanged(
-    sdbusplus::bus::bus& bus, const std::string& objectPath,
+    sdbusplus::bus_t& bus, const std::string& objectPath,
     const std::string& interface, CallbackFunction callback);
 
 /**
@@ -162,7 +162,7 @@ class ObjectMapper
   public:
     // It's useful to have this field public for when a user wants to call a
     // method on some other service than ObjectMapper, but using the same bus.
-    sdbusplus::bus::bus bus;
+    sdbusplus::bus_t bus;
 
     /** @brief Manager -> Interface* */
     using ValueType = std::map<std::string, std::vector<std::string>>;
@@ -177,7 +177,7 @@ class ObjectMapper
 
     ObjectMapper() : bus(sdbusplus::bus::new_default_system()) {}
 
-    ObjectMapper(sdbusplus::bus::bus&& bus) : bus(std::move(bus)) {}
+    ObjectMapper(sdbusplus::bus_t&& bus) : bus(std::move(bus)) {}
 
     /**
      * @brief Mimic the 'GetObject' method of 'ObjectMapper'
@@ -517,19 +517,18 @@ class DirectObjectMapper : public ObjectMapper<DirectObjectMapper>
   public:
     DirectObjectMapper() {}
 
-    DirectObjectMapper(sdbusplus::bus::bus&& bus) : ObjectMapper(std::move(bus))
-    {}
+    DirectObjectMapper(sdbusplus::bus_t&& bus) : ObjectMapper(std::move(bus)) {}
 
-    ValueType getObjectImpl(sdbusplus::bus::bus& bus,
+    ValueType getObjectImpl(sdbusplus::bus_t& bus,
                             const std::string& objectPath,
                             const std::vector<std::string>& interfaces) const;
 
     std::vector<std::string> getSubTreePathsImpl(
-        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        sdbusplus::bus_t& bus, const std::string& subtree, int depth,
         const std::vector<std::string>& interfaces) const;
 
     FullTreeType getSubtreeImpl(
-        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        sdbusplus::bus_t& bus, const std::string& subtree, int depth,
         const std::vector<std::string>& interfaces) const;
 };
 
@@ -538,29 +537,29 @@ class CachingObjectMapper : public ObjectMapper<CachingObjectMapper>
   public:
     CachingObjectMapper() : ObjectMapper(), isInitialized(false) {}
 
-    CachingObjectMapper(sdbusplus::bus::bus&& bus) :
+    CachingObjectMapper(sdbusplus::bus_t&& bus) :
         ObjectMapper(std::move(bus)), isInitialized(false)
     {}
 
-    ValueType getObjectImpl(sdbusplus::bus::bus& bus,
+    ValueType getObjectImpl(sdbusplus::bus_t& bus,
                             const std::string& objectPath,
                             const std::vector<std::string>& interfaces);
 
     std::vector<std::string> getSubTreePathsImpl(
-        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        sdbusplus::bus_t& bus, const std::string& subtree, int depth,
         const std::vector<std::string>& interfaces);
     std::vector<std::string> getSubTreePathsImpl(
-        sdbusplus::bus::bus& bus, const std::vector<std::string>& interfaces);
+        sdbusplus::bus_t& bus, const std::vector<std::string>& interfaces);
 
     // Not implemented for now
-    FullTreeType getSubtreeImpl(sdbusplus::bus::bus& bus,
+    FullTreeType getSubtreeImpl(sdbusplus::bus_t& bus,
                                 const std::string& subtree, int depth,
                                 const std::vector<std::string>& interfaces);
 
     /** @brief Synchronize the internal mirror data (@c
      * objectsServicesMapping) with dbus **/
     void refresh();
-    // void refresh(sdbusplus::bus::bus& bus);
+    // void refresh(sdbusplus::bus_t& bus);
 
     /**
      * @brief Given one of the values from the main dictionary return the set of
@@ -690,7 +689,7 @@ class DbusDelayerStateGuard
 class DelayedMethod
 {
   public:
-    DelayedMethod(DbusDelayer* dbusDelayer, sdbusplus::bus::bus& bus,
+    DelayedMethod(DbusDelayer* dbusDelayer, sdbusplus::bus_t& bus,
                   const std::string& service, const std::string& object,
                   const std::string& interface, const std::string& method) :
         _dbusDelayer(dbusDelayer),
@@ -705,7 +704,7 @@ class DelayedMethod
         }
     }
 
-    DelayedMethod(sdbusplus::bus::bus& bus, const std::string& service,
+    DelayedMethod(sdbusplus::bus_t& bus, const std::string& service,
                   const std::string& object, const std::string& interface,
                   const std::string& method) :
         _dbusDelayer(&defaultDbusDelayer),
@@ -727,7 +726,7 @@ class DelayedMethod
   private:
     DbusDelayer* _dbusDelayer;
     std::string _repr;
-    sdbusplus::bus::bus& _bus;
+    sdbusplus::bus_t& _bus;
     sdbusplus::message::message _method;
 };
 

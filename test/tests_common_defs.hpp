@@ -25,7 +25,7 @@ class DummyObjectMapper : public dbus::ObjectMapper<DummyObjectMapper>
 {
   public:
     std::vector<std::string> getSubTreePathsImpl(
-        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        sdbusplus::bus_t& bus, const std::string& subtree, int depth,
         const std::vector<std::string>& interfaces);
 };
 

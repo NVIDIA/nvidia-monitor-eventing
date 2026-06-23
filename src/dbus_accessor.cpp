@@ -260,13 +260,12 @@ DbusPropertyChangedHandler registerServicePropertyChanged(
     DbusAsioConnection conn, const std::string& objectPath,
     const std::string& interface, CallbackFunction callback)
 {
-    return registerServicePropertyChanged(
-        static_cast<sdbusplus::bus::bus&>(*conn), objectPath, interface,
-        callback);
+    return registerServicePropertyChanged(static_cast<sdbusplus::bus_t&>(*conn),
+                                          objectPath, interface, callback);
 }
 
 DbusPropertyChangedHandler registerServicePropertyChanged(
-    sdbusplus::bus::bus& bus, const std::string& objectPath,
+    sdbusplus::bus_t& bus, const std::string& objectPath,
     const std::string& interface, CallbackFunction callback)
 {
     log_elapsed();
@@ -329,7 +328,7 @@ bool setDbusProperty(const std::string& service, const std::string& objPath,
 // CachingObjectMapper ////////////////////////////////////////////////////////
 
 CachingObjectMapper::ValueType CachingObjectMapper::getObjectImpl(
-    [[maybe_unused]] sdbusplus::bus::bus& bus, const std::string& objectPath,
+    [[maybe_unused]] sdbusplus::bus_t& bus, const std::string& objectPath,
     const std::vector<std::string>& interfaces)
 {
     ensureIsInitialized();
@@ -337,7 +336,7 @@ CachingObjectMapper::ValueType CachingObjectMapper::getObjectImpl(
 }
 
 std::vector<std::string> CachingObjectMapper::getSubTreePathsImpl(
-    [[maybe_unused]] sdbusplus::bus::bus& bus, const std::string& subtree,
+    [[maybe_unused]] sdbusplus::bus_t& bus, const std::string& subtree,
     int depth, const std::vector<std::string>& interfaces)
 {
     ensureIsInitialized();
@@ -354,7 +353,7 @@ std::vector<std::string> CachingObjectMapper::getSubTreePathsImpl(
 }
 
 std::vector<std::string> CachingObjectMapper::getSubTreePathsImpl(
-    [[maybe_unused]] sdbusplus::bus::bus& bus,
+    [[maybe_unused]] sdbusplus::bus_t& bus,
     const std::vector<std::string>& interfaces)
 {
     ensureIsInitialized();
@@ -546,7 +545,7 @@ DbusDelayerStateGuard::~DbusDelayerStateGuard()
 // DirectObjectMapper /////////////////////////////////////////////////////////
 
 DirectObjectMapper::ValueType DirectObjectMapper::getObjectImpl(
-    sdbusplus::bus::bus& bus, const std::string& objectPath,
+    sdbusplus::bus_t& bus, const std::string& objectPath,
     const std::vector<std::string>& interfaces) const
 {
     ValueType result;
@@ -561,7 +560,7 @@ DirectObjectMapper::ValueType DirectObjectMapper::getObjectImpl(
 }
 
 std::vector<std::string> DirectObjectMapper::getSubTreePathsImpl(
-    sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+    sdbusplus::bus_t& bus, const std::string& subtree, int depth,
     const std::vector<std::string>& interfaces) const
 {
     std::vector<std::string> result;
@@ -577,7 +576,7 @@ std::vector<std::string> DirectObjectMapper::getSubTreePathsImpl(
 }
 
 DirectObjectMapper::FullTreeType DirectObjectMapper::getSubtreeImpl(
-    sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+    sdbusplus::bus_t& bus, const std::string& subtree, int depth,
     const std::vector<std::string>& interfaces) const
 {
     FullTreeType result;

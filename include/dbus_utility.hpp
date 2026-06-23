@@ -62,14 +62,14 @@ using DbusVariantType = std::variant<
     sdbusplus::message::unix_fd,
     std::vector<uint32_t>,
     std::vector<uint16_t>,
-    sdbusplus::message::object_path,
+    sdbusplus::object_path,
     std::tuple<uint64_t, std::vector<std::tuple<std::string, std::string, double, uint64_t>>>,
     std::vector<std::tuple<std::string, std::string>>,
     std::vector<std::tuple<uint32_t, std::vector<uint32_t>>>,
     std::vector<std::tuple<uint32_t, size_t>>,
-    std::vector<std::tuple<sdbusplus::message::object_path, std::string,
+    std::vector<std::tuple<sdbusplus::object_path, std::string,
                            std::string, std::string>>,
-    std::vector<sdbusplus::message::object_path>,
+    std::vector<sdbusplus::object_path>,
     std::vector<uint8_t>,
     std::vector<std::tuple<uint8_t, std::string>>,
     std::tuple<size_t, bool>,
@@ -80,7 +80,7 @@ using DbusVariantType = std::variant<
 using DBusPropertiesMap = std::vector<std::pair<std::string, DbusVariantType>>;
 using DBusInteracesMap = std::vector<std::pair<std::string, DBusPropertiesMap>>;
 using ManagedObjectType =
-    std::vector<std::pair<sdbusplus::message::object_path, DBusInteracesMap>>;
+    std::vector<std::pair<sdbusplus::object_path, DBusInteracesMap>>;
 
 // Map of service name to list of interfaces
 using MapperServiceMap =

@@ -42,7 +42,7 @@ const auto LOG_ENTRY_IFACE = "xyz.openbmc_project.Logging.Entry";
 
 using PropertiesChangedMap =
     boost::container::flat_map<std::string, dbus::PropertyVariant>;
-using match = sdbusplus::bus::match::match;
+using match = sdbusplus::bus::match_t;
 using Timer = sdeventplus::utility::Timer<sdeventplus::ClockId::Monotonic>;
 
 std::unique_ptr<TmpFileManager> fileManager;

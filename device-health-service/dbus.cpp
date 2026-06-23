@@ -171,7 +171,7 @@ bool setDbusProperty(const std::string& service, const std::string& objPath,
 // DirectObjectMapper /////////////////////////////////////////////////////////
 
 DirectObjectMapper::ValueType DirectObjectMapper::getObjectImpl(
-    sdbusplus::bus::bus& bus, const std::string& objectPath,
+    sdbusplus::bus_t& bus, const std::string& objectPath,
     const std::vector<std::string>& interfaces) const
 {
     ValueType result;
@@ -187,7 +187,7 @@ DirectObjectMapper::ValueType DirectObjectMapper::getObjectImpl(
 }
 
 std::vector<std::string> DirectObjectMapper::getSubTreePathsImpl(
-    sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+    sdbusplus::bus_t& bus, const std::string& subtree, int depth,
     const std::vector<std::string>& interfaces) const
 {
     std::vector<std::string> result;
@@ -204,7 +204,7 @@ std::vector<std::string> DirectObjectMapper::getSubTreePathsImpl(
 }
 
 DirectObjectMapper::FullTreeType DirectObjectMapper::getSubtreeImpl(
-    sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+    sdbusplus::bus_t& bus, const std::string& subtree, int depth,
     const std::vector<std::string>& interfaces) const
 {
     FullTreeType result;

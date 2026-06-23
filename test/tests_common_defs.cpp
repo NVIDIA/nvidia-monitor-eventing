@@ -20,7 +20,7 @@
 using namespace nlohmann;
 
 std::vector<std::string> DummyObjectMapper::getSubTreePathsImpl(
-    [[maybe_unused]] sdbusplus::bus::bus& bus,
+    [[maybe_unused]] sdbusplus::bus_t& bus,
     [[maybe_unused]] const std::string& subtree, [[maybe_unused]] int depth,
     [[maybe_unused]] const std::vector<std::string>& interfaces)
 {

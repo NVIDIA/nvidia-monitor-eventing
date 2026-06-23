@@ -92,7 +92,7 @@ class ObjectMapper
   public:
     // It's useful to have this field public for when a user wants to call a
     // method on some other service than ObjectMapper, but using the same bus.
-    sdbusplus::bus::bus bus;
+    sdbusplus::bus_t bus;
 
     /** @brief Manager -> Interface* */
     using ValueType = std::map<std::string, std::vector<std::string>>;
@@ -107,7 +107,7 @@ class ObjectMapper
 
     ObjectMapper() : bus(sdbusplus::bus::new_default_system()) {}
 
-    ObjectMapper(sdbusplus::bus::bus&& bus) : bus(std::move(bus)) {}
+    ObjectMapper(sdbusplus::bus_t&& bus) : bus(std::move(bus)) {}
 
     /**
      * @brief Mimic the 'GetObject' method of 'ObjectMapper'
@@ -450,19 +450,18 @@ class DirectObjectMapper : public ObjectMapper<DirectObjectMapper>
   public:
     DirectObjectMapper() {}
 
-    DirectObjectMapper(sdbusplus::bus::bus&& bus) : ObjectMapper(std::move(bus))
-    {}
+    DirectObjectMapper(sdbusplus::bus_t&& bus) : ObjectMapper(std::move(bus)) {}
 
-    ValueType getObjectImpl(sdbusplus::bus::bus& bus,
+    ValueType getObjectImpl(sdbusplus::bus_t& bus,
                             const std::string& objectPath,
                             const std::vector<std::string>& interfaces) const;
 
     std::vector<std::string> getSubTreePathsImpl(
-        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        sdbusplus::bus_t& bus, const std::string& subtree, int depth,
         const std::vector<std::string>& interfaces) const;
 
     FullTreeType getSubtreeImpl(
-        sdbusplus::bus::bus& bus, const std::string& subtree, int depth,
+        sdbusplus::bus_t& bus, const std::string& subtree, int depth,
         const std::vector<std::string>& interfaces) const;
 };
 

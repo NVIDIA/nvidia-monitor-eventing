@@ -230,7 +230,7 @@ class EventDetection : public object::Object
      * @param bus
      */
     static void setLogEntryResolved(const std::string objPath,
-                                    sdbusplus::bus::bus& bus)
+                                    sdbusplus::bus_t& bus)
     {
         try
         {
@@ -259,8 +259,7 @@ class EventDetection : public object::Object
      */
     static void recoverFromPowerCycleEvents(
         const std::string& devId,
-        const dbus::utility::ManagedObjectType& result,
-        sdbusplus::bus::bus& bus)
+        const dbus::utility::ManagedObjectType& result, sdbusplus::bus_t& bus)
     {
         for (auto& objectPath : result)
         {
