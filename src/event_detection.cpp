@@ -488,12 +488,14 @@ void EventDetection::bootUpEventsDetection()
         auto& accessor = accViewItem.first;
         auto& eventPtr = accViewItem.second;
 
-        // Ignore UDEV-BASED events for bootup since they are don't have valid
-        // accessor to check by design.
-        if (eventPtr->errorType == "UDEV-BASED")
+        // Ignore UDEV-BASED or GPIO-ALERT events for bootup since they are
+        // don't have valid accessor to check by design.
+        if (eventPtr->errorType == "UDEV-BASED" ||
+            eventPtr->errorType == "GPIO-ALERT")
         {
-            logs_dbg("Ignoring UDEV-BASED event [%s] for boot-up.\n",
-                     eventPtr->errorId.c_str());
+            logs_dbg(
+                "Ignoring UDEV-BASED or GPIO-ALERT event [%s] for boot-up.\n",
+                eventPtr->errorId.c_str());
             continue;
         }
 

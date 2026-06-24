@@ -17,8 +17,12 @@
 
 #include "event_instantiator.hpp"
 
+#include "data_accessor.hpp"
 #include "json_proc.hpp"
 #include "log.hpp"
+#include "util.hpp"
+
+#include <sstream>
 
 namespace event_handler
 {
@@ -155,6 +159,49 @@ event_info::EventNode EventInstantiator::instantiateEvent(
     device_id::PatternIndex device_index = indices[0];
     instantiated_node.setDeviceIndexTuple(device_index);
     log_dbg("Set device index tuple for device %s.\n", device_id.c_str());
+
+    // Bake the device index into every patterned accessor (accessor, trigger,
+    // recovery_accessor, telemetries, redfish.message_args.parameters) so
+    // later consumers see a concrete accessor rather than a range expression.
+    // No-op when fields are absent or carry no range
+    // (util::introduceDeviceInObjectpath guards on DeviceIdPattern::dim()).
+    auto bakeAccessor = [&device_index](data_accessor::DataAccessor& acc) {
+        std::stringstream ss;
+        ss << acc;
+        nlohmann::json acc_json = nlohmann::json::parse(ss.str());
+        if (acc_json.contains(data_accessor::objectKey) &&
+            acc_json[data_accessor::objectKey].is_string())
+        {
+            acc_json[data_accessor::objectKey] =
+                util::introduceDeviceInObjectpath(
+                    acc_json[data_accessor::objectKey].get<std::string>(),
+                    device_index);
+        }
+        if (acc_json.contains(data_accessor::argumentsKey) &&
+            acc_json[data_accessor::argumentsKey].is_string())
+        {
+            acc_json[data_accessor::argumentsKey] =
+                util::introduceDeviceInObjectpath(
+                    acc_json[data_accessor::argumentsKey].get<std::string>(),
+                    device_index);
+        }
+        acc = acc_json;
+    };
+
+    bakeAccessor(instantiated_node.accessor);
+    bakeAccessor(instantiated_node.trigger);
+    bakeAccessor(instantiated_node.recovery_accessor);
+    for (auto& tel : instantiated_node.telemetries)
+    {
+        bakeAccessor(tel);
+    }
+    for (auto& msgArg : instantiated_node.messageRegistry.messageArgs)
+    {
+        for (auto& param : msgArg.parameters)
+        {
+            bakeAccessor(param);
+        }
+    }
 
     // Handle origin of condition after device index is set
     if (!ooc_pattern.empty())

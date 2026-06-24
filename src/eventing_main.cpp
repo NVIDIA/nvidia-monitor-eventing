@@ -500,7 +500,30 @@ int main(int argc, char* argv[])
                 event_info::EventNode& instantiatedEvent =
                     instantiator.getInstantiatedEvent();
                 logs_dbg("Successfully instantiated event: %s\n",
-                         instantiatedEvent.event.c_str());
+                         instantiatedEvent.errorId.c_str());
+
+                // Run the accessor as a precondition check, skip the event if
+                // it does not pass
+                if (!instantiatedEvent.accessor.isEmpty() &&
+                    instantiatedEvent.accessor.existsCheckKey())
+                {
+                    data_accessor::CheckAccessor checkObj(
+                        instantiatedEvent.device);
+                    checkObj.check(instantiatedEvent.accessor,
+                                   instantiatedEvent.accessor);
+                    if (!checkObj.passed())
+                    {
+                        logs_wrn(
+                            "Precondition check failed for [%s] on device [%s], skipping.\n",
+                            instantiatedEvent.errorId.c_str(),
+                            instantiatedEvent.device.c_str());
+                        return 0;
+                    }
+                    logs_dbg(
+                        "Precondition check passed for [%s] on device [%s], continuing.\n",
+                        instantiatedEvent.errorId.c_str(),
+                        instantiatedEvent.device.c_str());
+                }
 
                 // Create EventHandlerManager for other handlers
                 event_handler::EventHandlerManager eventHdlrMgr;
