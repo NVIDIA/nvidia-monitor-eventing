@@ -28,6 +28,7 @@
 #include "message_composer.hpp"
 #include "pc_event.hpp"
 #include "selftest.hpp"
+#include "standalone_qualifier.hpp"
 #include "tal_singleton.hpp"
 #include "threadpool_manager.hpp"
 #include "util.hpp"
@@ -502,27 +503,18 @@ int main(int argc, char* argv[])
                 logs_dbg("Successfully instantiated event: %s\n",
                          instantiatedEvent.errorId.c_str());
 
-                // Run the accessor as a precondition check, skip the event if
-                // it does not pass
-                if (!instantiatedEvent.accessor.isEmpty() &&
-                    instantiatedEvent.accessor.existsCheckKey())
+                // Run the accessor as a qualifier; suppress the event if it
+                // does not pass. The external trigger (e.g. multi-gpio-monitor)
+                // proved a fault GPIO transitioned, but the qualifier (e.g.
+                // module power-good) decides whether the report is meaningful.
+                if (!eventing::standaloneQualifierPassed(instantiatedEvent))
                 {
-                    data_accessor::CheckAccessor checkObj(
-                        instantiatedEvent.device);
-                    checkObj.check(instantiatedEvent.accessor,
-                                   instantiatedEvent.accessor);
-                    if (!checkObj.passed())
-                    {
-                        logs_wrn(
-                            "Precondition check failed for [%s] on device [%s], skipping.\n",
-                            instantiatedEvent.errorId.c_str(),
-                            instantiatedEvent.device.c_str());
-                        return 0;
-                    }
-                    logs_dbg(
-                        "Precondition check passed for [%s] on device [%s], continuing.\n",
+                    logs_err(
+                        "Qualifier did not pass for event [%s] device [%s]; "
+                        "suppressing.\n",
                         instantiatedEvent.errorId.c_str(),
                         instantiatedEvent.device.c_str());
+                    return 0;
                 }
 
                 // Create EventHandlerManager for other handlers

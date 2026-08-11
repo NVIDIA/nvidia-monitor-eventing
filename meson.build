@@ -185,6 +185,7 @@ if get_option('tests').enabled()
 endif
 
 srcfiles_unittest = [
+    'test/accessor_expansion_test.cpp',
     'test/accessor_test.cpp',
     'test/dat_test.cpp',
     'test/dat_to_dbus_test.cpp',
@@ -199,6 +200,7 @@ srcfiles_unittest = [
     'test/propertyvalue_string_test.cpp',
     'test/propertyvalue_variant_test.cpp',
     'test/selftest_test.cpp',
+    'test/standalone_qualifier_test.cpp',
     'test/util_test.cpp',
 ]
 
@@ -222,6 +224,7 @@ eventinglib_sources = [
     'src/message_dispatcher.cpp',
     'src/event_instantiator.cpp',
     'src/property_accessor.cpp',
+    'src/standalone_qualifier.cpp',
     'src/util.cpp',
 ]
 
@@ -242,6 +245,9 @@ if (get_option('tests').enabled())
         srcfiles_unittest + eventinglib_sources + selftestlib_sources,
         include_directories: inc,
         install_dir: bindir,
+        cpp_args: [
+            '-DTEST_DATA_DIR="' + meson.current_source_dir() + '/test"',
+        ],
         dependencies: mon_evt_dependencies + [gtest_dep, gmock_dep],
     )
     test('eventing_unit_test', ut_bin)
