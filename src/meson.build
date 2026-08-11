@@ -18,6 +18,7 @@ eventinglib_sources = [
     'message_dispatcher.cpp',
     'event_instantiator.cpp',
     'property_accessor.cpp',
+    'standalone_qualifier.cpp',
     'util.cpp',
 ]
 

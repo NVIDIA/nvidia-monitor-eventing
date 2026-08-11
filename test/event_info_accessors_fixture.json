@@ -1,0 +1,3141 @@
+{
+ "source": "meta-vr-nvl-hmc event_info.json",
+ "events": [
+  {
+   "error_id": "GPU-NVLINK-TRAINING-ERROR",
+   "device_type": "GPU_[0-3]/NVLink_[0-17]",
+   "standalone": true,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]/Ports/NVLink_[0-17]",
+    "interface": "xyz.openbmc_project.Metrics.PortMetricsOem3",
+    "property": "TrainingError"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {
+    "type": "",
+    "metadata": ""
+   },
+   "recovery": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]/Ports/NVLink_[0-17]",
+     "interface": "xyz.openbmc_project.Metrics.PortMetricsOem3",
+     "property": "TrainingError"
+    }
+   ],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]/Ports/NVLink_[0-17]",
+     "interface": "xyz.openbmc_project.Metrics.PortMetricsOem3",
+     "property": "RuntimeError"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU-PWBRAKE-THROTTLE-EVENT",
+   "device_type": "GPU_[0-3]",
+   "standalone": true,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+    "interface": "xyz.openbmc_project.State.ProcessorPerformance",
+    "property": "ThrottleReasonHWPowerBrakeSlowdown"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {
+    "type": "",
+    "metadata": ""
+   },
+   "recovery": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.State.ProcessorPerformance",
+     "property": "ThrottleReasonHWPowerBrakeSlowdown"
+    }
+   ],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU-ROW-REMAPPING-ERROR",
+   "device_type": "GPU_[0-3]",
+   "standalone": true,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/dimm/GPU_[0-3]_DRAM_0",
+    "interface": "com.nvidia.MemoryRowRemapping",
+    "property": "RowRemappingFailureState"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {
+    "type": "",
+    "metadata": ""
+   },
+   "recovery": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/dimm/GPU_[0-3]_DRAM_0",
+     "interface": "com.nvidia.MemoryRowRemapping",
+     "property": "RowRemappingFailureState"
+    }
+   ],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/dimm/GPU_[0-3]_DRAM_0",
+     "interface": "com.nvidia.MemoryRowRemapping",
+     "property": "ceRowRemappingCount"
+    },
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/dimm/GPU_[0-3]_DRAM_0",
+     "interface": "com.nvidia.MemoryRowRemapping",
+     "property": "ueRowRemappingCount"
+    },
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/dimm/GPU_[0-3]_DRAM_0",
+     "interface": "com.nvidia.MemoryRowRemapping",
+     "property": "RowRemappingFailureState"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU-ROW-REMAPPING-PENDING-EVENT",
+   "device_type": "GPU_[0-3]",
+   "standalone": true,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/dimm/GPU_[0-3]_DRAM_0",
+    "interface": "com.nvidia.MemoryRowRemapping",
+    "property": "RowRemappingPendingState"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {
+    "type": "",
+    "metadata": ""
+   },
+   "recovery": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/dimm/GPU_[0-3]_DRAM_0",
+     "interface": "com.nvidia.MemoryRowRemapping",
+     "property": "RowRemappingPendingState"
+    }
+   ],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/dimm/GPU_[0-3]_DRAM_0",
+     "interface": "com.nvidia.MemoryRowRemapping",
+     "property": "RowRemappingPendingState"
+    },
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/dimm/GPU_[0-3]_DRAM_0",
+     "interface": "com.nvidia.MemoryRowRemapping",
+     "property": "ceRowRemappingCount"
+    },
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/dimm/GPU_[0-3]_DRAM_0",
+     "interface": "com.nvidia.MemoryRowRemapping",
+     "property": "ueRowRemappingCount"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU-SRAM-ECC-ERROR",
+   "device_type": "GPU_[0-3]",
+   "standalone": true,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+    "interface": "xyz.openbmc_project.Memory.MemoryECC",
+    "property": "isThresholdExceeded"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {
+    "type": "",
+    "metadata": ""
+   },
+   "recovery": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.Memory.MemoryECC",
+     "property": "isThresholdExceeded"
+    }
+   ],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.Memory.MemoryECC",
+     "property": "ECCModeEnabled"
+    },
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.Memory.MemoryECC",
+     "property": "PendingECCState"
+    },
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.Memory.MemoryECC",
+     "property": "ceCount"
+    },
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.Memory.MemoryECC",
+     "property": "isLoggingLimitReached"
+    },
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.Memory.MemoryECC",
+     "property": "state"
+    },
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.Memory.MemoryECC",
+     "property": "ueCount"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU-SYNCBOOST-THROTTLE-EVENT",
+   "device_type": "GPU_[0-3]",
+   "standalone": true,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+    "interface": "xyz.openbmc_project.State.ProcessorPerformance",
+    "property": "ThrottleReasonSyncBoost"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {
+    "type": "",
+    "metadata": ""
+   },
+   "recovery": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.State.ProcessorPerformance",
+     "property": "ThrottleReasonSyncBoost"
+    }
+   ],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU-THERMAL-THROTTLE-EVENT",
+   "device_type": "GPU_[0-3]",
+   "standalone": true,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+    "interface": "xyz.openbmc_project.State.ProcessorPerformance",
+    "property": "ThrottleReasonHWThermalSlowdown"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {
+    "type": "",
+    "metadata": ""
+   },
+   "recovery": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.State.ProcessorPerformance",
+     "property": "ThrottleReasonHWThermalSlowdown"
+    }
+   ],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU-THROTTLE-EVENT",
+   "device_type": "GPU_[0-3]",
+   "standalone": true,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+    "interface": "xyz.openbmc_project.State.ProcessorPerformance",
+    "property": "ThrottleReasonHWSlowdown"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {
+    "type": "",
+    "metadata": ""
+   },
+   "recovery": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/accelerator/GPU_[0-3]",
+     "interface": "xyz.openbmc_project.State.ProcessorPerformance",
+     "property": "ThrottleReasonHWSlowdown"
+    }
+   ],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:BOOTFAILURE_CMCD",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:BOOTFAILURE_MCMM",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:DEVICEERROR",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:FATALERROR",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_AF_BL",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_AF_KM",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_AF_RF",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_ARF_BL",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_ARF_KM",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_ARF_RF",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_FR",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_GHSWE",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_MCBL",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_MCKM",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_MCRF",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_OCP_DEVICE_STATUS:RECOVERYMODE_STF",
+   "device_type": "GPU_[0-3]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "ocp_recovery_status_parser",
+    "arguments": "GPU_[0-3]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+    "interface": "com.nvidia.RoT.BootStatus",
+    "property": "BootStatus"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": [
+    {
+     "type": "DBUS",
+     "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_IRoT_GPU_[0-3]",
+     "interface": "com.nvidia.RoT.BootStatus",
+     "property": "BootStatus"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_SMA-GPU-THERMAL-OVERT",
+   "device_type": "GPU_[0-3]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "gpio_parser",
+    "arguments": "BRD[0-1:0,2-3:1]_RUN_POWER_PG-I"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA-GPU-THERMAL-WARN",
+   "device_type": "GPU_[0-3]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "gpio_parser",
+    "arguments": "BRD[0-1:0,2-3:1]_RUN_POWER_PG-I"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA-GPU_IROT-ERROR-FATAL",
+   "device_type": "GPU_[0-3]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "gpio_parser",
+    "arguments": "BRD[0-1:0,2-3:1]_RUN_POWER_PG-I"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA-HSC-ALERT",
+   "device_type": "ProcessorModule_[0-1]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_hsc_hscc_alert_ctl",
+    "arguments": "GPU_SMA_[0-1] 128 reason"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [
+    {
+     "type": "CMDLINE",
+     "executable": "mcu_hsc_hscc_alert_ctl",
+     "arguments": "GPU_SMA_[0-1] 128 reason"
+    }
+   ],
+   "telemetries": [
+    {
+     "type": "CMDLINE",
+     "executable": "mcu_hsc_hscc_alert_ctl",
+     "arguments": "GPU_SMA_[0-1] 128 get"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_SMA-HSCC-ALERT",
+   "device_type": "ProcessorModule_[0-1]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_hsc_hscc_alert_ctl",
+    "arguments": "GPU_SMA_[0-1] 192 reason"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [
+    {
+     "type": "CMDLINE",
+     "executable": "mcu_hsc_hscc_alert_ctl",
+     "arguments": "GPU_SMA_[0-1] 192 reason"
+    }
+   ],
+   "telemetries": [
+    {
+     "type": "CMDLINE",
+     "executable": "mcu_hsc_hscc_alert_ctl",
+     "arguments": "GPU_SMA_[0-1] 192 get"
+    }
+   ]
+  },
+  {
+   "error_id": "GPU_SMA-SMA-PWR-BRAKE",
+   "device_type": "ProcessorModule_[0-1]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "gpio_parser",
+    "arguments": "BRD[0-1]_RUN_POWER_PG-I"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_DISCONNECT_ON_USB",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_error_injector",
+    "arguments": "GPU_SMA_DISCONNECT_ON_USB GPU_SMA_[0-1]"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_FW_RECOVERY_MODE",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_isp_mode_ctrl",
+    "arguments": "GPU_SMA_[0-1] enable"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:CPU1",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:CWTD0",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:CWTD1",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:DEBUGACCESSPORT",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:FATALERROR",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:JTAG",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:LOCKUPRESET",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:LOWPOWERACKTIMEOUT",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:PIN",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:RESETTIMEOUT",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:SECVIOLATION",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:SW",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:SYSCLKGEN",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:TAMPER",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:VBAT",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:WARMRESET",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:WINWTD0",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_BOOT_REASON_ERROR:WINWTD1",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:BFSR_IBUSERR",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:BFSR_IMPRECISEERR",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:BFSR_PRECISERR",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:BFSR_STKERR",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:BFSR_UNSTKERR",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:HFSR_FORCED",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:HFSR_VECTTBL",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:MMFSR_DACCVIOL",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:MMFSR_IACCVIOL",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:MMFSR_MSTKERR",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:MMFSR_MUNSTKERR",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:UFSR_DIVBYZERO",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:UFSR_INVPC",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:UFSR_INVSTATE",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:UFSR_NOCP",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:UFSR_UNALIGNED",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_EXCEPTION:UFSR_UNDEFINSTR",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_TASKHANG:Flash",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_TASKHANG:I2C",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_TASKHANG:I3C",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_TASKHANG:Idle",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_TASKHANG:Logger",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_TASKHANG:MCTP",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_TASKHANG:PLDM",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_TASKHANG:SPDM",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_TASKHANG:Timer",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_LAST_TASKHANG:USB",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_GPU_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "GPU_SMA_NOT_PROVISIONED",
+   "device_type": "GPU_SMA_[0-1]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_error_injector",
+    "arguments": "GPU_SMA_NOT_PROVISIONED GPU_SMA_[0-1]"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM-THERMAL-OVERT",
+   "device_type": "ProcessorModule_[0-1]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "gpio_parser",
+    "arguments": "BRD[0-1]_MODULE_PWR_GOOD-I"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM-THERMAL-WARN",
+   "device_type": "ProcessorModule_[0-1]",
+   "standalone": true,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "gpio_parser",
+    "arguments": "BRD[0-1]_MODULE_PWR_GOOD-I"
+   },
+   "event_trigger": {},
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-BUSBAR-THERMAL-OVERT",
+   "device_type": "ProcessorModule_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-BUSBAR-THERMAL-OVERT ProcessorModule_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-CPLD-AUTH-FAIL",
+   "device_type": "CPLD_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-CPLD-AUTH-FAIL CPLD_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-CPU-CHIPTHROT-ERROR",
+   "device_type": "CPU_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-CPU-CHIPTHROT-ERROR CPU_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-CPU-THERMAL-OVERT",
+   "device_type": "CPU_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-CPU-THERMAL-OVERT CPU_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-CPU-THERMAL-WARN",
+   "device_type": "CPU_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-CPU-THERMAL-WARN CPU_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-CPU_IROT-ERROR-FATAL",
+   "device_type": "CPU_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-CPU_IROT-ERROR-FATAL CPU_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-CPU_IROT-RECOVERY-MODE",
+   "device_type": "CPU_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-CPU_IROT-RECOVERY-MODE CPU_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-CPU_SOC-THERMAL-OVERT",
+   "device_type": "CPU_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-CPU_SOC-THERMAL-OVERT CPU_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-CPU_SOCAMM-ABSENT",
+   "device_type": "ProcessorModule_[0-1]_Memory_[0-7]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-CPU_SOCAMM-ABSENT ProcessorModule_[0-1]_Memory_[0-7]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-GPU_GROUP-THERMAL-WARN",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-GPU_GROUP-THERMAL-WARN ProcessorModule_SMA_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-LEAK-DETECTED-ERROR",
+   "device_type": "ProcessorModule_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-LEAK-DETECTED-ERROR ProcessorModule_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-PCIE_CLKBUF-FAULTY",
+   "device_type": "ProcessorModule_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-PCIE_CLKBUF-FAULTY ProcessorModule_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-SMA-THERMAL-OVERT",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-SMA-THERMAL-OVERT ProcessorModule_SMA_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA-SMA-THERMAL-WARN",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "HPM_SMA-SMA-THERMAL-WARN ProcessorModule_SMA_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_FW_RECOVERY_MODE",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_i2c_isp_mode",
+    "arguments": "ProcessorModule_SMA_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/software/HGX_FW_ProcessorModule_SMA_[0-1]",
+    "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+    "property": "State"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:CPU1",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:CWTD0",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:CWTD1",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:DEBUGACCESSPORT",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:FATALERROR",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:JTAG",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:LOCKUPRESET",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:LOWPOWERACKTIMEOUT",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:PIN",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:RESETTIMEOUT",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:SECVIOLATION",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:SW",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:SYSCLKGEN",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:TAMPER",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:VBAT",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:WARMRESET",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:WINWTD0",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_BOOT_REASON_ERROR:WINWTD1",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:BFSR_IBUSERR",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:BFSR_IMPRECISEERR",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:BFSR_PRECISERR",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:BFSR_STKERR",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:BFSR_UNSTKERR",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:HFSR_FORCED",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:HFSR_VECTTBL",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:MMFSR_DACCVIOL",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:MMFSR_IACCVIOL",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:MMFSR_MSTKERR",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:MMFSR_MUNSTKERR",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:UFSR_DIVBYZERO",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:UFSR_INVPC",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:UFSR_INVSTATE",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:UFSR_NOCP",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:UFSR_UNALIGNED",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_EXCEPTION:UFSR_UNDEFINSTR",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_TASKHANG:Flash",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_TASKHANG:I2C",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_TASKHANG:I3C",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_TASKHANG:Idle",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_TASKHANG:Logger",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_TASKHANG:MCTP",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_TASKHANG:PLDM",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_TASKHANG:SPDM",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_TASKHANG:Timer",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "HPM_SMA_LAST_TASKHANG:USB",
+   "device_type": "ProcessorModule_SMA_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/inventory/system/chassis/HGX_ProcessorModule_SMA_[0-1]/ResetStatistics",
+    "interface": "com.nvidia.ResetCounters.ResetCounterMetrics",
+    "property": "BootReason"
+   },
+   "event_counter_reset": {},
+   "recovery": [],
+   "parameters": [],
+   "telemetries": []
+  },
+  {
+   "error_id": "CPLD-PSEQ-FAULT",
+   "device_type": "CPLD_[0-1]",
+   "standalone": false,
+   "accessor": {
+    "type": "CMDLINE",
+    "executable": "mcu_event_parser",
+    "arguments": "CPLD-PSEQ-FAULT CPLD_[0-1]"
+   },
+   "event_trigger": {
+    "type": "DBUS",
+    "object": "/xyz/openbmc_project/gpio/HGX_ProcessorModule_SMA_[0-1]",
+    "interface": "com.nvidia.GPIO.State",
+    "property": "LineStates"
+   },
+   "event_counter_reset": {
+    "type": "",
+    "metadata": ""
+   },
+   "recovery": [],
+   "parameters": [
+    {
+     "type": "CMDLINE",
+     "executable": "cpld_parser",
+     "arguments": "CPLD_[0-1]"
+    }
+   ],
+   "telemetries": [
+    {
+     "type": "CMDLINE",
+     "executable": "cpld_parser",
+     "arguments": "dump_regtbl CPLD_[0-1]"
+    }
+   ]
+  }
+ ]
+}
